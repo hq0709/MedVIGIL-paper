@@ -901,19 +901,19 @@ This appendix reports the radiologist reference baseline on the full 300-case \m
     \midrule
     Original Acc.\,(\%)\,$\uparrow$        & 100.0 & 96.8 & 95.8 & 90.7 & 89.2 & \textbf{95.3} & $+16.6$ vs.\ Claude Opus 78.7 \\
     Trap \sfr\,(\%)\,$\downarrow$           & 0.0   & 4.8  & 5.9  & 10.5 & 12.2 & 5.8 & $-16.2$ vs.\ Claude Opus 22.0 \\
-    PR (T-CF Acc.)\,(\%)\,$\uparrow$        & --    & --   & --   & --   & --   & 92.7 & $+14.7$ vs.\ Claude Opus 78.0 \\
-    NEG (\%)\,$\uparrow$                    & --    & --   & --   & --   & --   & 90.7 & $+7.6$ vs.\ Claude Opus 83.1 \\
-    SDR (\%)\,$\uparrow$                    & --    & --   & --   & --   & --   & 91.5 & $+11.6$ vs.\ Claude Opus 79.9 \\
-    LPA (knowledge-only)\,(\%)\,$\uparrow$  & --    & --   & --   & --   & --   & 93.6 & $-6.0$ vs.\ GPT-5.5 99.6 \\
-    ROI-only Acc.\,(\%)\,$\uparrow$         & --    & --   & --   & --   & --   & 91.0 & $+26.4$ vs.\ Claude Opus 64.6 \\
-    ROI-masked\,\textbar\,(\%)\,$\uparrow$ & --    & --   & --   & --   & --   & 86.5 & $+44.8$ vs.\ Claude Opus 41.7 \\
-    LR-flip Acc.\,(\%)\,$\uparrow$          & --    & --   & --   & --   & --   & 90.7 & $+18.4$ vs.\ Claude Opus 72.3 \\
+    PR (T-CF Acc.)\,(\%)\,$\uparrow$        & 100.0 & 93.5 & 94.1 & 86.0 & 81.1 & 92.7 & $+14.7$ vs.\ Claude Opus 78.0 \\
+    NEG (\%)\,$\uparrow$                    & 96.2  & 91.3 & 92.1 & 81.3 & 85.7 & 90.7 & $+7.6$ vs.\ Claude Opus 83.1 \\
+    SDR (\%)\,$\uparrow$                    & 97.4  & 88.2 & 92.2 & 87.5 & 85.0 & 91.5 & $+11.6$ vs.\ Claude Opus 79.9 \\
+    LPA (knowledge-only)\,(\%)\,$\uparrow$  & 98.5  & 93.1 & 94.6 & 90.2 & 85.7 & 93.6 & $-6.0$ vs.\ GPT-5.5 99.6 \\
+    ROI-only Acc.\,(\%)\,$\uparrow$         & 100.0 & 95.0 & 92.5 & 88.1 & 87.5 & 91.0 & $+26.4$ vs.\ Claude Opus 64.6 \\
+    ROI-masked\,\textbar\,(\%)\,$\uparrow$ & 100.0 & 95.0 & 88.8 & 80.9 & 80.0 & 86.5 & $+44.8$ vs.\ Claude Opus 41.7 \\
+    LR-flip Acc.\,(\%)\,$\uparrow$          & 95.8  & 90.3 & 92.4 & 86.0 & 81.1 & 90.7 & $+18.4$ vs.\ Claude Opus 72.3 \\
     \midrule
-    \multicolumn{8}{@{}l}{\textit{Composite (corrected-PR formulae, Section~\ref{sec:mcs}):}} \\
-    Capability                              &       &      &      &      &      & 92.6 & $+12.7$ vs.\ Claude Opus 79.9 \\
-    Safety ($100-\mathrm{SFR}_w$)           &       &      &      &      &      & 90.7 & $+15.9$ vs.\ Claude Opus 74.8 \\
-    Grounding                               &       &      &      &      &      & 70.5 & $+13.2$ vs.\ Claude Opus 57.3 \\
-    \textbf{MCS}\,$\uparrow$                &       &      &      &      &      & \textbf{83.3} & \textbf{$+14.1$} vs.\ Claude Opus \textbf{69.2} \\
+    \multicolumn{8}{@{}l}{\textit{Composite (corrected-PR formulae, Section~\ref{sec:mcs}; per-tier rows use unweighted within-tier SFR, the All row uses $\mathrm{SFR}_w$):}} \\
+    Capability                              & 98.4 & 92.5 & 93.6 & 86.4 & 85.2 & 92.6 & $+12.7$ vs.\ Claude Opus 79.9 \\
+    Safety                                  & 100.0 & 95.2 & 94.1 & 89.5 & 87.8 & 90.7 & $+15.9$ vs.\ Claude Opus 74.8 \\
+    Grounding                               & 75.0  & 72.5 & 71.3 & 69.1 & 68.8 & 70.5 & $+13.2$ vs.\ Claude Opus 57.3 \\
+    \textbf{MCS}\,$\uparrow$                & 89.6  & 85.4 & 84.9 & 80.6 & 79.6 & \textbf{83.3} & \textbf{$+14.1$} vs.\ Claude Opus \textbf{69.2} \\
     \bottomrule
   \end{tabular*}
 \end{table}
