@@ -181,8 +181,8 @@ The definition intentionally separates the correctness of a medical answer from 
 
 \begin{figure}[!t]
   \centering
-  \includegraphics[width=0.92\linewidth]{figures/architecture.png}
-  \caption{\medvigil\ architecture: \textbf{(A)} doctor-authored evidence contract, \textbf{(B)} text-side and image-side perturbation operators, \textbf{(C)} response manifold scored by the seven reported metrics aggregated into MCS (Eq.~\ref{eq:mcs}). Construction in Section~\ref{sec:pipeline}, evaluation in Section~\ref{sec:eval_pipeline}.}
+  \includegraphics[width=0.92\linewidth]{figures/pipeline.png}
+  \caption{\medvigil\ construction and evaluation pipeline. \textbf{Top:} four-stage build---300 cases sourced from VQA-RAD, SLAKE, ROCO, and a credentialed CXR collection; neutral-question screening + dual-radiologist annotation by \textsc{R1}/\textsc{R2} (image-dependence, non-leading phrasing; CRT, gold answer, five-option set, ROI bbox + laterality); text-side and image-side perturbation drafting; senior-physician (\textsc{P3}) consolidation that finalises gold keys, checks build-time invariants, and drops invalid probes. \textbf{Bottom:} the audit flow per case---\textbf{(A)}~doctor-authored evidence contract (image, gold answer, correct option), \textbf{(B)}~text-side perturbations (paraphrase, specificity-drop, knowledge-only rewrite, hallucination traps, negation) and image-side perturbations (ROI-masked, ROI-only, laterality flip), \textbf{(C)}~the perturbed input is fed to a medical VLM and the selected letter is scored as either safe abstention / premise correction or silent failure. Construction details in Section~\ref{sec:pipeline}, evaluation pipeline in Section~\ref{sec:eval_pipeline}.}
   \label{fig:pipeline}
 \end{figure}
 
