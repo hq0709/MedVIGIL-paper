@@ -235,49 +235,20 @@ Four deterministic stages close the loop from the case manifest to the audit com
 \subsection{Per-Family Metric Definitions}
 \label{sec:per_family_metrics}
 
-\textbf{Notation.} Let $\hat{\ell}_j(f)\in\{A,\dots,E\}$ denote model $f$'s selected letter on probe $j$, and let $\ell_j^{\star}$ denote the \textsc{P3}-finalised correct letter. Every metric below is an exact-match aggregate of the binary signal $\mathbb{1}[\hat{\ell}_j(f)=\ell_j^{\star}]$, taken over a probe family $\mathcal{J}_{\mathrm{kind}}$ and computed from a single per-probe letter trace. Throughout we write $\Pr_{j\in\mathcal{J}}[\,\cdot\,]$ for the empirical mean over $\mathcal{J}$.
+\textbf{Notation.} Let $\hat{\ell}_j(f)\in\{A,\dots,E\}$ be model $f$'s selected letter on probe $j$ and $\ell^{\star}_j$ the \textsc{P3}-finalised correct letter. Every metric is the empirical exact-match rate $\Pr_{j\in\mathcal{J}_{\mathrm{kind}}}\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr]$ over a probe family.
 
-\textbf{Capability and text robustness.} Original-probe accuracy isolates clean-input ability; three text-robustness scores extend it to wording perturbations whose gold is either preserved (T-CF, specificity-drop) or controllably transformed (negation):
-\begin{align}
-  \mathrm{Acc}_{\mathrm{orig}}(f) &= \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{orig}}}\!\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr], &
-  \mathrm{PR}(f) &= \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{T\text{-}CF}}}\!\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr], \nonumber\\
-  \mathrm{NEG}(f) &= \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{neg}}}\!\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr], &
-  \mathrm{SDR}(f) &= \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{sdr}}}\!\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr].
-  \label{eq:cap_metrics}
-\end{align}
-Paraphrase robustness PR is correctness-conditioned by design: a model that is consistently wrong on T-CF probes is not credited as paraphrase-robust.\footnote{The cached letter trace also supports a paraphrase \emph{consistency} diagnostic $\mathrm{PCons}(f)=\Pr_{j\in\mathcal{J}_{\mathrm{T\text{-}CF}}}\!\bigl[\hat{\ell}^{\mathrm{orig}}_j(f)=\hat{\ell}^{\mathrm{tcf}}_j(f)\bigr]$, reported in Appendix~\ref{app:pcons_diagnostic} (Table~\ref{tab:pcons_diagnostic}). PCons is informative as an output-stability measure but is excluded from the composite because high consistency is achievable by a confidently wrong model.} NEG and SDR are accuracy on the negation and specificity-drop probe families, with negation flipping the gold and specificity-drop preserving it.
+\textbf{Capability and text robustness.} $\mathrm{Acc}_{\mathrm{orig}}$, $\mathrm{PR}$, $\mathrm{NEG}$, $\mathrm{SDR}$ are exact-match accuracy on the original, T-CF paraphrase, negation, and specificity-drop families (formal definitions in Appendix~\ref{app:metric_formulas}, Eq.~\ref{eq:cap_metrics}). PR is correctness-conditioned by design: a model consistently wrong on T-CF probes is not credited as paraphrase-robust; the output-stability variant PCons is reported separately in Appendix~\ref{app:pcons_diagnostic}.
 
-\textbf{Evidence safety.} A hallucination-trap probe wraps a false-premise question whose only correct option is the doctor-defined refusal letter (``the premise of this question is incorrect''). The silent-failure rate is the fraction of trap responses that pick a non-refusal option:
+\textbf{Evidence safety.} On a hallucination-trap probe the only correct option is the doctor-defined refusal letter; the silent-failure rate
 \begin{equation}
-  \sfr(f)=\Pr\nolimits_{j\in\mathcal{J}_{\mathrm{trap}}}\!\bigl[\hat{\ell}_j(f)\neq\ell^{\star}_j\bigr].
+  \sfr(f)=\Pr\nolimits_{j\in\mathcal{J}_{\mathrm{trap}}}\!\bigl[\hat{\ell}_j(f)\neq\ell^{\star}_j\bigr]
   \label{eq:sfr}
 \end{equation}
-Lower values are safer. A clinical-risk-weighted variant $\mathrm{SFR}_w$ feeding the composite is defined in Section~\ref{sec:mcs}.
+is the fraction of trap responses that pick a non-refusal option (lower is safer). The clinical-risk-weighted variant $\mathrm{SFR}_w$ feeding MCS is defined in Section~\ref{sec:mcs}.
 
-\textbf{Visual grounding.} For ROI-annotated cases, the same question is scored on two image variants: \emph{ROI-only} retains only the answer-relevant region (the rest replaced by mid-grey), and \emph{ROI-masked} removes only the answer-relevant region (whose \textsc{P3}-adjudicated correct option then becomes the explicit refusal letter). The case-paired contrast is
-\begin{equation}
-  \mathrm{VGR}(f) = \mathrm{Acc}_{\text{ROI-only}}(f) - \mathrm{Acc}_{\text{ROI-masked}}(f).
-  \label{eq:vgr}
-\end{equation}
-Sign matters: positive VGR means accuracy is higher when the answer-relevant region is visible; negative VGR can indicate prior-driven answering or instability under masking, and must be read together with $\mathrm{Acc}_{\text{ROI-masked}}$.
+\textbf{Visual grounding.} For ROI-annotated cases, ROI-only retains only the answer-relevant region and ROI-masked removes it; the case-paired contrast is $\mathrm{VGR}(f) = \mathrm{Acc}_{\text{ROI-only}}(f) - \mathrm{Acc}_{\text{ROI-masked}}(f)$. Sign matters: positive VGR means accuracy is higher when the answer-relevant region is visible; negative VGR can indicate prior-driven answering and must be read alongside $\mathrm{Acc}_{\text{ROI-masked}}$.
 
-\textbf{Language prior and counterfactual coherence.} Language-prior accuracy is accuracy on knowledge-only probes whose answer is recoverable from clinical knowledge alone:
-\begin{equation}
-  \mathrm{LPA}(f)=\Pr\nolimits_{j\in\mathcal{J}_{\mathrm{know}}}\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr].
-  \label{eq:lpa}
-\end{equation}
-LPA is a capability control whose safety implication only emerges when paired with a non-degenerate VGR; an LPA-high, VGR-low model is the worry case.\footnote{We use \emph{language-prior accuracy} (LPA) rather than the legacy ``language-prior leakage'' (LPL) label: high values are desirable here, so the leakage connotation was misleading.} Triplet coherence is a designed metric for the released triplet artefact: a triplet is coherent when the model's predictions match the gold simultaneously on the anchor, T-CF, and V-CF probes,
-\begin{equation}
-  \mathrm{TR\text{-}coh}(f) = \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{tri}}}\!\!\Bigl[
-    \hat{\ell}^{\mathrm{anchor}}_j(f)=\ell^{\star,\mathrm{anchor}}_j
-    \;\wedge\;
-    \hat{\ell}^{\mathrm{T\text{-}CF}}_j(f)=\ell^{\star,\mathrm{T\text{-}CF}}_j
-    \;\wedge\;
-    \hat{\ell}^{\mathrm{V\text{-}CF}}_j(f)=\ell^{\star,\mathrm{V\text{-}CF}}_j
-  \Bigr].
-  \label{eq:trcoh}
-\end{equation}
-TR-coh is correctness-conditioned by construction. The current empirical audit does not report per-model TR-coh because the V-CF probe arm has not yet been scored on every audited system; the build-time invariants and released V-CF probe set are described in Appendix~\ref{app:case_schema_appendix}, and we treat TR-coh as a designed-but-deferred axis (Section~\ref{sec:limitations}) rather than a reported headline number.
+\textbf{Language prior and counterfactual coherence.} $\mathrm{LPA}$ is exact-match accuracy on knowledge-only probes whose answer is recoverable from clinical text alone---a capability control whose safety implication emerges paired with a low VGR.\footnote{We use \emph{language-prior accuracy} (LPA) rather than the legacy ``language-prior leakage'' label: high values are desirable here, so the leakage connotation was misleading.} The triplet-coherence axis $\mathrm{TR\text{-}coh}(f)$ requires simultaneous gold-match on the anchor, T-CF, and V-CF probes; the formal statement and build-time invariants are in Appendix~\ref{app:metric_formulas} (Eq.~\ref{eq:trcoh}) and per-model values are deferred (Section~\ref{sec:limitations}).
 
 \subsection{The \medvigil\ Composite Score}
 \label{sec:mcs}
@@ -511,7 +482,31 @@ The release package is organised around a benchmark card, versioned case manifes
 \section{Evaluation Pipeline and MCS Details}
 \label{app:eval_pipeline_detail}
 
-This appendix expands the four-stage evaluation pipeline summarised in Section~\ref{sec:eval_pipeline}, and the MCS-interpretation notes that Section~\ref{sec:mcs} compresses into a forward pointer.
+This appendix expands the four-stage evaluation pipeline summarised in Section~\ref{sec:eval_pipeline}, gives the formal per-family metric definitions deferred from Section~\ref{sec:per_family_metrics}, and contains the MCS-interpretation notes that Section~\ref{sec:mcs} compresses into a forward pointer.
+
+\subsection{Formal Metric Definitions}
+\label{app:metric_formulas}
+
+The capability and text-robustness metrics defined in Section~\ref{sec:per_family_metrics} are exact-match accuracy aggregated over a probe family $\mathcal{J}_{\mathrm{kind}}$:
+\begin{align}
+  \mathrm{Acc}_{\mathrm{orig}}(f) &= \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{orig}}}\!\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr], &
+  \mathrm{PR}(f) &= \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{T\text{-}CF}}}\!\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr], \nonumber\\
+  \mathrm{NEG}(f) &= \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{neg}}}\!\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr], &
+  \mathrm{SDR}(f) &= \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{sdr}}}\!\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr],
+  \label{eq:cap_metrics}
+\end{align}
+with negation flipping the gold and specificity-drop preserving it. The paraphrase-consistency variant is $\mathrm{PCons}(f)=\Pr_{j\in\mathcal{J}_{\mathrm{T\text{-}CF}}}\!\bigl[\hat{\ell}^{\mathrm{orig}}_j(f)=\hat{\ell}^{\mathrm{tcf}}_j(f)\bigr]$ (reported separately in Appendix~\ref{app:pcons_diagnostic}; excluded from the composite because high consistency is achievable by a confidently wrong model). Language-prior accuracy is $\mathrm{LPA}(f)=\Pr_{j\in\mathcal{J}_{\mathrm{know}}}\!\bigl[\hat{\ell}_j(f)=\ell^{\star}_j\bigr]$ on knowledge-only probes. Triplet coherence requires simultaneous gold-match on all three probes of a triplet:
+\begin{equation}
+  \mathrm{TR\text{-}coh}(f) = \Pr\nolimits_{j\in\mathcal{J}_{\mathrm{tri}}}\!\!\Bigl[
+    \hat{\ell}^{\mathrm{anchor}}_j(f)=\ell^{\star,\mathrm{anchor}}_j
+    \;\wedge\;
+    \hat{\ell}^{\mathrm{T\text{-}CF}}_j(f)=\ell^{\star,\mathrm{T\text{-}CF}}_j
+    \;\wedge\;
+    \hat{\ell}^{\mathrm{V\text{-}CF}}_j(f)=\ell^{\star,\mathrm{V\text{-}CF}}_j
+  \Bigr].
+  \label{eq:trcoh}
+\end{equation}
+TR-coh is correctness-conditioned by construction; the per-model audit does not report it because the V-CF probe arm has not yet been scored on every audited system, and we treat it as a designed-but-deferred axis (Section~\ref{sec:limitations}) rather than retracted.
 
 \subsection{Stage-by-Stage Detail}
 
