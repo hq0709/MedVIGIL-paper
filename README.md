@@ -3,7 +3,7 @@
 This repository contains the LaTeX source, figures, analysis scripts, and reproducibility artifacts for the MedVIGIL paper:
 
 > **MedVIGIL: Evaluating Trustworthy Medical VLMs Under Broken Visual Evidence**
-> NeurIPS 2026 Datasets & Benchmarks Track submission.
+> Preprint, under review.
 
 **Project page:** <https://hq0709.github.io/MedVIGIL-page/>
 **Benchmark dataset (300 cases, 2,556 MCQ probes, 240 counterfactual triplets, ROI annotations, Croissant 1.0 metadata, scoring code, cached model outputs):** <https://huggingface.co/datasets/jhq0709/MedVIGIL>
@@ -14,8 +14,8 @@ This repository contains the LaTeX source, figures, analysis scripts, and reprod
 paper/   # LaTeX source
   neurips_2026.tex            # Main manuscript (single-file)
   ref.bib                     # Bibliography
-  neurips_2026.sty            # NeurIPS 2026 D&B style file
-  checklist.tex               # NeurIPS reproducibility checklist
+  neurips_2026.sty            # conference style file (vendored)
+  checklist.tex               # reproducibility checklist
   figures/                    # All figures (PDF/PNG/SVG)
   icons/                      # Provider/model logo icons
   fonts/                      # Embedded fonts
