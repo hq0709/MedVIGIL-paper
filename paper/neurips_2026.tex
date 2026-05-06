@@ -1,7 +1,12 @@
 \documentclass{article}
 
-% NeurIPS 2026 Evaluations & Datasets Track single-blind format.
-\usepackage[eandd,nonanonymous]{neurips_2026}
+% NeurIPS 2026 Evaluations & Datasets Track default format.
+% Per ED-Chair guidance (2026-05-06): all ED submissions must use the
+% default [eandd] option, even when going through the single-blind
+% review policy; the single-blind status is indicated in the OpenReview
+% submission form, which permits non-anonymised dataset / code URLs in
+% the manuscript without invoking the nonanonymous package option.
+\usepackage[eandd]{neurips_2026}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -61,23 +66,27 @@
 \author{%
 {\normalfont\bfseries
 Hanqi Jiang\textsuperscript{1,2},
+Junhao Chen\textsuperscript{1},
+Yi Pan\textsuperscript{1,2},
 Lifeng Chen\textsuperscript{1},
 Weihang You\textsuperscript{1},
-Yi Pan\textsuperscript{1,2},
-Haozhen Gong\textsuperscript{3},}\\
+Haozhen Gong\textsuperscript{3},
+Ruiyu Yan\textsuperscript{4},}\\
 {\normalfont\bfseries
-Mingyu Kang\textsuperscript{2},
-Hyeokjae Kwon\textsuperscript{2},
+Jinglei Lv\textsuperscript{5},
+Lin Zhao\textsuperscript{6},
+Hui Ren\textsuperscript{2},
+Quanzheng Li\textsuperscript{2},
 Tianming Liu\textsuperscript{1},
 Xiang Li\textsuperscript{2,\textdagger}}
 \\[0.4em]
 \normalfont\mdseries\normalsize
-\normalsize
-\textsuperscript{1}University of Georgia\\
-\textsuperscript{2}Harvard Medical School\\
-\normalsize
+\textsuperscript{1}University of Georgia\quad
+\textsuperscript{2}Harvard Medical School\quad
 \textsuperscript{3}Nanyang Technological University\\
-\normalsize
+\textsuperscript{4}New York University\quad
+\textsuperscript{5}University of Sydney\quad
+\textsuperscript{6}New Jersey Institute of Technology\\
 \textsuperscript{\textdagger}Corresponding author
 }
 
