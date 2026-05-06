@@ -316,13 +316,6 @@ Model & \multicolumn{2}{c}{Capability} & \multicolumn{2}{c}{Evidence Safety} & \
 % end tabular
 \end{table}
 
-\begin{figure}[!ht]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_audit_summary.pdf}
-  \caption{Audit summary. \textbf{Left:} MCS component decomposition (Capability / Safety $\!=\!100\!-\!\mathrm{SFR}_w$ / Grounding / harmonic-mean MCS), ordered by MCS. \textbf{Right:} risk-tier $\sfr$ heatmap with Original accuracy (left blue) and $\mathrm{SFR}_w$ (right red), sorted safest-first.}
-  \label{fig:audit_summary}
-\end{figure}
-
 \textbf{Individual axes do not collapse to a single ranking.} Claude Opus 4.7 leads accuracy (Overall $76.5$\%); Gemini 3.1 Flash-Lite has the largest ROI contrast (VGR $+49.5$\,pp); GPT-5.5 leads knowledge-only accuracy (LPA $99.6$\%); and aggregate \sfr\ is lowest on Claude Opus 4.7 ($22.0$\%) and Gemini 3.1 Flash-Lite ($22.3$\%) at different overall-accuracy levels.
 
 \textbf{The radiologist baseline establishes a clean human ceiling.} \textsc{R4} scores $95.3$\% Original accuracy, $5.8$\% trap \sfr, and MCS $83.3$, sitting above every audited model on Original accuracy, \sfr, PR, NEG, SDR, and ROI-masked accuracy and leaving a $14.1$-point composite headroom over the strongest audited model. \textsc{R4}'s raw VGR is only $+4.5$\,pp because \textsc{R4} also refuses correctly when the ROI is removed---the use-when-present / refuse-when-absent pattern that motivates entering VGR into MCS through the clipped, ROI-masked-paired Grounding axis rather than as a stand-alone monotone score.
@@ -337,7 +330,12 @@ Model & \multicolumn{2}{c}{Capability} & \multicolumn{2}{c}{Evidence Safety} & \
 
 \textbf{MCS reorders the leaderboard by bottleneck.} Claude Opus 4.7 leads at $69.2$ because all three component scores are high; Gemini 3.1 Flash-Lite ranks second at $66.0$ on the strength of its Safety and Grounding axes; GPT-4o falls to $44.1$ because Safety is its bottleneck; Qwen3.5-9B remains lowest at $31.0$ with Safety below $25$. Per-probe-kind, per-CRT, and per-source breakdowns are in Appendix~\ref{app:audit_breakdowns}; bootstrap rank stability and weight / Grounding sensitivity in Appendices~\ref{app:bootstrap_appendix},~\ref{app:mcs_sensitivity}; extended interpretation in Appendix~\ref{app:extended_discussion}.
 
-
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_audit_summary.pdf}
+  \caption{Audit summary. \textbf{Left:} MCS component decomposition (Capability / Safety $\!=\!100\!-\!\mathrm{SFR}_w$ / Grounding / harmonic-mean MCS), ordered by MCS. \textbf{Right:} risk-tier $\sfr$ heatmap with Original accuracy (left blue) and $\mathrm{SFR}_w$ (right red), sorted safest-first.}
+  \label{fig:audit_summary}
+\end{figure}
 
 \subsection{Ablation: Visual Information Decay}
 \label{sec:visual_decay}
@@ -364,8 +362,8 @@ Trustworthy medical VLM evaluation cannot stop at intact-image accuracy. A model
 \bibliographystyle{plainnat}
 \bibliography{ref}
 
-% \newpage
-% \input{checklist}
+\newpage
+\input{checklist}
 
 \clearpage
 \appendix
