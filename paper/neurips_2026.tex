@@ -129,8 +129,8 @@ Medical vision--language models (VLMs) are usually evaluated on intact image--qu
 
 \begin{figure}[!t]
   \centering
-  \includegraphics[width=\linewidth]{figures/motivation.png}
-  \caption{A vision-required chest X-ray paired with two evidence-perturbations (ROI mask, laterality flip) yields contrasting behaviours: a \textcolor{red!75!black}{\textbf{silent failure}} fabricating a left-apical-pneumothorax measurement vs.\ a \textcolor{green!50!black}{\textbf{safe refusal}} recognising the broken evidence. \medvigil\ measures this gap.}
+  \includegraphics[width=0.92\linewidth]{figures/motivation.png}
+  \caption{A vision-required chest X-ray paired with two evidence-perturbations (ROI mask, laterality flip) yields contrasting behaviours: a \textcolor{red!75!black}{\textbf{silent failure}} fabricating a left-apical-pneumothorax measurement vs.\ a \textcolor{green!50!black}{\textbf{safe refusal}} recognising the broken evidence.}
   \label{fig:motivation}
 \end{figure}
 
@@ -144,7 +144,7 @@ A key driver is text-prior dominance. Frontier VLMs can rank top on standard med
 We formalise this gap as an \emph{evidence-contract} framework: when the ROI is masked or the question carries a premise the image contradicts, the contract is broken and the appropriate behaviour shifts from producing a better answer to recognising that the evidential basis has failed. \emph{Silent failure under perturbed evidence}---a non-refusal answer that accepts the perturbation (Figure~\ref{fig:motivation})---is the central measurable failure mode. We operationalise the framework through \medvigil, a 300-case dataset-backed evaluation suite supervised end to end by four board-certified radiologists (R1, R2 parallel annotation; P3 senior consolidation; R4 construction-blind baseline; full pipeline in Section~\ref{sec:pipeline}). It spans eight probe families (five textual, three visual), 240 counterfactual triplets, and clinician-finalised risk tiers, and combines Capability, Safety, and Grounding via the harmonic-mean \medvigil\ Composite Score (MCS, Section~\ref{sec:mcs}) so that strong clean-input performance cannot mask unsafe failure or weak grounding.
 
 We audit 16 vision-capable model configurations and two text-only language-prior baselines (up to $2{,}556$ scored probes per model) and observe consistent axis divergence: Claude Opus 4.7 leads MCS ($69.2$) by balance; Gemini 3.1 Flash-Lite has the largest ROI contrast (VGR $+49.5$\,pp); GPT-4o drops to MCS $44.1$ because Safety is its bottleneck; and \textsc{R4} reaches MCS $83.3$, $14.1$ points above the strongest audited model. Accuracy, safe refusal, and visual grounding do not reduce to a single ranking, and evidence-integrity evaluation is a necessary complement to diagnostic accuracy. The paper makes three main contributions:
-\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\begin{enumerate}[leftmargin=*,itemsep=0pt,topsep=2pt,parsep=0pt]
   \item We define deployment-oriented trustworthiness for medical VLMs as the conjunction of intact-input capability, evidence-conditional safe failure, and ROI-conditioned visual grounding, and formalise silent failure under perturbed evidence as its core measurable failure mode.
   \item We introduce \medvigil, a 300-case evaluation suite constructed end to end by four board-certified radiologists (three constructing, one independently evaluating), with eight probe families, 240 counterfactual triplets, clinician-finalised clinical risk tiers, and a seven-metric correctness-conditioned scoring suite (Overall Accuracy, \sfr, VGR, PR, NEG, SDR, LPA). The release ships with a Croissant 1.0 metadata file, RAI fields, and a paired open-ended variant.
   \item We propose the \medvigil\ Composite Score (MCS), a harmonic-mean composite that prevents any single axis from masking weakness in the others, and report a full 16-model audit with matched no-image ablations, a continuous visual-decay sweep, an ROI-mask visual-token ablation, and an independent fourth-radiologist reference baseline.
@@ -186,8 +186,8 @@ The definition intentionally separates the correctness of a medical answer from 
 
 \begin{figure}[!t]
   \centering
-  \includegraphics[width=\linewidth]{figures/architecture.png}
-  \caption{\medvigil\ benchmark architecture: \textbf{(A)} the doctor-authored evidence contract (image, question, five-option gold), \textbf{(B)} text-side and image-side contract-perturbation operators, and \textbf{(C)} the response manifold scored by the seven reported metrics aggregated into MCS (Eq.~\ref{eq:mcs}). Construction pipeline is detailed in Section~\ref{sec:pipeline}; evaluation pipeline in Section~\ref{sec:eval_pipeline}.}
+  \includegraphics[width=0.92\linewidth]{figures/architecture.png}
+  \caption{\medvigil\ architecture: \textbf{(A)} doctor-authored evidence contract, \textbf{(B)} text-side and image-side perturbation operators, \textbf{(C)} response manifold scored by the seven reported metrics aggregated into MCS (Eq.~\ref{eq:mcs}). Construction in Section~\ref{sec:pipeline}, evaluation in Section~\ref{sec:eval_pipeline}.}
   \label{fig:pipeline}
 \end{figure}
 
@@ -322,14 +322,12 @@ We audit 16 vision-capable model configurations spanning five proprietary provid
 
 \subsection{Headline Results}
 
-Table~\ref{tab:headline_results} summarises the main result matrix; grouped headers separate capability, evidence safety, text robustness, language prior, and the MCS composite.
-
-\FloatBarrier
-\begin{table}[!htbp]
-  \caption{Headline \medvigil\ results (\%; VGR in pp). Shaded \textsc{Doctors} row is the independent fourth radiologist \textsc{R4} (Appendix~\ref{app:clinician_pilot}), shown as a calibration anchor not as a leaderboard entry. PR is paraphrase accuracy on T-CF probes (Section~\ref{sec:per_family_metrics}). $\downarrow$ lower is safer, $\uparrow$ higher is better. $^{\dagger}$HuatuoGPT-V was trained on PubMedVision (overlaps VQA-RAD/SLAKE). Bootstrap CIs in Appendix~\ref{app:bootstrap_appendix}; weight/Grounding sensitivity in Appendix~\ref{app:mcs_sensitivity}.}
+\begin{table}[!t]
+  \caption{Headline \medvigil\ results (\%; VGR in pp). Shaded \textsc{Doctors} row is \textsc{R4} (Appendix~\ref{app:clinician_pilot}), shown as a calibration anchor. PR is paraphrase accuracy on T-CF probes. $\downarrow$ lower is safer, $\uparrow$ higher is better. $^{\dagger}$HuatuoGPT-V trained on PubMedVision (overlaps VQA-RAD/SLAKE). Bootstrap CIs and weight/Grounding sensitivity in Appendices~\ref{app:bootstrap_appendix},~\ref{app:mcs_sensitivity}.}
   \label{tab:headline_results}
   \centering
-\renewcommand{\arraystretch}{1.15}
+  \footnotesize
+\renewcommand{\arraystretch}{1.0}
 \setlength{\tabcolsep}{2pt}
 % tabular begins here
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrrrrrr@{}}
@@ -363,16 +361,15 @@ Model & \multicolumn{2}{c}{Capability} & \multicolumn{2}{c}{Evidence Safety} & \
 \end{tabular*}
 % end tabular
 \end{table}
-\FloatBarrier
 
 \textbf{Axes do not collapse, and accuracy alone is not trustworthiness.} Claude Opus 4.7 leads accuracy (Overall $76.5$\%); Gemini 3.1 Flash-Lite has the largest ROI contrast (VGR $+49.5$\,pp); GPT-5.5 leads LPA ($99.6$\%); aggregate \sfr\ is lowest on Claude Opus 4.7 ($22.0$\%) and Gemini 3.1 Flash-Lite ($22.3$\%). High Overall accuracy can coexist with high \sfr\ (Gemini 3 Flash $71.9$\% / $37.2$\%; GPT-4o $56.1$\% / $53.0$\%). The construction-blind radiologist baseline (\textsc{R4}) reaches MCS $83.3$, $14.1$ points above the strongest audited model; \textsc{R4}'s raw VGR is only $+4.5$\,pp because \textsc{R4} also refuses correctly under ROI mask, the use-when-present / refuse-when-absent pattern that motivates the clipped, ROI-masked-paired Grounding axis.
 
 \textbf{MCS reorders by bottleneck.} Claude Opus 4.7 leads at $69.2$ on balance; Gemini 3.1 Flash-Lite is second at $66.0$ on Safety+Grounding; GPT-4o falls to $44.1$ on Safety; Qwen3.5-9B remains lowest at $31.0$. Per-probe-kind / per-CRT / per-source breakdowns are in Appendix~\ref{app:audit_breakdowns}; bootstrap and weight/Grounding sensitivity in Appendices~\ref{app:bootstrap_appendix},~\ref{app:mcs_sensitivity}; extended interpretation in Appendix~\ref{app:extended_discussion}.
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_audit_summary.pdf}
-  \caption{\medvigil\ audit summary. \textbf{Left:} MCS component decomposition---Capability, Safety ($100-\mathrm{SFR}_w$), Grounding, and harmonic-mean MCS, models ordered by MCS. \textbf{Right:} Risk-tier silent-failure heatmap; centre matrix is per-tier trap \sfr, left blue bar is original-probe accuracy, right red bar is $\mathrm{SFR}_w$ (Eq.~\ref{eq:sfr_w}), models sorted safest-first. Figure~\ref{fig:audit_summary} makes explicit where the human ceiling is most distant from frontier VLMs (ROI-masked refusal, L4--L5 traps).}
+  \caption{Audit summary. \textbf{Left:} MCS component decomposition (Capability / Safety $\!=\!100\!-\!\mathrm{SFR}_w$ / Grounding / harmonic-mean MCS), ordered by MCS. \textbf{Right:} risk-tier $\sfr$ heatmap with Original accuracy (left blue) and $\mathrm{SFR}_w$ (right red), sorted safest-first.}
   \label{fig:audit_summary}
 \end{figure}
 
@@ -382,7 +379,7 @@ Model & \multicolumn{2}{c}{Capability} & \multicolumn{2}{c}{Evidence Safety} & \
 \begin{figure}[!t]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_visual_decay.pdf}
-  \caption{Visual information decay on the 300 image-required cases. Solid curves: MCQ accuracy as blur $\sigma$ grows from $0$ to $64$\,px and to no-image ($\sigma{=}\infty$, X marker). Dashed curves: text-answerable control. Shaded region right of $L^\star$ is the language-prior-dominated regime ($\geq 80\%$ of visual contribution lost). Full protocol, per-tier breakdown, and per-model table in Appendix~\ref{app:visual_decay_appendix}.}
+  \caption{Visual information decay on the 300 image-required cases (solid: MCQ accuracy as blur $\sigma$ grows; dashed: text-answerable control; X: no-image). Shaded region right of $L^\star$ is the language-prior-dominated regime. Full protocol and per-tier breakdown in Appendix~\ref{app:visual_decay_appendix}.}
   \label{fig:visual_decay}
 \end{figure}
 
@@ -396,7 +393,7 @@ Trustworthy medical VLM evaluation cannot stop at intact-image accuracy. A model
 \section{Limitations}
 \label{sec:limitations}
 
-\medvigil\ targets one component of deployment-oriented trustworthiness---unsafe non-refusal under controlled textual or visual evidence perturbations---and is complementary to clinical diagnostic accuracy, deployment readiness, and workflow-prevalence studies. Specific scoping limits apply. (i)~The visual axis covers ROI-masked, ROI-only, and a global laterality flip; the Gaussian-blur sweep (Section~\ref{sec:visual_decay}) is a four-model ablation, and full-image corruptions are out of scope. (ii)~V-CF is realised as a textual conditional anchor rather than a regenerated image, and the triplet-coherence axis TR-coh is released but not yet scored across all audited systems; we treat it as a deferred axis rather than retracted. (iii)~The severity-aware metrics (Critical-Findings Hallucination Rate, Severity Drift Magnitude) and patch-masking VFR are part of the broader \medvigil\ design but require severity scoring and counterfactual image generation not run here. (iv)~ROI bboxes are adjudicated benchmark regions for positioning binary masks, not pixel-level segmentation labels. (v)~The human reference baseline rests on full 300-case coverage by a single construction-blind rater (\textsc{R4}); a multi-rater extension with inter-rater $\kappa$ / Krippendorff's $\alpha$ and time-budgeted arm contrast is the natural follow-up. (vi)~Source images come from public or appropriately licensed corpora, with credentialed CXR shipped as reconstruction pointers (Appendix~\ref{app:documentation}); pretraining-overlap cannot be ruled out, and results should not be read as evidence on private hospital cohorts. (vii)~We do not yet ablate thinking mode, temperature, safety-instruction prompts, or medical-specialised model families. The refusal classifier and LPA proxy are auditable benchmark instruments, not clinical measurement tools.
+\medvigil\ targets unsafe non-refusal under controlled evidence perturbations and is complementary to diagnostic-accuracy and workflow-prevalence studies. (i)~The visual axis covers ROI-masked, ROI-only, and laterality-flip; the Gaussian-blur sweep is a four-model ablation, and full-image corruptions are out of scope. (ii)~V-CF is realised as a textual conditional anchor; triplet-coherence (TR-coh) is released but not yet audited across all systems---deferred, not retracted. (iii)~Severity-aware metrics (CFHR, SDM) and patch-masking VFR are designed but require severity scoring and counterfactual image generation not run here. (iv)~ROI bboxes are benchmark regions for binary masks, not segmentation labels. (v)~The human reference rests on full 300-case coverage by a single construction-blind rater \textsc{R4}; a multi-rater extension with inter-rater $\kappa$ / Krippendorff's $\alpha$ is the natural follow-up. (vi)~Sources are public or appropriately licensed (credentialed CXR as reconstruction pointers, Appendix~\ref{app:documentation}); pretraining-overlap cannot be ruled out, and results should not be read as evidence on private hospital cohorts. (vii)~We do not yet ablate thinking mode, temperature, safety-instruction prompts, or medical-specialised families. The refusal classifier and LPA proxy are benchmark instruments, not clinical measurement tools.
 
 \bibliographystyle{plainnat}
 \bibliography{ref}
