@@ -182,7 +182,7 @@ The definition intentionally separates the correctness of a medical answer from 
 \begin{figure}[!t]
   \centering
   \includegraphics[width=0.92\linewidth]{figures/pipeline.png}
-  \caption{\medvigil\ construction and evaluation pipeline. \textbf{Top:} four-stage build---300 cases sourced from VQA-RAD, SLAKE, ROCO, and a credentialed CXR collection; neutral-question screening + dual-radiologist annotation by \textsc{R1}/\textsc{R2} (image-dependence, non-leading phrasing; CRT, gold answer, five-option set, ROI bbox + laterality); text-side and image-side perturbation drafting; senior-physician (\textsc{P3}) consolidation that finalises gold keys, checks build-time invariants, and drops invalid probes. \textbf{Bottom:} the audit flow per case---\textbf{(A)}~doctor-authored evidence contract (image, gold answer, correct option), \textbf{(B)}~text-side perturbations (paraphrase, specificity-drop, knowledge-only rewrite, hallucination traps, negation) and image-side perturbations (ROI-masked, ROI-only, laterality flip), \textbf{(C)}~the perturbed input is fed to a medical VLM and the selected letter is scored as either safe abstention / premise correction or silent failure. Construction details in Section~\ref{sec:pipeline}, evaluation pipeline in Section~\ref{sec:eval_pipeline}.}
+  \caption{\medvigil\ construction and evaluation pipeline. \textbf{Top:} four-stage build---source mix (300 cases from VQA-RAD/SLAKE/ROCO/CXR), \textsc{R1}/\textsc{R2} dual-radiologist annotation, perturbation drafting, and \textsc{P3} senior-physician consolidation. \textbf{Bottom:} per-case audit flow---\textbf{(A)} doctor-authored evidence contract, \textbf{(B)} text-side and image-side perturbations, \textbf{(C)} medical VLM scored as safe abstention vs.\ silent failure. Details in Sections~\ref{sec:pipeline},~\ref{sec:eval_pipeline}.}
   \label{fig:pipeline}
 \end{figure}
 
@@ -276,7 +276,7 @@ The audit covers 16 vision-capable model configurations across five proprietary 
 
 \subsection{Headline Results}
 
-\begin{table}[!t]
+\begin{table}[!ht]
   \caption{Headline \medvigil\ results (\%; VGR in pp). Shaded \textsc{Doctors} row is \textsc{R4} (Appendix~\ref{app:clinician_pilot}), shown as a calibration anchor. PR is paraphrase accuracy on T-CF probes. $\downarrow$ lower is safer, $\uparrow$ higher is better. $^{\dagger}$HuatuoGPT-V trained on PubMedVision (overlaps VQA-RAD/SLAKE). Bootstrap CIs and weight/Grounding sensitivity in Appendices~\ref{app:bootstrap_appendix},~\ref{app:mcs_sensitivity}.}
   \label{tab:headline_results}
   \centering
