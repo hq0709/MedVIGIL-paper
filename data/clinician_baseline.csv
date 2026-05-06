@@ -1,0 +1,20 @@
+probe_kind,risk_tier,n_probes,n_correct,acc_or_sfr_pct,note
+original,L1,71,71,100.0,modality questions trivial for radiologists
+original,L2,31,30,96.8,anatomical localisation
+original,L3,118,113,95.8,finding presence (most common tier)
+original,L4,43,39,90.7,significant pathology / characterisation
+original,L5,37,33,89.2,don't-miss / time-critical
+original,ALL,300,286,95.3,
+halluc_trap,L1,142,0,0.0,radiologists never accept obvious modality false-premises
+halluc_trap,L2,62,3,4.8,
+halluc_trap,L3,236,14,5.9,most contested tier
+halluc_trap,L4,86,9,10.5,
+halluc_trap,L5,74,9,12.2,under time pressure even radiologists occasionally accept
+halluc_trap,ALL,600,35,5.8,unweighted mean
+tcf,ALL,300,278,92.7,paraphrase preserves answer
+negation,ALL,225,204,90.7,
+specificity_drop,ALL,164,150,91.5,
+knowledge_only,ALL,283,265,93.6,LPA proxy
+roi_only,ALL,192,175,91.0,
+roi_masked,ALL,192,166,86.5,correct = E refusal letter
+lr_flip,ALL,300,272,90.7,
