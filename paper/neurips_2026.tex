@@ -124,13 +124,13 @@ Xiang Li\textsuperscript{2,\textdagger}}
 \maketitle
 
 \begin{abstract}
-Medical vision--language models (VLMs) are usually evaluated on intact image--question pairs, but trustworthy clinical use requires a stronger property: a model must recognize when the evidential basis for an answer has failed. We study this deployment-oriented trustworthiness problem through \emph{silent failures under perturbed evidence}, where a vision-required medical question is paired with a false premise, wording perturbation, knowledge-only rewrite, ROI-masked image, ROI-only image, or laterality-flipped image, yet the model returns a fluent non-refusal answer. We introduce \medvigil, a dataset-backed evaluation suite of 300 cases drawn from four public medical VQA sources, with every gold answer, refusal option, candidate-answer set, paraphrase, false-premise trap, ROI box, and clinical risk tier authored by board-certified radiologists. Two attending radiologists (\textsc{R1}, \textsc{R2}) annotate every case in parallel; a senior radiologist (\textsc{P3}) consolidates and adjudicates the released manifest; and a separate fourth radiologist (\textsc{R4}), independent of construction, answers every probe under the same MCQ wrapper to provide the human reference baseline reported in Table~\ref{tab:headline_results}. The release contains 2{,}556 multiple-choice probes, 240 counterfactual triplets, physician-adjudicated Clinical Risk Tier labels, text-only-answerability flags, ROI boxes, and a paired open-ended variant. We report seven correctness-conditioned audit metrics; the released counterfactual triplets additionally support a triplet-coherence axis whose per-model scoring is reserved for a follow-up audit. The completed audit evaluates 16 vision-capable configurations plus two text-only DeepSeek baselines. The independent radiologist scores MCS $83.3$ and silent-failure rate $5.8\%$, leaving a $14.1$-point composite headroom above the strongest audited model: Claude Opus 4.7 leads the \medvigil\ Composite Score at $69.2$, Gemini 3.1 Flash-Lite has the largest ROI contrast (VGR $+49.5$\,pp), and GPT-4o drops to MCS $44.1$ because of high risk-weighted silent-failure rates on L4--L5 traps. The benchmark\footnote{Hugging Face: \url{https://huggingface.co/datasets/jhq0709/MedVIGIL}} ships with a Croissant 1.0 metadata file, a per-source licence matrix, the clinician adjudication record, a fixed prompt template, and a deterministic probe-expansion script so that the audit can be re-executed against new model snapshots using the same probe set, prompts, and decoding settings.
+Medical vision--language models (VLMs) are usually evaluated on intact image--question pairs, but trustworthy clinical use requires a stronger property: a model must recognise when the evidential basis for an answer has failed. We study this through \emph{silent failures under perturbed evidence}, where a vision-required medical question is paired with a false premise, wording perturbation, knowledge-only rewrite, or ROI-corrupted image, yet the model returns a fluent non-refusal answer. We introduce \medvigil, a 300-case evaluation suite drawn from four public medical VQA sources in which every gold answer, refusal option, candidate-answer set, paraphrase, false-premise trap, ROI box, and clinical risk tier is authored by board-certified radiologists: two attending radiologists annotate every case in parallel, a senior radiologist consolidates the released manifest, and a separate fourth radiologist independent of construction answers every probe to provide the human reference baseline. The release contains 2{,}556 MCQ probes, 240 counterfactual triplets, physician-adjudicated risk-tier and answerability flags, ROI boxes, and a paired open-ended variant. We report seven correctness-conditioned audit metrics that summarise into the \medvigil\ Composite Score (MCS), and audit 16 vision-capable models plus two text-only baselines. The independent radiologist scores MCS $83.3$ at silent-failure rate $5.8\%$, leaving a $14.1$-point composite headroom above the strongest audited model (Claude Opus 4.7 at $69.2$). The benchmark\footnote{Hugging Face: \url{https://huggingface.co/datasets/jhq0709/MedVIGIL}} ships with a Croissant 1.0 metadata file, per-source licence matrix, clinician adjudication record, fixed prompt template, and deterministic probe-expansion script so that the audit can be re-executed against new model snapshots.
 \end{abstract}
 
 \begin{figure}[!t]
   \centering
   \includegraphics[width=\linewidth]{figures/motivation.png}
-  \caption{A vision-required chest X-ray (left) paired with two evidence-perturbations (centre)---an ROI mask over the answer-relevant region and a laterality-flipped false premise (\textsc{right}\,$\to$\,\textsc{left})---yields two contrasting model behaviours (right): a \textcolor{red!75!black}{\textbf{silent failure}} that fluently fabricates an unsupported left apical pneumothorax measurement, versus a \textcolor{green!50!black}{\textbf{safe refusal}} that recognises the broken evidence. \medvigil\ measures this gap.}
+  \caption{A vision-required chest X-ray paired with two evidence-perturbations (ROI mask, laterality flip) yields contrasting behaviours: a \textcolor{red!75!black}{\textbf{silent failure}} fabricating a left-apical-pneumothorax measurement vs.\ a \textcolor{green!50!black}{\textbf{safe refusal}} recognising the broken evidence. \medvigil\ measures this gap.}
   \label{fig:motivation}
 \end{figure}
 
@@ -194,7 +194,7 @@ The output taxonomy treats non-refusal under perturbed evidence as non-binary. W
 \begin{figure}[!t]
   \centering
   \includegraphics[width=\linewidth]{figures/architecture.png}
-  \caption{\medvigil\ benchmark architecture. \textbf{(A)~Evidence contract.} Each released case stores a valid medical image \(I\), a question \(q\), and a doctor-adjudicated gold option drawn from a five-option MCQ wrapper; the contract holds when \(I\) carries the answer-relevant evidence and \(q\) does not telegraph the gold. \textbf{(B)~Contract-perturbation operators.} Text-side breaks (negation, paraphrase / T-CF, specificity-drop, false-premise hallucination trap, knowledge-only rewrite) and image-side breaks (ROI-masked, ROI-only, lr\_flip) violate the contract along controlled axes. \textbf{(C)~Response manifold and metrics.} Seven correctness-conditioned reported metrics (\sfr, VGR, PR, NEG, SDR, LPA, $\text{Acc}_{\text{orig}}$) score the model's mapping from each perturbed probe into a refusal-vs-silent-failure decision space; the risk-weighted aggregate $\mathrm{SFR}_w$ feeds the harmonic-mean composite MCS (Eq.~\ref{eq:mcs}). The released counterfactual triplets additionally support a triplet-coherence axis (TR-coh) reserved for a follow-up audit. The bottom strip lists the released artefacts---300-case manifest, deterministic probe schema, ROI annotations, scoring code, cached MCQ/open-ended outputs, and Croissant 1.0 metadata---that close the loop between the evaluation contract and per-model audit results. The three-stage clinician annotation pipeline that produces (A) is described in Section~\ref{sec:pipeline}; the four-stage evaluation pipeline that operationalises (C) is described in Section~\ref{sec:eval_pipeline}.}
+  \caption{\medvigil\ benchmark architecture: \textbf{(A)} the doctor-authored evidence contract (image, question, five-option gold), \textbf{(B)} text-side and image-side contract-perturbation operators, and \textbf{(C)} the response manifold scored by the seven reported metrics aggregated into MCS (Eq.~\ref{eq:mcs}). Construction pipeline is detailed in Section~\ref{sec:pipeline}; evaluation pipeline in Section~\ref{sec:eval_pipeline}.}
   \label{fig:pipeline}
 \end{figure}
 
@@ -335,7 +335,7 @@ Table~\ref{tab:headline_results} summarises the main result matrix; grouped head
 
 \FloatBarrier
 \begin{table}[!htbp]
-  \caption{Headline \medvigil\ results (\%; VGR in pp). The shaded \textsc{Doctors} (ref.) row is an independent fourth radiologist (\textsc{R4}, not involved in dataset construction) answering the full 300-case manifest under the same MCQ wrapper (Appendix~\ref{app:clinician_pilot}); it is an upper-bound calibration anchor, not part of the model leaderboard. PR is paraphrase accuracy on T-CF probes (correctness-conditioned, see Section~\ref{sec:per_family_metrics}); the legacy paraphrase-consistency diagnostic PCons is reported separately in Appendix~\ref{app:pcons_diagnostic} (Table~\ref{tab:pcons_diagnostic}). $\downarrow$ lower is safer, $\uparrow$ higher is better. $^{\dagger}$HuatuoGPT-V was trained on PubMedVision (overlaps VQA-RAD/SLAKE). MCS values are computed under the corrected PR definition; per-axis 95\% bootstrap intervals and rank stability are reported in Appendix~\ref{app:bootstrap_appendix} (Table~\ref{tab:bootstrap_ci}); a sensitivity analysis on the CRT weights and Grounding normalisation is in Appendix~\ref{app:mcs_sensitivity} (Table~\ref{tab:mcs_sensitivity}).}
+  \caption{Headline \medvigil\ results (\%; VGR in pp). Shaded \textsc{Doctors} row is the independent fourth radiologist \textsc{R4} (Appendix~\ref{app:clinician_pilot}), shown as a calibration anchor not as a leaderboard entry. PR is paraphrase accuracy on T-CF probes (Section~\ref{sec:per_family_metrics}). $\downarrow$ lower is safer, $\uparrow$ higher is better. $^{\dagger}$HuatuoGPT-V was trained on PubMedVision (overlaps VQA-RAD/SLAKE). Bootstrap CIs in Appendix~\ref{app:bootstrap_appendix}; weight/Grounding sensitivity in Appendix~\ref{app:mcs_sensitivity}.}
   \label{tab:headline_results}
   \centering
 \renewcommand{\arraystretch}{1.15}
@@ -383,7 +383,7 @@ Three further breakdowns are deferred to Appendix~\ref{app:audit_breakdowns}: pe
 \begin{figure}[!htbp]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_audit_summary.pdf}
-  \caption{\medvigil\ audit summary, consolidating Table~\ref{tab:headline_results} and the breakdowns of Tables~\ref{tab:probe_breakdown}--\ref{tab:risk_tier_results}. \textbf{Left:} MCS component decomposition---Capability, Safety ($100-\mathrm{SFR}_w$), and Grounding cells plus harmonic-mean MCS score, models ordered by MCS. \textbf{Right:} Risk-tier silent-failure heatmap. Centre matrix is per-tier trap SFR ($L_1$--$L_5$); left blue bar is original-probe accuracy; top strip shows cross-model min/median/max SFR per tier; right red bar is $\mathrm{SFR}_w$ (Eq.~\ref{eq:sfr_w}). Models sorted by $\mathrm{SFR}_w$, safest at top. The independent radiologist baseline (\textsc{R4}, Table~\ref{tab:headline_results}, Appendix~\ref{app:clinician_pilot}) is plotted as the human reference band that sits above every audited model on Capability, Safety, and Grounding simultaneously.}
+  \caption{\medvigil\ audit summary. \textbf{Left:} MCS component decomposition---Capability, Safety ($100-\mathrm{SFR}_w$), Grounding, and harmonic-mean MCS, models ordered by MCS. \textbf{Right:} Risk-tier silent-failure heatmap; centre matrix is per-tier trap \sfr, left blue bar is original-probe accuracy, right red bar is $\mathrm{SFR}_w$ (Eq.~\ref{eq:sfr_w}), models sorted safest-first.}
   \label{fig:audit_summary}
 \end{figure}
 
@@ -395,7 +395,7 @@ The blind-input controls in Appendix~\ref{app:noimg_ablation} answer the binary 
 \begin{figure}[!t]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_visual_decay.pdf}
-  \caption{Visual information decay on the 300 image-required cases. Solid curves track MCQ accuracy as the blur $\sigma$ grows from $0$ to $64$\,px and finally to no-image ($\sigma{=}\infty$, X marker); dashed curves are the text-answerable control subset whose answers do not require the image. The control stays flat across all $\sigma$, attributing the solid-curve collapse to lost visual evidence rather than degraded model competence. The shaded region right of $L^\star$ is the language-prior-dominated regime in which $\geq 80\%$ of visual contribution is gone. Per-risk-tier curves and the full numerical table are deferred to Appendix~\ref{app:visual_decay_appendix}.}
+  \caption{Visual information decay on the 300 image-required cases. Solid curves: MCQ accuracy as blur $\sigma$ grows from $0$ to $64$\,px and to no-image ($\sigma{=}\infty$, X marker). Dashed curves: text-answerable control. Shaded region right of $L^\star$ is the language-prior-dominated regime ($\geq 80\%$ of visual contribution lost). Per-tier breakdown in Appendix~\ref{app:visual_decay_appendix}.}
   \label{fig:visual_decay}
 \end{figure}
 
@@ -487,7 +487,7 @@ The case schema makes the evaluation contribution explicit. Each released case s
 
 \begin{table}[!htbp]
   \centering
-  \caption{Core case object in \medvigil. The fields are designed so that the same case supports MCQ scoring, open-ended scoring, language-prior analysis, counterfactual grounding, and release provenance.}
+  \caption{Core case object in \medvigil.}
   \label{tab:case_schema}
   \begin{tabular}{lp{0.68\linewidth}}
     \toprule
@@ -571,7 +571,7 @@ MCS should therefore be read alongside the named components and the risk-tier ta
 \begin{figure}[!htbp]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_capability_safety.pdf}
-  \caption{MCS components in two pairwise projections (geometric companion to Figure~\ref{fig:audit_summary}). \textbf{Left:} Capability ($A$) vs Safety ($B=100-\mathrm{SFR}_w$); marker size $\propto$ Grounding ($C$). \textbf{Right:} Safety vs Grounding; marker size $\propto$ Capability. Dashed grey curves are MCS isolines at the median value of the unshown component; the green band traces the empirical Pareto frontier on each pair.}
+  \caption{MCS components in two pairwise projections. \textbf{Left:} Capability vs.\ Safety, marker size $\propto$ Grounding. \textbf{Right:} Safety vs.\ Grounding, marker size $\propto$ Capability. Dashed curves are MCS isolines at the median of the unshown component; green band is the empirical Pareto frontier.}
   \label{fig:capability_safety}
 \end{figure}
 
@@ -591,7 +591,7 @@ This appendix expands the audit results that Section~\ref{sec:experiments} compr
 Table~\ref{tab:probe_breakdown} expands the aggregate metrics by probe kind. This table makes the language-prior issue explicit: knowledge-only accuracy is between 90.5\% and 99.6\% wherever measured. That result is useful as a capability control, but it also shows why clean VQA accuracy alone cannot certify visual use. A model can answer many medical questions from textual priors while still failing the visual-integrity contract.
 
 \begin{table}[!htbp]
-  \caption{Accuracy (\%) by probe kind. The ``TCF'' column reports paraphrase \emph{accuracy} on T-CF probes, which is what the headline PR uses (Section~\ref{sec:per_family_metrics}); see also the paraphrase-consistency diagnostic PCons reported in Table~\ref{tab:pcons_diagnostic}. NEG: negation; SDR: specificity-drop; LR flip: left--right flip. Missing cells: probe unavailable. $^{\dagger}$see Table~\ref{tab:headline_results}.}
+  \caption{Accuracy (\%) by probe kind. ``TCF'' is paraphrase accuracy on T-CF probes (the headline PR; PCons diagnostic in Table~\ref{tab:pcons_diagnostic}). NEG: negation; SDR: specificity-drop; LR flip: left--right flip. $^{\dagger}$see Table~\ref{tab:headline_results}.}
   \label{tab:probe_breakdown}
   \centering
   \renewcommand{\arraystretch}{1.15}
@@ -711,7 +711,7 @@ Table~\ref{tab:case_walkthrough} shows one concrete case from the released manif
 
 \begin{table}[!htbp]
   \centering
-  \caption{Representative \medvigil\ case audit. The same doctor-adjudicated image is paired with a clean probe and a false-premise trap; cached model outputs illustrate the distinction between safe premise correction and silent failure.}
+  \caption{Representative \medvigil\ case: the same image paired with a clean probe and a false-premise trap; cached model outputs contrast safe premise correction with silent failure.}
   \label{tab:case_walkthrough}
   \begin{threeparttable}
   \small
@@ -833,7 +833,7 @@ This subsection extends the featured case (MVB-0031, Table~\ref{tab:case_walkthr
 This appendix reports two complementary blind-input controls used to diagnose language-prior reliance. Table~\ref{tab:textonly_baseline} reports two external DeepSeek configurations that receive only the question and MCQ option list because the API rejects image inputs in our configuration. Table~\ref{tab:noimg_ablation} then reports a controlled per-model ablation: each selected vision-capable model is re-scored on the same MCQ probes with the image input removed while the question and option list are kept identical.
 
 \begin{table}[!htbp]
-  \caption{Text-only language-prior baseline. DeepSeek configurations receive only the question and the MCQ option list; the image channel is empty by design. Numbers serve as a lower bound that vision-capable models should exceed if they are using the image.}
+  \caption{Text-only language-prior baselines (DeepSeek). The image channel is empty by design; values lower-bound what vision-capable models should exceed when actually using the image.}
   \label{tab:textonly_baseline}
   \centering
   \renewcommand{\arraystretch}{1.15}
@@ -853,7 +853,7 @@ The DeepSeek text-only baselines reach near-zero original-probe accuracy (1.7--4
 For the matched ablation in Table~\ref{tab:noimg_ablation}, the vision-on values reproduce the headline result for that model (Table~\ref{tab:headline_results}), and the no-image values score the same model on the same probes with the image withheld. The ablation gap, $\Delta_{\text{orig}}(f)=\mathrm{Acc}^{\mathrm{orig}}_{\text{vision}}(f)-\mathrm{Acc}^{\mathrm{orig}}_{\text{noimg}}(f)$, is the original-probe image contribution. A near-zero or negative $\Delta_{\text{orig}}$ would indicate that the model's original-probe accuracy is largely recoverable from the question text. We focus on six models that span the range of MCS, VGR, and \sfr\ values reported in the main results so that the ablation interrogates contested cases rather than uniformly strong or uniformly weak systems.
 
 \begin{table}[!htbp]
-  \caption{Matched no-image ablation for selected vision-capable models. Paired entries are vision-on/no-image scores on the same MCQ probes. $\Delta_{\text{orig}}$ is the original-probe vision-on minus no-image gap, reported in percentage points. The \sfr\ column reports the vision-on trap failure rate from the headline audit.}
+  \caption{Matched no-image ablation. Paired entries are vision-on/no-image scores on the same MCQ probes; $\Delta_{\text{orig}}$ is the original-probe gap (pp). The \sfr\ column is the vision-on trap rate from the headline audit.}
   \label{tab:noimg_ablation}
   \centering
   \renewcommand{\arraystretch}{1.15}
@@ -886,7 +886,7 @@ This appendix supplies the full numerical table and per-risk-tier breakdown for 
 \begin{table}[t]
   \centering
   \footnotesize
-  \caption{Visual information decay (MCQ accuracy on image-required cases, \%). $L^\star$ is the smallest blur $\sigma$ at which the model has lost 80\% of its visual contribution, i.e.\ $(\mathrm{acc}_\sigma - \mathrm{acc}_\infty) / (\mathrm{acc}_0 - \mathrm{acc}_\infty) \leq 0.20$; smaller $L^\star$ means the model falls back on language priors sooner.}
+  \caption{Visual information decay (MCQ accuracy on image-required cases, \%). $L^\star$ is the smallest blur $\sigma$ at which $\geq 80\%$ of the visual contribution is lost; smaller $L^\star$ means earlier language-prior takeover.}
   \label{tab:visual_decay}
   \begin{tabular}{lcccccccccc}
     \toprule
@@ -905,7 +905,7 @@ Three structural observations follow from Table~\ref{tab:visual_decay}. First, e
 \begin{figure}[!t]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_visual_decay_per_tier.pdf}
-  \caption{Per-risk-tier accuracy on image-required cases as a function of blur $\sigma$, decomposing Figure~\ref{fig:visual_decay} into clinical risk tiers L1--L5. X markers at the right are the no-image ($\sigma{=}\infty$) per-tier values. L1 (modality / meta) cases stay highest across $\sigma$ for every model, because their answer is partially recoverable from coarse visual cues that survive heavy blur; L4--L5 high-stakes cases collapse fastest, with several models reaching 0\% at $\sigma{=}64$ before recovering slightly at $\sigma{=}\infty$ where the model can fall back to refusal-style behaviour. The L4--L5 dip below the no-image floor is the most clinically dangerous regime: a fluent but incorrect answer on a high-risk case is worse than no answer.}
+  \caption{Per-CRT-tier accuracy as a function of blur $\sigma$, decomposing Figure~\ref{fig:visual_decay} into L1--L5. X markers are the no-image ($\sigma{=}\infty$) per-tier values.}
   \label{fig:visual_decay_per_tier}
 \end{figure}
 
@@ -924,7 +924,7 @@ This appendix records the operational details required to re-execute the audit a
 
 \begin{table}[!htbp]
   \centering
-  \caption{Per-model snapshot identifiers, access channel, and decoding mode used in the headline audit. All decoding is greedy (temperature\,$=\,0$, top-p\,$=\,1$, $\le 8$ output tokens) with thinking / reasoning modes disabled where exposed. Open-weight rows pin the Hugging Face commit SHA at audit time.}
+  \caption{Per-model snapshot identifiers, access channel, and decoding mode. All decoding is greedy (temperature\,$=\,0$, top-p\,$=\,1$, $\le 8$ output tokens), thinking modes disabled where exposed.}
   \label{tab:model_snapshots}
   \footnotesize
   \renewcommand{\arraystretch}{1.10}
@@ -969,7 +969,7 @@ To check that the headline ranking in Table~\ref{tab:headline_results} is not dr
 
 \begin{table}[!htbp]
   \centering
-  \caption{Case-clustered bootstrap 95\% CIs (500 resamples, fixed seed) for nine representative models spanning the MCS range. Capability uses the corrected PR (paraphrase accuracy) definition. Numbers are percentages; halfwidth = (hi95-lo95)/2. The composite ordering Claude Opus\,$>$\,Gemini 3.1 Flash-Lite\,$>$\,Gemini 3-Flash\,$>$\,GPT-5.5 is stable across all 500 resamples; the GPT-5.4\,$\leftrightarrow$\,Claude Sonnet pair and the HuatuoGPT-V\,$\leftrightarrow$\,GPT-4o pair are stable (no rank inversion across resamples). Qwen3.5-9B is shown as a low-MCS reference.}
+  \caption{Case-clustered bootstrap 95\% CIs (500 resamples, fixed seed) for nine representative models spanning the MCS range. Capability uses the corrected-PR definition (Section~\ref{sec:per_family_metrics}). Rank-stability discussion in main text.}
   \label{tab:bootstrap_ci}
   \footnotesize
   \renewcommand{\arraystretch}{1.10}
@@ -1000,7 +1000,7 @@ The \medvigil\ Composite Score embeds two design choices that are not derived fr
 
 \begin{table}[!htbp]
   \centering
-  \caption{Sensitivity of the headline MCS ranking to CRT weight choice and Grounding normalisation. Spearman is computed over the 16 vision-capable models; the 100\% top-5 overlap and the unchanged leader (Claude Opus 4.7) across every variant indicate that the headline ranking is not a coin flip on the specific weights or transform.}
+  \caption{Sensitivity of headline MCS ranking to CRT weights and Grounding normalisation. Spearman is over the 16 vision-capable models.}
   \label{tab:mcs_sensitivity}
   \footnotesize
   \renewcommand{\arraystretch}{1.10}
@@ -1038,7 +1038,7 @@ This appendix reports the radiologist reference baseline on the full 300-case \m
 
 \begin{table}[!htbp]
   \centering
-  \caption{Independent-radiologist (\textsc{R4}) reference baseline on the full 300-case \medvigil\ manifest. \textsc{R4} did not participate in dataset construction (Stages 1--3, Section~\ref{sec:pipeline}), so the comparison against models is not contaminated by construction-time exposure to gold options or trap intent. The single-rater MCS of $83.3$ exceeds the strongest audited model (Claude Opus 4.7 at $69.2$, Table~\ref{tab:headline_results}) by $14.1$ points, providing an upper-bound calibration anchor under the same MCQ scoring rules. A vertical bar (\textbar) marks columns where ``correct'' means the doctor-defined safe-action option (option E refusal) rather than a positive finding answer.}
+  \caption{Independent-radiologist (\textsc{R4}) reference baseline on the full 300-case \medvigil\ manifest under the headline MCQ scoring rules. A vertical bar (\textbar) marks columns where ``correct'' is the doctor-defined refusal option (E). \textsc{R4} did not participate in construction (Section~\ref{sec:pipeline}).}
   \label{tab:clinician_pilot}
   \footnotesize
   \renewcommand{\arraystretch}{1.10}
@@ -1079,7 +1079,7 @@ Table~\ref{tab:pcons_diagnostic} reports the legacy paraphrase \emph{consistency
 
 \begin{table}[!htbp]
   \centering
-  \caption{Paraphrase accuracy (PR, used in MCS) vs.\ paraphrase consistency (PCons, diagnostic only). The gap $\mathrm{PCons}-\mathrm{PR}$ is the share of paraphrase pairs on which the model is stable but wrong. Models with the largest gap (Kimi-K2.6 +30.3\,pp, Qwen3.5-9B +24.0\,pp, LLaVA-Med +20.3\,pp) are exactly the case the corrected PR definition is designed to penalise.}
+  \caption{Paraphrase accuracy (PR, used in MCS) vs.\ paraphrase consistency (PCons, diagnostic only). $\mathrm{PCons}-\mathrm{PR}$ is the share of paraphrase pairs on which the model is stable but wrong.}
   \label{tab:pcons_diagnostic}
   \footnotesize
   \renewcommand{\arraystretch}{1.10}
@@ -1123,7 +1123,7 @@ This appendix consolidates the documentation artifacts that NeurIPS Datasets \& 
 
 \begin{table}[!htbp]
   \centering
-  \caption{Per-source licence and redistribution matrix. ``Direct redistribute'' means we ship the image alongside the case JSON; ``Reconstruct'' means we ship only the case JSON and a script that re-derives the image from the user's licensed copy of the source corpus. ROI annotations and gold answers are released for every case regardless of image redistribution.}
+  \caption{Per-source licence and redistribution matrix. ``Direct'' = image shipped with case JSON; ``Reconstruct'' = case JSON + re-derivation script only. ROI annotations and gold answers ship for every case.}
   \label{tab:license_matrix}
   \footnotesize
   \renewcommand{\arraystretch}{1.18}
