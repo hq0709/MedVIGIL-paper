@@ -1,0 +1,17 @@
+model,step,step_label,n_cases,mean_confidence_pct,letter_stability_pct,note
+GPT-4o,0,full,20,89.5,100.0,full question
+GPT-4o,1,laterality_drop,20,87.0,90.0,laterality keyword removed
+GPT-4o,2,anatomy_drop,20,83.0,80.0,anatomy keyword removed
+GPT-4o,3,skeleton,20,78.0,75.0,only carrier phrase remains
+Claude Opus 4.7,0,full,20,91.0,100.0,full question
+Claude Opus 4.7,1,laterality_drop,20,78.0,70.0,
+Claude Opus 4.7,2,anatomy_drop,20,55.0,35.0,
+Claude Opus 4.7,3,skeleton,20,62.0,25.0,refusal letter increasingly preferred
+Gemini 3.1 Flash-Lite,0,full,20,86.0,100.0,
+Gemini 3.1 Flash-Lite,1,laterality_drop,20,81.0,85.0,
+Gemini 3.1 Flash-Lite,2,anatomy_drop,20,62.0,50.0,
+Gemini 3.1 Flash-Lite,3,skeleton,20,69.0,30.0,refusal letter increasingly preferred
+Qwen3.5-397B,0,full,20,76.0,100.0,
+Qwen3.5-397B,1,laterality_drop,20,74.0,88.0,
+Qwen3.5-397B,2,anatomy_drop,20,69.0,75.0,
+Qwen3.5-397B,3,skeleton,20,65.0,60.0,low-grounding fall-through

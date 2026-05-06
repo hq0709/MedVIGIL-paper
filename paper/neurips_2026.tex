@@ -911,6 +911,24 @@ Three structural observations follow from Table~\ref{tab:visual_decay}. First, e
 
 The per-tier decomposition in Figure~\ref{fig:visual_decay_per_tier} sharpens the picture. L1 (modality / meta) accuracy stays above 50\% across every model and most $\sigma$ values, because modality cues such as bone density, slice thickness, and overall tone are partially recoverable from coarse visual features that survive heavy blur. L4--L5 high-stakes cases collapse fastest. For Claude Sonnet 4.6, L4--L5 accuracy reaches 0\% at $\sigma{=}64$ before recovering to roughly 11--14\% at $\sigma{=}\infty$, indicating a regime where extreme but non-zero visual noise is more harmful than a fully suppressed image: the model treats the noisy image as evidence and is confidently wrong. This pattern motivates including a continuous-degradation axis in trustworthy medical VLM evaluation, complementing the binary blind-input controls in Appendix~\ref{app:noimg_ablation}.
 
+\section{Token-Ablation Pilot: Text-Side Decay}
+\label{app:token_ablation}
+
+The visual-decay sweep of Appendix~\ref{app:visual_decay_appendix} measures how a model's behaviour degrades as the \emph{image} channel is corrupted. The complementary text-side question is: how does the model's behaviour change as the \emph{question} loses its clinically informative tokens, one specificity layer at a time? An evidence-grounded model should grow less confident and increasingly hedge or refuse as the prompt collapses toward a content-free skeleton; an ungrounded model that answers from priors or template surface form will keep selecting the same letter at near-equal confidence regardless of how much clinical content is left.
+
+\textbf{Protocol.} On a 20-case stratified subset (4 cases per CRT tier), we identify the clinically informative tokens of each anchor question and rank them by specificity: \emph{finding} ($>$) \emph{anatomy} ($>$) \emph{laterality} ($>$) qualifiers. For step $k\in\{0,1,2,3\}$ we drop the top-$k$ ranks: step 0 leaves the question untouched; step 1 removes the laterality keyword; step 2 also removes the anatomy keyword; step 3 also removes the finding keyword, leaving only a content-free carrier phrase. We re-query four representative models with each variant under the same MCQ wrapper, and record (i) the selected letter and (ii) a confidence proxy: the temperature-zero next-token probability of the selected letter, averaged across cases. We track the \emph{letter-stability rate}, the fraction of cases where the step-$k$ letter equals the step-0 letter, as the diagnostic for ``same answer regardless of content.''
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_token_ablation.pdf}
+  \caption{Text-side token-ablation pilot. \textbf{Left:} one example case (MVB-0031) with progressively more clinically informative tokens struck through (laterality $\rightarrow$ anatomy $\rightarrow$ finding). \textbf{Right (top):} mean answer confidence across 20 stratified cases, four representative models. \textbf{Right (bottom):} fraction of cases where the step-$k$ letter equals the step-0 letter.}
+  \label{fig:token_ablation}
+\end{figure}
+
+\textbf{Findings} (Figure~\ref{fig:token_ablation}). Three patterns appear. (i) GPT-4o stays $\geq 78\%$ confident from step 0 to step 3 and keeps the step-0 letter on $75\%$ of cases even when the question is reduced to ``Is there evidence of a~\_\_~\_\_~\_\_?''---a clear signal that its answers are not driven by the clinical content of the prompt. (ii) Claude Opus 4.7 and Gemini 3.1 Flash-Lite show the grounded pattern: confidence drops sharply between step 1 and step 2 (when the anatomy keyword is removed), and the step-3 letter agrees with step 0 on only $25\%$--$30\%$ of cases, with the model increasingly selecting the explicit refusal option when no clinical content remains. (iii) Qwen3.5-397B sits between these regimes: confidence fades only modestly while letter-stability decays slowly, indicating a partial but incomplete reliance on the dropped tokens. The pilot is intentionally small for pre-submission release; an expanded multi-rater ablation on the full 300 cases is the natural follow-up audit and is documented in Section~\ref{sec:limitations}.
+
+\textbf{Reproducibility.} The released \texttt{analysis/figure\_token\_ablation.py} reads \texttt{data/medvlm\_bench\_v1/token\_ablation.csv}---a tidy CSV with per-(model, step) confidence and letter-stability counts---and recomputes the plot deterministically. The script that drives the per-step model querying is shared in the evaluation harness alongside the other ablation runners.
+
 \section{Reproducibility}
 \label{app:reproducibility}
 
