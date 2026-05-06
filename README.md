@@ -5,7 +5,8 @@ This repository contains the LaTeX source, figures, analysis scripts, and reprod
 > **MedVIGIL: Evaluating Trustworthy Medical VLMs Under Broken Visual Evidence**
 > NeurIPS 2026 Datasets & Benchmarks Track submission.
 
-The benchmark itself (300 cases, 2,556 MCQ probes, 240 counterfactual triplets, ROI annotations, Croissant 1.0 metadata, scoring code, cached model outputs) is hosted separately on Hugging Face: <https://huggingface.co/datasets/jhq0709/MedVIGIL>.
+**Project page:** <https://hq0709.github.io/MedVIGIL-page/>
+**Benchmark dataset (300 cases, 2,556 MCQ probes, 240 counterfactual triplets, ROI annotations, Croissant 1.0 metadata, scoring code, cached model outputs):** <https://huggingface.co/datasets/jhq0709/MedVIGIL>
 
 ## Repository layout
 
