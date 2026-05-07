@@ -128,16 +128,16 @@ Xiang Li\textsuperscript{2,\textdagger}}
 Medical vision--language models (VLMs) are usually evaluated on intact image--question pairs, but trustworthy clinical use requires a stronger property: a model must recognise when the evidential basis for an answer has failed. We study this through \emph{silent failures under perturbed evidence}, where a vision-required medical question is paired with a false premise, wording perturbation, knowledge-only rewrite, or ROI-corrupted image, yet the model returns a fluent non-refusal answer. We introduce \medvigil, a 300-case evaluation suite drawn from four public medical VQA sources, supervised end to end by four board-certified radiologists: every gold answer, refusal option, candidate-answer set, paraphrase, false-premise trap, ROI box, and clinical risk tier is clinician-authored. Two attending radiologists annotate every case in parallel, a senior radiologist consolidates the released manifest, and a separate fourth radiologist independent of construction answers every probe to provide the human reference baseline. The release contains 2{,}556 MCQ probes, 240 counterfactual triplets, physician-adjudicated risk-tier and answerability flags, ROI boxes, and a paired open-ended variant. We report seven correctness-conditioned audit metrics that summarise into the \medvigil\ Composite Score (MCS), and audit 16 vision-capable models plus two text-only baselines. The independent radiologist scores MCS $83.3$ at silent-failure rate $5.8\%$, leaving a $14.1$-point composite headroom above the strongest audited model (Claude Opus 4.7 at $69.2$). The benchmark and evaluation harness are publicly released.\footnote{Dataset: \url{https://huggingface.co/datasets/jhq0709/MedVIGIL}; evaluation harness: \url{https://github.com/hq0709/MedVIGIL}.}
 \end{abstract}
 
-\begin{figure}[!t]
-  \centering
-  \includegraphics[width=0.80\linewidth]{figures/motivation.png}
-  \caption{A vision-required chest X-ray paired with two evidence-perturbations (ROI mask, laterality flip) yields contrasting behaviours: a \textcolor{red!75!black}{\textbf{silent failure}} fabricating a left-apical-pneumothorax measurement vs.\ a \textcolor{green!50!black}{\textbf{safe refusal}} recognising the broken evidence.}
-  \label{fig:motivation}
-\end{figure}
+
 
 \section{Introduction}
 \label{sec:introduction}
-
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/motivation.png}
+  \caption{A vision-required chest X-ray paired with two evidence-perturbations (ROI mask, laterality flip) yields contrasting behaviours: a \textcolor{red!75!black}{\textbf{silent failure}} fabricating a left-apical-pneumothorax measurement vs.\ a \textcolor{green!50!black}{\textbf{safe refusal}} recognising the broken evidence.}
+  \label{fig:motivation}
+\end{figure}
 Medical vision--language models (VLMs) have made remarkable progress in processing and interpreting medical images, with open medical systems such as LLaVA-Med~\cite{li2023llavamed} and HuatuoGPT-Vision~\cite{chen2024huatuogptvision} sitting alongside proprietary multimodal systems (GPT-4o~\cite{openai2024gpt4o}, Claude~\cite{anthropic2024claude3}, Gemini~\cite{gemini2023technical}) across clinical workflows ranging from radiology report assistance to multimodal clinical decision support~\cite{moor2023medflamingo,wu2023radfm}. As these models move from controlled benchmarks into real-world clinical settings, trustworthiness becomes a critical concern: a model operating in high-stakes medical environments must not only produce accurate responses but must also behave safely when its inputs are unreliable or ambiguous. Yet a growing body of evidence suggests that current medical VLMs struggle to ground answers in the actual image content, capturing surface terminology rather than fine-grained visual evidence, raising serious concerns about their readiness for real clinical deployment.
 
 This problem can be further attributed to text priors dominating model outputs at the expense of genuine visual grounding. Recent work has shown that frontier VLMs can achieve top rank on standard medical imaging benchmarks without ever receiving an image, fabricating clinically detailed findings from textual context alone~\cite{asadi2026mirageillusionvisualunderstanding}, and that state-of-the-art multimodal models dramatically underperform young children on tasks requiring genuine visual perception, revealing that benchmark-leading performance largely reflects language-prior exploitation rather than true visual understanding~\cite{chen2026babyvision}. This reliance on language priors is particularly consequential in the medical domain, where biomedical literature is exceptionally rich and a model can assemble plausible-sounding clinical answers from question templates and terminology alone, without ever consulting the image~\cite{goyal2017vqa,agarwal2020causalvqa}. However, existing medical VLM evaluations universally assume an intact evidence contract, and few systematically address the failure mode that naturally follows, namely whether a medical VLM can recognise when the visual evidence has failed and refuse, rather than fabricating a fluent clinical response from language priors alone~\cite{lau2018vqarad,liu2021slake,zhang2023pmcvqa,li2023pope,rohrbach2018chair,chen2024medihallv1,geifman2017selective,ren2023selfevaluation,singhal2023medpalm}.
@@ -182,7 +182,7 @@ The definition intentionally separates the correctness of a medical answer from 
 
 \begin{figure}[!t]
   \centering
-  \includegraphics[width=0.92\linewidth]{figures/pipeline.png}
+  \includegraphics[width=\linewidth]{figures/pipeline.png}
   \caption{\medvigil\ construction and evaluation pipeline. \textbf{Top:} four-stage build (source mix (300 cases from VQA-RAD/SLAKE/ROCO/CXR), \textsc{R1}/\textsc{R2} dual-radiologist annotation, perturbation drafting, and \textsc{P3} senior-physician consolidation). \textbf{Bottom:} per-case audit flow: \textbf{(A)} doctor-authored evidence contract, \textbf{(B)} text-side and image-side perturbations, \textbf{(C)} medical VLM scored as safe abstention vs.\ silent failure. Details in Sections~\ref{sec:pipeline},~\ref{sec:eval_pipeline}.}
   \label{fig:pipeline}
 \end{figure}
@@ -317,6 +317,13 @@ Model & \multicolumn{2}{c}{Capability} & \multicolumn{2}{c}{Evidence Safety} & \
 % end tabular
 \end{table}
 
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_audit_summary.pdf}
+  \caption{Audit summary. \textbf{Left:} MCS component decomposition (Capability / Safety $\!=\!100\!-\!\mathrm{SFR}_w$ / Grounding / harmonic-mean MCS), ordered by MCS. \textbf{Right:} risk-tier $\sfr$ heatmap with Original accuracy (left blue) and $\mathrm{SFR}_w$ (right red), sorted safest-first.}
+  \label{fig:audit_summary}
+\end{figure}
+
 \textbf{Individual axes do not collapse to a single ranking.} Claude Opus 4.7 leads accuracy (Overall $76.5$\%); Gemini 3.1 Flash-Lite has the largest ROI contrast (VGR $+49.5$\,pp); GPT-5.5 leads knowledge-only accuracy (LPA $99.6$\%); and aggregate \sfr\ is lowest on Claude Opus 4.7 ($22.0$\%) and Gemini 3.1 Flash-Lite ($22.3$\%) at different overall-accuracy levels.
 
 \textbf{The radiologist baseline establishes a clean human ceiling.} \textsc{R4} scores $95.3$\% Original accuracy, $5.8$\% trap \sfr, and MCS $83.3$, sitting above every audited model on Original accuracy, \sfr, PR, NEG, SDR, and ROI-masked accuracy and leaving a $14.1$-point composite headroom over the strongest audited model. \textsc{R4}'s raw VGR is only $+4.5$\,pp because \textsc{R4} also refuses correctly when the ROI is removed, the use-when-present / refuse-when-absent pattern that motivates entering VGR into MCS through the clipped, ROI-masked-paired Grounding axis rather than as a stand-alone monotone score.
@@ -331,12 +338,7 @@ Model & \multicolumn{2}{c}{Capability} & \multicolumn{2}{c}{Evidence Safety} & \
 
 \textbf{MCS reorders the leaderboard by bottleneck.} Claude Opus 4.7 leads at $69.2$ because all three component scores are high; Gemini 3.1 Flash-Lite ranks second at $66.0$ on the strength of its Safety and Grounding axes; GPT-4o falls to $44.1$ because Safety is its bottleneck; Qwen3.5-9B remains lowest at $31.0$ with Safety below $25$. Per-probe-kind, per-CRT, and per-source breakdowns are in Appendix~\ref{app:audit_breakdowns}; bootstrap rank stability and weight / Grounding sensitivity in Appendices~\ref{app:bootstrap_appendix},~\ref{app:mcs_sensitivity}; extended interpretation in Appendix~\ref{app:extended_discussion}.
 
-\begin{figure}[!t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_audit_summary.pdf}
-  \caption{Audit summary. \textbf{Left:} MCS component decomposition (Capability / Safety $\!=\!100\!-\!\mathrm{SFR}_w$ / Grounding / harmonic-mean MCS), ordered by MCS. \textbf{Right:} risk-tier $\sfr$ heatmap with Original accuracy (left blue) and $\mathrm{SFR}_w$ (right red), sorted safest-first.}
-  \label{fig:audit_summary}
-\end{figure}
+
 
 \subsection{Ablation: Visual Information Decay}
 \label{sec:visual_decay}
@@ -879,6 +881,16 @@ MCS should therefore be read alongside the named components and the risk-tier ta
 For evaluation, the main implication is that medical VLM audits should include evidence-contract controls rather than treating them as generic robustness checks. A minimal report should include clean-input capability, trap \sfr, risk-weighted \sfr, ROI-conditioned grounding, language-prior controls, and a paired coherence measure. Reporting only accuracy rewards systems that answer through broken evidence; reporting only refusal rewards systems that avoid useful clinical questions. The paired design constrains both failure modes.
 
 For deployment, the safest mitigation is external input validation before model inference. A clinical pipeline should check image presence, file integrity, resolution, entropy, modality consistency, and expected metadata before forwarding a request to the VLM. If these checks fail, the system should return a structured refusal rather than asking the model to infer whether the image is usable. Model-side training can still help, but it should include refusal-aware probes that resemble the false-premise and ROI-masked structures used in \medvigil, so that the model learns to mark broken evidence rather than answer through it.
+
+\subsection{On Dataset Scale and Pretraining Overlap}
+
+Two related concerns naturally arise about \medvigil: the suite is intentionally small ($300$ cases, $2{,}556$ probes) and is built on top of source corpora (VQA-RAD, SLAKE, ROCO, public CXR collections) that almost certainly intersect the pretraining mixtures of the audited proprietary models. We address both together because, under \medvigil's perturbation design, they actually \emph{strengthen} rather than weaken the empirical conclusions.
+
+The audited models do enjoy any overlap that exists. They reach high accuracy on the original probes (Claude Opus 4.7 at $78.7$\%, Gemini 3 Flash at $77.0$\%, GPT-5.5 at $75.0$\%), exactly the regime in which prior memorisation would help most. If MedVIGIL were scored only on these clean-input probes, the most reasonable interpretation of the leaderboard would be ``the models have seen these or near-duplicate examples during pretraining and have memorised the answers.'' That is the textbook overfitting hypothesis, and the clean-accuracy column is consistent with it.
+
+What overlap does \emph{not} explain is the perturbed-evidence behaviour. The doctor-authored false-premise traps, the ROI-masked variants, and the laterality-flip rewrites are constructed at build time and have not appeared in any pretraining corpus. Under those perturbations, no audited model reaches the level its clean-input accuracy would predict: aggregate \sfr\ stays above $22$\% even for the safest model, the per-CRT \sfr\ on L4--L5 traps reaches $75$+\% for several frontier models (Section~\ref{sec:experiments}, Table~\ref{tab:risk_tier_results}), and the construction-blind radiologist baseline still leads MCS by $14.1$ points despite seeing the same probes for the first time. If pretraining-overlap memorisation were transferable to genuine medical reasoning, the gap to \textsc{R4} would close on perturbations rather than widen on them. The fact that it widens is the signal that the high clean-input numbers reflect surface pattern matching on familiar inputs, not the deployment-relevant capability the benchmark is designed to expose.
+
+The 300-case scale follows the same logic. \medvigil\ is sized for falsification of safe-failure claims under perturbation, not for training; bootstrap CIs (Appendix~\ref{app:bootstrap_appendix}) and per-CRT stratification (Appendix~\ref{app:audit_breakdowns}) are sufficient to separate the top systems on Safety and Grounding even at this size, and the credentialed CXR subset is shipped only as reconstruction pointers (Appendix~\ref{app:documentation}) so that downstream researchers can verify the absence of leakage on a per-case basis. A larger v2 release across more specialties is documented as the natural follow-up; we do not believe scaling will reverse the present finding, because the failure modes the benchmark exposes (silent commitment under broken evidence) compound with case count rather than dilute under it.
 
 \section{Blind-input Controls}
 \label{app:noimg_ablation}
