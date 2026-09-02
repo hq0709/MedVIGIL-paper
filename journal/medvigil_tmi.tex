@@ -814,7 +814,7 @@ sentence and differ only in the image, the same variable ranks the label at
 function of the sentence and not of the volume. Scale sharpens the reading of
 the number without touching the label: across Qwen2.5-VL 3B, 7B, 32B and 72B
 the within-pair AUROC rises 0.54, 0.78, 0.85, 0.96 while the label AUROC
-stays at 0.50, 0.48, 0.51, 0.50 (Fig.~\ref{fig:decision}c), and full-corpus
+stays at 0.50, 0.48, 0.51, 0.50 (Fig.~\ref{fig:decision}b), and full-corpus
 accuracy rises from 50.0\% to 56.0\% between 3B and 32B on the growth cue
 alone while growth-matched accuracy stays at 50.0--50.6\%.
 
@@ -822,7 +822,7 @@ The same picture holds at the level of answers. Over paired sighted and
 blind runs on identical probes we measure, per model, the mean absolute
 perturbation of the option log-probabilities, the mean decision gap between
 the top two options in the sighted arm, and the share of probes whose argmax
-differs between arms (Fig.~\ref{fig:decision}b). Six models perturb their scores
+differs between arms. Six models perturb their scores
 measurably and change almost nothing: Qwen2.5-VL-7B moves 0.355~nats against
 a 1.657-nat decision gap and flips 0.0\% of 2{,}262 probes [0.0, 0.0];
 Idefics3-8B and Med3DVLM-7B flip 0.0\%; SmolVLM2, Qwen2.5-VL-3B and
@@ -838,14 +838,13 @@ between, at 18.5\% and 19.7\%.
   \includegraphics[width=0.96\textwidth]{figs/fig_decision.pdf}
   \caption{\textbf{The decision variable reads the question, not the volume.}
   (a)~AUROC of $\log p_{\text{yes}}-\log p_{\text{no}}$ on the growth-matched
-  subset with volume-clustered 95\% intervals: against the computed label over
-  all 1{,}368 probes; within the 363 complete matched pairs, where volume and
-  rendering are identical and only the growth number in the question differs;
-  and across the 182 probes whose question sentence is identical and only the
-  volume differs. (b)~Mean log-probability perturbation between sighted and
-  blind arms (filled) against the sighted-arm decision gap (open), sorted by
-  the share of probes whose answer changes. (c)~The label and within-pair
-  AUROCs across Qwen2.5-VL 3B--72B on the published rendering.}
+  subset with volume-clustered 95\% intervals, three comparisons per model:
+  within the 363 complete matched pairs, where volume and rendering are
+  identical and only the growth number in the question differs; against the
+  computed label over all 1{,}368 probes; and across the 182 probes whose
+  question sentence is identical and only the volume differs.
+  $^{\dagger}$Native volumetric input. (b)~The growth-number and label AUROCs
+  across Qwen2.5-VL 3B--72B on the published rendering.}
   \label{fig:decision}
 \end{figure*}
 
@@ -1028,7 +1027,8 @@ modal share) and still lands at 26.3\%.
 
 Chance-level accuracy is compatible with two states no accuracy can
 separate: nothing usable reaches the decision, or something does and is
-out-voted. Fig.~\ref{fig:decision} separates them. Six models are the first
+out-voted. The paired sighted and blind runs separate them
+(Section~\ref{sec:results_3d}). Six models are the first
 case: the volume perturbs their option scores by less than the decision gap
 and changes almost no answers. Five models are the second, and it is the
 harder one to explain away: InternVL3-14B rewrites 92\% of its answers when
