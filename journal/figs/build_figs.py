@@ -18,7 +18,9 @@ for r in DV:
         if k.startswith("auc") or k in ("acc", "params_b"): r[k] = float(r[k])
 main = [r for r in DV if r["arm"] == "sighted"] + [r for r in DV if r["tag"] == "qwen72b" and r["arm"] == "plain"]
 main = sorted(main, key=lambda r: r["auc_pair"])
-fig, (a, b, c) = plt.subplots(1, 3, figsize=(7.2, 3.4), gridspec_kw={"width_ratios": [1.3, 1.0, 0.85]})
+from matplotlib.gridspec import GridSpec
+fig = plt.figure(figsize=(7.2, 4.6)); gs = GridSpec(2, 3, figure=fig, width_ratios=[1.3, 1.0, 0.82], height_ratios=[1.0, 0.9], wspace=0.55, hspace=0.42)
+a = fig.add_subplot(gs[:, 0]); b = fig.add_subplot(gs[:, 1]); c = fig.add_subplot(gs[0, 2]); key = fig.add_subplot(gs[1, 2]); key.axis("off")
 H.panel_title(a, "a", "What the decision variable ranks (AUROC)")
 SER = [("auc_gold", "the computed label (all probes)", H.CHARCOAL, "o", True), ("auc_pair", "same volume, growth number differs", H.LILAC, "D", True), ("auc_text", "same sentence, volume differs", H.SAGE, "s", False)]
 for i, r in enumerate(main):
@@ -26,11 +28,11 @@ for i, r in enumerate(main):
         a.plot([r[k + "_lo"], r[k + "_hi"]], [i, i], color=col, lw=1.0, alpha=0.5, zorder=2)
         a.plot(r[k], i, marker=mk, ms=4.2, color=col, mfc=col if filled else "white", mec=col if not filled else "white", mew=0.8 if not filled else 0.6, ls="none", zorder=3)
 a.axvline(0.5, color=CH, lw=0.8, zorder=1)
-a.set_yticks(range(len(main))); a.set_yticklabels([r["model"].replace("-OneVision", "-OV").replace("M3D-LaMed-", "M3D-") + (" (plain)" if r["tag"] == "qwen72b" else "") for r in main], fontsize=6.3)
+a.set_yticks(range(len(main))); a.set_yticklabels([r["model"].replace("-OneVision", "-OV").replace("M3D-LaMed-", "M3D-") + (" (plain)" if r["tag"] == "qwen72b" else "") for r in main], fontsize=6.6)
 a.set_xlim(0.25, 1.0); a.set_xticks([0.3, 0.5, 0.7, 0.9]); a.set_xlabel("AUROC of $\\log p_{\\rm yes}-\\log p_{\\rm no}$", fontsize=8); a.set_ylim(-0.7, len(main) + 0.3)
 a.annotate("chance", (0.5, len(main) - 0.35), ha="center", va="bottom", fontsize=6.2, color=MUTED)
 ha = [Line2D([], [], marker=mk, ms=4.2, color=col, mfc=col if filled else "white", mec=col if not filled else "white", mew=0.8, ls="none", label=lab) for _, lab, col, mk, filled in SER]
-H.boxed_legend(a, ha, loc="lower right", fontsize=5.9, handlelength=1.2, borderpad=0.35, labelspacing=0.3, handletextpad=0.4)
+LEGA = ha
 # (b) dumbbell: perturbation vs decision gap, sorted by answer change
 rows = list(csv.DictReader(open(f"{D3}/figdata/fig10_margin.csv")))
 for r in rows: r["p"] = float(r["perturbation"]); r["g"] = float(r["gap"]); r["f"] = float(r["flip_rate"])
@@ -43,11 +45,11 @@ for i, r in enumerate(order):
     b.plot(r["g"], i, marker="o", ms=5, mfc="white", mec=col, mew=1.2, ls="none", zorder=3)
     b.annotate(f"{r['f']:.0f}%", (1.03, i), xycoords=("axes fraction", "data"), ha="left", va="center", fontsize=6.4, color=INK, fontweight="bold" if r["f"] >= 30 else "normal", annotation_clip=False)
 b.annotate("answer\nchanges", (1.03, len(order) + 0.55), xycoords=("axes fraction", "data"), ha="left", va="top", fontsize=6.0, color=MUTED, annotation_clip=False)
-b.set_yticks(range(len(order))); b.set_yticklabels([r["model"].replace("-OneVision", "-OV").replace("M3D-LaMed-", "M3D-") for r in order], fontsize=6.3)
+b.set_yticks(range(len(order))); b.set_yticklabels([r["model"].replace("-OneVision", "-OV").replace("M3D-LaMed-", "M3D-") for r in order], fontsize=6.6)
 b.set_xscale("log"); b.set_xlim(0.09, 20); b.set_xticks([0.1, 0.3, 1, 3, 10]); b.set_xticklabels(["0.1", "0.3", "1", "3", "10"]); b.minorticks_off()
 b.set_xlabel("nats (log scale)", fontsize=8); b.set_ylim(-0.7, len(order) + 0.6)
 hb = [Line2D([], [], marker="o", ms=5, color="#777", mec="white", ls="none", label="perturbation"), Line2D([], [], marker="o", ms=5, mfc="white", mec="#777", mew=1.2, ls="none", label="decision gap")]
-H.boxed_legend(b, hb, loc="upper left", **LEG)
+LEGB = hb
 # (c) scale ladder, Qwen2.5-VL family on the plain rendering
 lad = {r["tag"]: r for r in DV if r["arm"] in ("sighted", "plain") and r["tag"] in ("qwen3b", "qwen7b", "qwen32b", "qwen72b")}
 xs = [lad[t]["params_b"] for t in ("qwen3b", "qwen7b", "qwen32b", "qwen72b")]
@@ -59,8 +61,10 @@ for k, lab, col, mk in [("auc_pair", "growth number differs", H.LILAC, "D"), ("a
 c.axhline(0.5, color=CH, lw=0.8, zorder=1)
 c.set_xscale("log"); c.set_xticks(xs); c.set_xticklabels(["3B", "7B", "32B", "72B"]); c.minorticks_off(); c.set_xlim(2.2, 100)
 c.set_ylim(0.35, 1.02); c.set_yticks([0.4, 0.6, 0.8, 1.0]); c.set_xlabel("Qwen2.5-VL parameters", fontsize=8); c.set_ylabel("AUROC", fontsize=8)
-H.boxed_legend(c, c.get_legend_handles_labels()[0], loc="lower right", fontsize=6.0, handlelength=1.4, borderpad=0.35, labelspacing=0.3)
-fig.tight_layout(w_pad=1.4); fig.savefig("figs/fig_decision.pdf", bbox_inches="tight"); plt.close(fig)
+l1 = H.boxed_legend(key, LEGA, loc="upper center", bbox_to_anchor=(0.5, 1.0), title="(a), (c): AUROC against", fontsize=6.4, title_fontsize=6.6, handlelength=1.2, borderpad=0.5, labelspacing=0.45, handletextpad=0.5)
+l1.get_title().set_ha("left"); key.add_artist(l1)
+H.boxed_legend(key, LEGB, loc="lower center", bbox_to_anchor=(0.5, 0.0), title="(b): per model", fontsize=6.4, title_fontsize=6.6, handlelength=1.2, borderpad=0.5, labelspacing=0.45, handletextpad=0.5)
+fig.savefig("figs/fig_decision.pdf", bbox_inches="tight"); plt.close(fig)
 
 # ================= Fig. 5: row 1 accuracy, row 2 modal share =================
 rows = list(csv.DictReader(open(f"{D3}/figdata/fig9_roi_four_arm.csv"))); organs = ["Lung", "Colon", "Pancreas", "Liver"]

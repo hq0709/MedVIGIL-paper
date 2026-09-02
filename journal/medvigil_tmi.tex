@@ -38,6 +38,11 @@
 %% Editorial scaffolding, removed before submission. A placeholder must never
 %% silently become final copy, so both macros print in red.
 %% ---------------------------------------------------------------------------
+%% ieeecolor's single-column caption path switches to the heading colour without a group; keep it local.
+\makeatletter
+\def\fnum@figure{{\color{subsectioncolor}\sf Fig.~\thefigure}}
+\def\fnum@table{{\color{subsectioncolor}\sf TABLE~\thetable}}
+\makeatother
 \newcommand{\figfix}[1]{\textcolor{red}{\textbf{[FIGURE TO REDRAW]}~#1}}
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO]}~#1}}
 
