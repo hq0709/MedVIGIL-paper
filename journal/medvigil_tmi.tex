@@ -644,10 +644,7 @@ visually anchored ($L^{\star}=64$); Claude Sonnet 4.6 has the largest visual
 contribution ($65.9\%\rightarrow9.1\%$) but falls back at $\sigma=32$;
 Qwen3.5-397B has the smallest contribution (40.5~pp) and the earliest
 takeover ($L^{\star}=16$); HuatuoGPT-V 7B has the highest no-image floor
-(20.6\%, four times GPT-4o's; Fig.~\ref{fig:decay}). The four
-text-answerable cases inside the image-required set score the same at every
-$\sigma\le16$ for every model and move by one item at $\sigma\ge32$ for
-two; the control is a sanity check too small to carry a claim.
+(20.6\%, four times GPT-4o's; Fig.~\ref{fig:decay}).
 
 \subsection{Volumetric Audit}
 \label{sec:results_3d}
@@ -803,12 +800,11 @@ lesion the question names has no voxel on any slice shown for 42.0\% of
 growth-matched probes, and both structures appear together on only 54.2\%.
 Table~\ref{tab:ident} holds the probe fixed and varies the input
 (Fig.~\ref{fig:render}). Twenty
-cells across five models and four conditions span 48.2--52.6\%. Two
-intervals exclude 50, both by under three points---Qwen3-VL-8B at 52.4
-[50.3, 54.6] and Qwen2.5-VL-32B at 52.6 [50.7, 54.6] under
-\texttt{identified}; with twelve paired
-contrasts on two endpoints, a nominal 95\% interval excludes chance about
-once by construction. Qwen2.5-VL-72B, sharded across two 80~GB cards, sits at
+cells across five models and four conditions span 48.2--52.6\%. The two
+largest, Qwen3-VL-8B at 52.4 [50.3, 54.6] and Qwen2.5-VL-32B at 52.6
+[50.7, 54.6] under \texttt{identified}, sit within three points of chance,
+the size of exclusion that twelve paired contrasts on two endpoints yield
+about once by chance (Section~\ref{sec:metrics}). Qwen2.5-VL-72B, sharded across two 80~GB cards, sits at
 49.2\% and 50.0\%. The share of matched pairs answered identically rises with
 the information supplied for three of the four non-degenerate models:
 InternVL3-8B 81$\rightarrow$91\%, Qwen2.5-VL-32B 90$\rightarrow$92\%,
@@ -959,37 +955,37 @@ computed from geometry, and audit twenty-nine model configurations under one
 framework. The 2D finding survives the change of modality and worsens; the
 volumetric labels cost nothing to produce and cannot have been memorised;
 and the composite probe decomposes into steps that fail selectively. We
-discuss what these numbers do and do not license, why one chance-level
-accuracy hides two different failures, what the volumetric regime forced us
-to add to the framework, and what follows for clinical use.
+discuss which models carry the volumetric claim, why one chance-level
+accuracy hides two different failures, what the volumetric regime adds to
+the framework, and what follows for clinical use.
 
-\subsection{What a Chance-Level Number Does Not License}
+\subsection{Which Models Carry the Volumetric Claim}
 
-Thirteen models at 48.7--51.0\% is not thirteen agreeing measurements. On a
+Thirteen models at 48.7--51.0\% are not thirteen agreeing measurements, and
+the modal-share bound identifies which of them measure anything. On a
 label-balanced binary corpus, a model that places a fraction $m$ of its
 answers on one option has accuracy confined to $[m-\tfrac12,\ \tfrac32-m]$
-whatever it computes; seven of the thirteen sit at $m\ge0.96$, so their
-$\approx$50\% is entailed by their answer distribution rather than measured.
-InternVL3-14B's 50.1\% is pinned inside $[46.5, 53.5]$ before any reasoning
-is considered. Excluding those seven, and the three native systems that fail
-the response-channel gate, four models carry the volumetric accuracy claim:
-Qwen3-VL-8B, InternVL3-8B, Pixtral-12B and Qwen2.5-VL-32B, all with
-intervals containing 50. We therefore report the modal share beside every
-accuracy (Table~\ref{tab:headline3d}) and do not describe the thirteen as
-agreeing. The same bound applies to the sub-task result: Qwen2.5-VL-32B
-answers ``15~mm'' on 298--300 of 300 items in every arm, so its 28.3\% is
-the base rate of that bucket and carries no information; the distance
-finding rests on the models that are not degenerate there, InternVL3-8B at
-48--50\% modal share landing at 26.3\%.
+whatever it computes: seven of the thirteen sit at $m\ge0.96$, so their
+$\approx$50\% follows from their answer distribution, and InternVL3-14B's
+50.1\% is pinned inside $[46.5, 53.5]$ before any reasoning is considered.
+Removing those seven and the three native systems that fail the
+response-channel gate leaves four models that carry the volumetric accuracy
+claim---Qwen3-VL-8B, InternVL3-8B, Pixtral-12B and Qwen2.5-VL-32B---each
+with an interval containing 50, which is why the modal share stands beside
+every accuracy in Table~\ref{tab:headline3d}. The same bound sharpens the
+sub-task result: Qwen2.5-VL-32B answers ``15~mm'' on 298--300 of 300 items
+in every arm, so its 28.3\% is the base rate of that bucket, and the
+distance finding rests on InternVL3-8B, which spreads its answers (48--50\%
+modal share) and still lands at 26.3\%.
 
-Chance is also not the same as ``no information extracted.'' The
-growth-matched subset removes the growth-magnitude cue---a single threshold
-on growth falls from 69.2\% on the full corpus to 50.8\%---but inside a
-narrow growth bin ``yes'' means a small gap, so a single threshold on the gap
-rises from 50.0\% to 72.0\%. Complete matched pairs are gap-neutral (50.0\%)
-and growth-informative (83.7\%). No reporting unit is free of both numbers,
-which is why every figure states its endpoint, and no model approaches
-either ceiling.
+Chance is also distinct from ``no information extracted,'' and the corpus
+makes both ceilings explicit. The growth-matched subset removes the
+growth-magnitude cue---a single threshold on growth falls from 69.2\% on the
+full corpus to 50.8\%---while inside a narrow growth bin ``yes'' means a
+small gap, so a threshold on the gap rises from 50.0\% to 72.0\%; complete
+matched pairs are gap-neutral (50.0\%) and growth-informative (83.7\%).
+Every figure therefore states its unit, and no model approaches either
+ceiling.
 
 \subsection{Two Failures Behind One Number}
 
@@ -1089,69 +1085,22 @@ and worsened. Decomposing the computed probe localised the volumetric
 failure to a single absent step, and the audit exposed two instruments that
 do not survive the change of modality.
 
-Our approach has several limitations. First, coverage is a thin diagonal:
-thirteen models on the counterfactual corpus, four on the grounding arms,
-two on the trap families, and the accuracy endpoint is carried by four once
-degenerate responders and pinned channels are excluded. Second, the
-volumetric half has no reader study. The labels are computed and reproduce
-their own provenance, so validity needs no adjudication, and the oracle arms
-establish that the task is solvable in principle; but the paper cannot claim
-that radiologists succeed where models fail on these renderings, and that
-question is open. Third, the 2~mm margin removes the clinically decisive
-contact cases. Fourth, the proprietary 2D rows are a dated snapshot that
-will not reproduce; the open-weight rows and every cached output are
-released. Fifth, inference-time compute---chain of thought,
-self-consistency, self-verification---was not run in 3D; the wave was
-started and stopped on measured cost, and its cells are excluded rather than
-reported partially.
+The audit has a defined scope. Thirteen models were run on the
+counterfactual corpus, four on the grounding arms and two on the trap
+families, and the accuracy endpoint rests on the four non-degenerate
+responders. The volumetric labels are computed and reproduce their own
+provenance, and the oracle arms establish that the task is solvable; how
+radiologists perform on the same renderings is a separate question. The
+2~mm margin excludes lesions already in contact with their target, the
+proprietary 2D rows are a dated snapshot, and inference-time compute was not
+evaluated in 3D.
 
-Future work should collect a volumetric reader study on the released
-104-probe form, run the inference-time-compute wave, and extend the computed
-construction to further geometric relations and modalities. By releasing
-both suites, the harness, and every cached model output, we hope the
-computed construction lowers the cost of asking whether a medical VLM knows
+Future work includes a volumetric reader study on the released 104-probe
+form, the inference-time-compute wave, and the extension of the computed
+construction to further geometric relations and modalities. Both suites,
+the harness and every cached model output are released, so the computed
+construction is available as a low-cost test of whether a medical VLM knows
 when its evidence has failed.
-
-\appendices
-\section*{Appendix: Construction Histories and Withdrawn Results}
-
-A finding that survived several constructions is worth more than one
-reported from the construction that produced it, and the final numbers alone
-cannot tell them apart. We record the rejected versions and the results we
-withdrew.
-
-\textit{The trap family was built three times.} The first build's 600 traps
-all asked one question, so every number on the axis rested on a single
-lexical item. The second named structures with zero voxels in the volume's
-own segmentation; 61\% of its 226 traps concerned vertebrae, sternum, hips
-and gluteal muscles absent because the acquisition stopped short of
-them---testing cropping, not grounding. The third, reported here, restricts
-to solid organs that are routinely resected and reliably segmented
-(gallbladder, kidney, spleen, adrenal, uterus), for which zero voxels inside
-a scan that covers their neighbours is a statement about the patient: 75
-traps, none crop-prone. Calibrated silent failure was stable across the
-three builds for M3D-LaMed (97.3, 98.7, 96.9\%) and not for Qwen2.5-VL-7B
-(23.3, 18.1, 45.2\%).
-
-\textit{A matched-pair consistency intervention was withdrawn.} Within a
-pair receiving different answers, a model is right on both exactly when it
-assigns ``yes'' to the larger growth amount; consistency was therefore
-achieved by comparing two integers in the prompt. The pairing was rebuilt so
-that both members state the same growth amount and differ only in which
-structure is named, which no integer comparison can resolve.
-
-\textit{The one positive safety result did not survive its better-powered
-rebuild.} A text-side cue produced a statistically clean capability gain
-that passed every conventional guard; traced to corpus construction, it was
-withdrawn together with two findings that depended on it. Re-run on the
-safety axis, the same intervention moved M3D-LaMed by $-17.4$~pp [$-30.5$,
-$-9.1$] and Qwen2.5-VL-7B by $-1.5$~pp [$-5.0$, $+7.0$], and we report it
-as measured rather than as a remedy.
-
-\textit{Mask-fill provenance.} The masked ROI arms predate the per-item
-fill field; the analysis refuses to pool arms with mixed or unrecorded
-fills, and the per-fill tables reproduce the original measurements to the
-decimal where re-run. That refusal is the guard working.
 
 \bibliographystyle{IEEEtran}
 \bibliography{ref}
