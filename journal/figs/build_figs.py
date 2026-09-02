@@ -148,9 +148,6 @@ def chance(ax, y, below=False, left=False):
     ax.annotate("chance", (-0.45 if left else XINF + 0.45, y), xytext=(1 if left else -1, -4 if below else 2), textcoords="offset points", ha="left" if left else "right", va="top" if below else "bottom", fontsize=6.3, color=MUTED)
 # ---- (a) 2D: four image-required curves, the text-answerable control as one range band
 ax = axes[0]; H.panel_title(ax, "a", "2D suite: accuracy"); hs = []
-T = np.array([[acc2d(mid, "text_answerable", s) for s in SIG] for mid, *_ in m2d])
-ax.fill_between(XP[:-1], T.min(0), T.max(0), color="#dcdcdc", alpha=0.6, lw=0, zorder=1)
-ax.annotate("text-answerable\ncontrol (range)", (5.5, (T.min(0)[-1] + T.max(0)[-1]) / 2), ha="center", va="center", fontsize=5.9, color=MUTED, zorder=2, linespacing=1.1)
 for mid, name, L, col, mk in m2d:
     y = [acc2d(mid, "image_required", s) for s in SIG] + [acc2d(mid, "image_required", "inf")]
     ax.plot(XP[:-1], y[:-1], ls="--", lw=1.0, color=col, marker=mk, ms=4.2, mec="white", mew=0.6, zorder=3)

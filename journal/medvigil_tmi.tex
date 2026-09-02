@@ -245,22 +245,22 @@ Section~\ref{sec:metrics}. CRT = clinical risk tier.}
 \label{tab:suites}
 \centering
 \fontsize{7.5}{9}\selectfont
-\setlength\tabcolsep{4pt}
+\setlength\tabcolsep{2.5pt}
 \begin{tabular}{lll}
 \toprule
  & 2D (conference) & Volumetric (this work) \\
 \midrule
-Sources & VQA-RAD 120, SLAKE 60, & MSD~\cite{antonelli2022msd}: liver 118, \\
- & ROCO 60, CXR 60 & lung 63, pancreas 281, colon 126 \\
+Sources & VQA-RAD 120, SLAKE 60, & MSD~\cite{antonelli2022msd}: liver 118, lung 63, \\
+ & ROCO 60, CXR 60 & pancreas 281, colon 126 \\
 Units & 300 cases & 588 CT volumes \\
 Probes & 2{,}556 MCQ & 9{,}484 (8{,}476 growth-contact) \\
 Counterfactuals & 240 triplets & 4{,}238 matched pairs \\
 Options & five (A--E, E = refusal) & two (yes / no) \\
-Label source & three-stage radiologist pipeline & distance transform \\
+Label source & radiologist pipeline (3 stages) & distance transform \\
 Annotation cost & four radiologists & none \\
 Human reference & construction-blind radiologist & none (Sec.~\ref{sec:conclusion}) \\
 CRT L1:L2:L3:L4:L5 & 71:31:118:43:37 & assigned by target structure \\
-Chance & 20\% & 50\%, balanced by construction \\
+Chance & 20\% & 50\% (balanced) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -290,7 +290,10 @@ CheXpert~\cite{irvin2019chexpert}, stratified across five clinical risk
 tiers with a thirty-case minimum per tier; credentialed cases ship as
 reconstruction pointers. Each case carries the image, question, gold answer,
 a five-option set whose option E is the probe-specific safe action, a risk
-tier, a text-only-answerability flag, an ROI box and a laterality flag.
+tier, a text-only-answerability flag, an ROI box and a laterality flag. All
+sources in both suites are public and de-identified; MIMIC-CXR and CheXpert
+are used under their data use agreements and MSD under CC~BY-SA~4.0, no new
+patient data were collected, and no ethics approval was required.
 
 Four board-certified radiologists build the suite in three stages
 (Fig.~\ref{fig:pipeline}, top). Two attending radiologists independently
@@ -380,7 +383,27 @@ slices and red/cyan outlines of lesion and target to \texttt{identified}
 (both, plus a 10~mm scale bar drawn from the panel's own spacing); an
 \emph{input-richness} arm then holds annotation at that level and shows
 three planes, nine, twenty-five contiguous axial slices, or the same planes
-cropped and magnified.
+cropped and magnified. Fig.~\ref{fig:render} shows one probe under the four
+identification conditions.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.96\textwidth]{figs/fig_render.pdf}
+  \caption{\textbf{What the volumetric models are shown.} One growth-contact
+  probe (liver, lesion 5, target heart: \emph{if this lesion grew by
+  16.2~mm in every direction, would it contact the heart?}) rendered by the
+  released harness under the four identification conditions. (a)~The
+  published \texttt{plain} input takes the three centre slices: the lesion
+  the question names has no voxel on any of them, as for 42.0\% of
+  growth-matched probes. (b)~\texttt{bestslice} chooses the slices on which
+  both structures are visible. (c)~\texttt{overlay} keeps the centre slices
+  and adds the legend sentence, so the prompt describes a red outline the
+  image does not contain. (d)~\texttt{identified} combines joint-visibility
+  slices, both outlines and a 10~mm bar drawn from each panel's own spacing;
+  it is byte-identical to the reader-study rendering and is the input of the
+  sub-task decomposition (Fig.~\ref{fig:subtask}).}
+  \label{fig:render}
+\end{figure*}
 
 \subsubsection{Verification} The reference rule re-derived from each
 probe's stored provenance reproduces the emitted label on 8{,}476 of 8{,}476
@@ -440,6 +463,20 @@ measured on a contentless question against a common baseline, and
 \emph{greedy-decoding variants} (suffix \texttt{-gen}), which parse a decoded
 answer so that a scoring artefact and a genuine chance result can be told
 apart side by side.
+
+\subsubsection{Statistical analysis} Every metric is an exact-match rate,
+and no hypothesis test is used to declare a capability. Intervals are 95\%
+percentile bootstrap intervals clustered by case in 2D and by volume in 3D,
+$B=10{,}000$ unless stated; contrasts between arms are paired differences
+with clustered intervals on the same units. The identification control
+tests twelve paired contrasts on two endpoints, so a nominal 95\% interval
+will exclude chance about once by construction, and no single excluded
+interval is read as capability. Because a model that places a share $m$ of
+its answers on one option of a balanced binary probe has accuracy confined
+to $[m-\tfrac12,\ \tfrac32-m]$ whatever it computes, the modal share is
+reported beside every volumetric accuracy. Robustness of the composite
+ordering is assessed by the Spearman correlation between CS rankings under
+alternative harm weights and grounding normalisations.
 
 \subsection{Audited Models and Protocol}
 \label{sec:protocol}
@@ -569,7 +606,14 @@ Gemini 3.1 Flash-Lite is second at 66.0 on the strength of Safety and
 Grounding; GPT-4o falls to 44.1 because Safety is its bottleneck; Qwen3.5-9B
 is lowest at 31.0. The construction-blind radiologist scores 83.3 at 5.8\%
 $\sfr$, 14.1 points above the strongest model. Every audited model has LPA
-above 75\%, so failures elsewhere are not knowledge deficits.
+above 75\%, so failures elsewhere are not knowledge deficits. The ordering
+is neither sample noise nor a weighting choice: case-clustered bootstrap
+intervals (500 resamples) put the leader at CS 69.2 [66.6, 72.1] against
+66.0 [62.8, 68.2] for Gemini 3.1 Flash-Lite and 61.3 [58.2, 64.3] for
+GPT-5.5, and under nine alternative composites---linear, uniform,
+exponential and high-skew harm weights and four grounding
+normalisations---the Spearman correlation with the default ranking is at
+least 0.97, the top five are unchanged and the leader is the same.
 
 Capability and safe behaviour come apart. Gemini 3 Flash reaches 71.9\%
 Overall at 37.2\% $\sfr$; GPT-4o 56.1\% at 53.0\%; Kimi-K2.5 47.3\% at
@@ -600,8 +644,10 @@ visually anchored ($L^{\star}=64$); Claude Sonnet 4.6 has the largest visual
 contribution ($65.9\%\rightarrow9.1\%$) but falls back at $\sigma=32$;
 Qwen3.5-397B has the smallest contribution (40.5~pp) and the earliest
 takeover ($L^{\star}=16$); HuatuoGPT-V 7B has the highest no-image floor
-(20.6\%, four times GPT-4o's). The text-answerable control is flat across
-$\sigma$ for every model (Fig.~\ref{fig:decay}).
+(20.6\%, four times GPT-4o's; Fig.~\ref{fig:decay}). The four
+text-answerable cases inside the image-required set score the same at every
+$\sigma\le16$ for every model and move by one item at $\sigma\ge32$ for
+two; the control is a sanity check too small to carry a claim.
 
 \subsection{Volumetric Audit}
 \label{sec:results_3d}
@@ -755,7 +801,8 @@ CS & 0.0 & 7.1 & 2.0 & 49.1 \\
 \subsubsection{Identification control} In the published condition the
 lesion the question names has no voxel on any slice shown for 42.0\% of
 growth-matched probes, and both structures appear together on only 54.2\%.
-Table~\ref{tab:ident} holds the probe fixed and varies the input. Twenty
+Table~\ref{tab:ident} holds the probe fixed and varies the input
+(Fig.~\ref{fig:render}). Twenty
 cells across five models and four conditions span 48.2--52.6\%. Two
 intervals exclude 50, both by under three points---Qwen3-VL-8B at 52.4
 [50.3, 54.6] and Qwen2.5-VL-32B at 52.6 [50.7, 54.6] under
@@ -857,8 +904,7 @@ Pancreas-CT collection'', which none of these volumes come from.
   \caption{\textbf{The image perturbs the volumetric models and never reaches
   their decision.} Visual information decay under one protocol. (a)~2D:
   accuracy on image-required probes as blur $\sigma$ grows (dashed with
-  markers), the text-answerable control (grey band, range over the four
-  models), and the no-image floor ($\times$); $L^{\star}$ is the smallest
+  markers) and the no-image floor ($\times$); $L^{\star}$ is the smallest
   $\sigma$ at which residual visual contribution falls below 20\% of the
   clean-image contribution, $L^{\star}\in\{16,32,64\}$~px. (b)~Volumetric,
   400 growth-matched probes: accuracy is flat at chance,
