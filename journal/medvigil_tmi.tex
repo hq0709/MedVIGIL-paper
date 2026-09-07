@@ -114,15 +114,13 @@ computed tomography, visual grounding, silent failure, counterfactual probing.
   \centering
   \includegraphics[width=\linewidth]{figures/intro.png}
   \caption{\textbf{A fluent answer and a safe refusal look alike until the
-  evidence is checked.} A vision-required chest radiograph paired with two
-  evidence perturbations (ROI mask, laterality flip) yields contrasting
-  behaviours: a \emph{silent failure} fabricating a left-apical pneumothorax
-  measurement, against a \emph{safe refusal} that names the broken evidence.
-  \figfix{Add panel (b) showing the same contrast on a CT volume: the lesion
-  outlined in red, the target structure in cyan, the counterfactual growth
-  annulus drawn around the lesion, and a model answer against a computed
-  gold. Panel (a) stays as published. The two panels should share one
-  legend so the reader sees a single framework spanning both modalities.}}
+  evidence is checked.} (a)~2D: a chest radiograph whose question names a
+  right apical pneumothorax is paired with an ROI-masked image and a
+  false-premise rewrite. The silent failure reports the size of a left
+  apical pneumothorax; the safe response declines to measure the masked apex
+  and corrects the premise. (b)~3D: a CT lesion (red), a target vessel (cyan)
+  and the counterfactual growth annulus. The gold, contact after 16~mm of
+  growth, is computed from a 10.2~mm gap; a fluent ``no'' contradicts it.}
   \label{fig:motivation}
 \end{figure*}
 
@@ -283,18 +281,15 @@ Chance & 20\% & 50\% (balanced) \\
 \begin{figure*}[!t]
   \centering
   \includegraphics[width=0.92\textwidth]{figures/dataset.png}
-  \caption{\textbf{Two constructions, one evaluation.} \textbf{Top:} the 2D
-  build: source mix, dual-radiologist annotation, perturbation drafting and
-  senior-physician consolidation. \textbf{Bottom:} per-case audit
-  flow: (A) evidence contract, (B) text-side and image-side perturbations,
-  (C) the model scored as safe abstention against silent failure.
-  \figfix{Add a third track for the volumetric suite, parallel to the 2D
-  build and converging on the same evaluation block: expert lesion mask $+$
-  automatic anatomy segmentation $\rightarrow$ one distance transform
-  $\rightarrow$ matched pair $(g^{-},\text{no})$, $(g^{+},\text{yes})$
-  $\rightarrow$ provenance gate. The two tracks should visibly share the
-  evaluation block; that shared block is the paper's premise. Strip the
-  former suite name from the rendered top track.}}
+  \caption{\textbf{Two constructions, one evaluation.} (a)~The 2D suite is
+  annotation-backed: source datasets, dual-radiologist screening and
+  annotation, perturbation drafting, senior adjudication, and a probe bank
+  with radiologist-adjudicated gold. (b)~The volumetric suite is
+  simulator-backed: an expert lesion mask and an automatic anatomy
+  segmentation, one distance transform per lesion, matched pairs that
+  straddle the gap, a provenance gate that recomputes every label, and a
+  probe bank with computed gold. Both banks enter the shared evaluation of
+  Fig.~\ref{fig:eval}.}
   \label{fig:pipeline}
 \end{figure*}
 
@@ -311,7 +306,7 @@ are used under their data use agreements and MSD under CC~BY-SA~4.0, no new
 patient data were collected, and no ethics approval was required.
 
 Four board-certified radiologists build the suite in three stages
-(Fig.~\ref{fig:pipeline}, top). Two attending radiologists independently
+(Fig.~\ref{fig:pipeline}a). Two attending radiologists independently
 annotate each case and jointly author its text-side perturbations
 (paraphrase, negation, specificity drop, knowledge-only rewrite and two
 hallucination traps), while the three image-side variants are rendered from
@@ -457,7 +452,21 @@ backgrounds differ only in what surrounds the outlines.
 \label{sec:metrics}
 
 Every metric is an exact-match rate over a probe family; no judge model is
-used. \emph{Capability} is $\mathrm{Acc}_{\mathrm{orig}}$ on original probes
+used. Fig.~\ref{fig:eval} summarises the shared evaluation.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/eval.png}
+  \caption{\textbf{One evaluation for both suites.} Probes from either bank
+  pass through the same contract, task-specific protocol, paired evidence
+  conditions and reference-based scoring. Responses are classed as supported
+  answers, safe abstention or correction, expressed uncertainty, or silent
+  failure, and summarised on the capability, safety and grounding axes with
+  the risk-weighted composite. The volumetric suite adds the diagnostic
+  controls of Sections~\ref{sec:protocol} and \ref{sec:results_3d}.}
+  \label{fig:eval}
+\end{figure*}
+ \emph{Capability} is $\mathrm{Acc}_{\mathrm{orig}}$ on original probes
 and, in 2D, paraphrase (PR), negation (NEG) and specificity-drop (SDR)
 accuracy. \emph{Evidence safety} is the silent-failure rate on traps,
 $\sfr(f)=\Pr_{j\in\mathcal{J}_{\mathrm{trap}}}[\hat{\ell}_j(f)\neq\ell^{\star}_j]$.
@@ -875,19 +884,26 @@ contain 25\%, and each model keeps its answer habit across backgrounds:
 Qwen2.5-VL-32B answers ``15'' on 296--300 of 300 items whether the outlines
 enclose anatomy or nothing at all. The metric channel is absent on a blank
 background as it is on a CT, so the deficit belongs to the models and the
-clinical task inherits it.
+clinical task inherits it. The answer given in its place is a habit: each
+model's modal answer and its share are the same on all three backgrounds
+(Fig.~\ref{fig:metric}c).
 
 \begin{figure*}[!t]
   \centering
   \includegraphics[width=0.96\textwidth]{figs/fig_metric.pdf}
-  \caption{\textbf{The metric channel is absent on any background.} (a)~One
-  item's axial panel under the three backgrounds: synthetic outlines on
-  uniform grey, the same synthetic outlines drawn over the real anatomy after
-  its annotations were erased, and the real lesion and target. (b)~Distance
-  sub-task accuracy per model and background with volume-clustered 95\%
-  intervals, chance 25\%. The synthetic gaps follow the gap distribution of
-  the 300 real items, and each gold is recomputed from the drawn masks with
-  the corpus's distance transform.}
+  \caption{\textbf{Two ways the evidence contract breaks in the volume: a
+  channel the models lack on any image, and a clinical sentence that
+  disables the arithmetic they have.} (a)~One item's axial panel under
+  three backgrounds: synthetic outlines on uniform grey, the same synthetic
+  outlines drawn over the real anatomy after its annotations were erased,
+  and the real lesion and target. (b)~Distance sub-task accuracy per model
+  and background with volume-clustered 95\% intervals; the synthetic gaps
+  follow the real gap distribution and each gold is recomputed from the
+  drawn masks. (c)~The modal answer and its share on each background: the
+  answer habit does not change with what the outlines enclose.
+  (d)~The comparison the probe reduces to, posed three ways on the 1{,}368
+  growth-matched probes: as two numbers, as the same two numbers inside the
+  clinical sentence with no image, and as the published image.}
   \label{fig:metric}
 \end{figure*}
 
@@ -949,7 +965,10 @@ greedy scoring. The text oracle supplies the same two numbers inside the
 clinical sentence and removes the image: Qwen2.5-VL-7B, InternVL3-8B and
 Qwen3-VL-8B score 50.0\% with one constant answer on 1{,}368 of 1{,}368
 items; Qwen2.5-VL-32B 51.1\% (``no'' on 1{,}353); Qwen2.5-VL-72B 52.4\%
-(``yes'' on 1{,}335). Greedy decoding yields the same constants.
+(``yes'' on 1{,}335). Greedy decoding yields the same constants. The three
+forms of one comparison sit side by side in Fig.~\ref{fig:metric}d: the
+numbers alone are solved, the numbers inside the clinical sentence are not,
+and the image adds nothing to the sentence.
 
 \subsubsection{Grounding} The visual grounding ratio is negative in every
 organ for both models with a verified response channel, $-4.5$ to $-6.3$ for
