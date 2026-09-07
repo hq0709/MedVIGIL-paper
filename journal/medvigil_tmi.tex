@@ -114,13 +114,19 @@ computed tomography, visual grounding, silent failure, counterfactual probing.
   \centering
   \includegraphics[width=\linewidth]{figures/intro.png}
   \caption{\textbf{A fluent answer and a safe refusal look alike until the
-  evidence is checked.} (a)~2D: a chest radiograph whose question names a
-  right apical pneumothorax is paired with an ROI-masked image and a
-  false-premise rewrite. The silent failure reports the size of a left
-  apical pneumothorax; the safe response declines to measure the masked apex
-  and corrects the premise. (b)~3D: a CT lesion (red), a target vessel (cyan)
-  and the counterfactual growth annulus. The gold, contact after 16~mm of
-  growth, is computed from a 10.2~mm gap; a fluent ``no'' contradicts it.}
+  evidence is checked.} (a)~2D. A chest radiograph whose question asks about
+  a right apical pneumothorax is paired with two evidence perturbations: the
+  apex is masked, and the premise is rewritten to a left apical pneumothorax.
+  The silent failure reports the size of a left apical pneumothorax,
+  fluently and against the evidence; the safe response declines to measure
+  the masked apex and corrects the premise. (b)~3D. A CT lesion (red), a
+  target vessel (cyan) and the counterfactual growth annulus (dashed). The
+  question asks whether the lesion would contact the vessel after 16~mm of
+  isotropic growth; the gold is computed from the 10.2~mm surface gap and is
+  ``yes''. The silent failure answers ``no'' against the computed geometry;
+  the correct answer states that the growth exceeds the gap. The CT is an
+  illustrative case from the MSD hepatic-vessel task, outside the four tasks
+  audited, and the model responses are illustrative.}
   \label{fig:motivation}
 \end{figure*}
 
@@ -282,14 +288,20 @@ Chance & 20\% & 50\% (balanced) \\
   \centering
   \includegraphics[width=0.92\textwidth]{figures/dataset.png}
   \caption{\textbf{Two constructions, one evaluation.} (a)~The 2D suite is
-  annotation-backed: source datasets, dual-radiologist screening and
-  annotation, perturbation drafting, senior adjudication, and a probe bank
-  with radiologist-adjudicated gold. (b)~The volumetric suite is
-  simulator-backed: an expert lesion mask and an automatic anatomy
-  segmentation, one distance transform per lesion, matched pairs that
-  straddle the gap, a provenance gate that recomputes every label, and a
-  probe bank with computed gold. Both banks enter the shared evaluation of
-  Fig.~\ref{fig:eval}.}
+  annotation-backed. Three hundred cases from VQA-RAD, SLAKE, ROCO and chest
+  radiograph collections are screened and annotated by two radiologists
+  (image-dependent question, gold answer, A--E candidates, ROI and
+  laterality, risk tier), text and image perturbations are drafted, a senior
+  radiologist adjudicates gold keys and construction invariants, and the
+  bank carries radiologist-adjudicated gold with risk labels and ROI
+  annotations. (b)~The volumetric suite is simulator-backed. From an expert
+  lesion mask and an automatic anatomy segmentation, one distance transform
+  per lesion gives the surface gap $d$; a matched pair states one growth
+  below the gap and one above it (for $d=10.2$~mm, 8~mm gives no contact and
+  16~mm gives contact); a provenance gate recomputes every label from the
+  stored gap and growth; the bank carries computed gold
+  $y=\mathbf{1}[g\ge d]$ with the stored geometry. Both banks enter the
+  shared evaluation of Fig.~\ref{fig:eval}.}
   \label{fig:pipeline}
 \end{figure*}
 
@@ -458,12 +470,18 @@ used. Fig.~\ref{fig:eval} summarises the shared evaluation.
   \centering
   \includegraphics[width=0.92\textwidth]{figures/eval.png}
   \caption{\textbf{One evaluation for both suites.} Probes from either bank
-  pass through the same contract, task-specific protocol, paired evidence
-  conditions and reference-based scoring. Responses are classed as supported
-  answers, safe abstention or correction, expressed uncertainty, or silent
-  failure, and summarised on the capability, safety and grounding axes with
-  the risk-weighted composite. The volumetric suite adds the diagnostic
-  controls of Sections~\ref{sec:protocol} and \ref{sec:results_3d}.}
+  meet the same evidence contract (valid visual evidence and a well-posed
+  premise), a task-specific protocol (five-option MCQ in 2D, yes/no growth
+  contact in 3D) and paired evidence conditions. Text probes perturb the
+  question with the image intact (paraphrase, specificity drop, negation,
+  knowledge-only rewrite, false-premise traps); visual probes hold the
+  question and vary the input (full, ROI masked, ROI only, blank; laterality
+  flip in 2D). Responses are scored by exact match against physician gold in
+  2D and computed gold in 3D, classed as supported answer, safe abstention
+  or correction, expressed uncertainty, or silent failure, and summarised on
+  the capability, safety and grounding axes with the risk-weighted
+  composite. The volumetric suite adds the diagnostic controls of
+  Sections~\ref{sec:protocol} and \ref{sec:results_3d}.}
   \label{fig:eval}
 \end{figure*}
  \emph{Capability} is $\mathrm{Acc}_{\mathrm{orig}}$ on original probes
