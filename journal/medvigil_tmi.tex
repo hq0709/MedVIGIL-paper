@@ -110,9 +110,9 @@ computed tomography, visual grounding, silent failure, counterfactual probing.
 \section{Introduction}
 \label{sec:introduction}
 
-\begin{figure}[!t]
+\begin{figure*}[!t]
   \centering
-  \includegraphics[width=\linewidth]{motivation.png}
+  \includegraphics[width=\linewidth]{figures/intro.png}
   \caption{\textbf{A fluent answer and a safe refusal look alike until the
   evidence is checked.} A vision-required chest radiograph paired with two
   evidence perturbations (ROI mask, laterality flip) yields contrasting
@@ -124,7 +124,7 @@ computed tomography, visual grounding, silent failure, counterfactual probing.
   gold. Panel (a) stays as published. The two panels should share one
   legend so the reader sees a single framework spanning both modalities.}}
   \label{fig:motivation}
-\end{figure}
+\end{figure*}
 
 \IEEEPARstart{M}{edical} vision--language models (VLMs) have moved from
 research prototypes into clinical imaging workflows, open and proprietary
@@ -279,7 +279,7 @@ Chance & 20\% & 50\% (balanced) \\
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.92\textwidth]{pipeline.png}
+  \includegraphics[width=0.92\textwidth]{figures/dataset.png}
   \caption{\textbf{Two constructions, one evaluation.} \textbf{Top:} the 2D
   build: source mix, dual-radiologist annotation, perturbation drafting and
   senior-physician consolidation. \textbf{Bottom:} per-case audit
