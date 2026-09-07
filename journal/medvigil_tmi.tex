@@ -94,8 +94,8 @@ automatic anatomy segmentation. This yields 9{,}484 verifiable probes over
 occurred. The silent-failure finding replicates and worsens. Dataset
 recognition measures 0.0--5.0\% against a live positive control. The failure
 is localised: models perceive the annotation and perform the underlying
-numeric comparison, but they cannot estimate distance from the image, and
-their decision variable ranks the growth number in the question at AUROC up
+numeric comparison, but they cannot estimate distance from the image, on anatomy or on a
+blank synthetic background, and their decision variable ranks the growth number in the question at AUROC up
 to 0.96 while ranking the computed label at 0.47--0.52. Two metrics
 validated in 2D do not survive the change of modality, and we report the
 corrections. The suite, harness and cached outputs are released.
@@ -203,13 +203,15 @@ annotation-backed 2D audit of the conference version with a new
 simulator-backed volumetric audit under the same framework, metrics and
 composite, and it covers thirteen volumetric and sixteen 2D model
 configurations over 335{,}522 scored probes. Three results follow. First,
-the silent-failure finding replicates and worsens under computed labels, and
-dataset recognition is measured directly instead of argued. Second, the
+the silent-failure finding replicates and worsens under computed labels, the
+2D protocol's text-side columns replicate at chance, and dataset recognition
+is measured directly instead of argued. Second, the
 failure is localised. Models perceive an outlined lesion, read the growth
 number in the question (their decision variable ranks it at AUROC up to
 0.96), and perform the numeric comparison the task reduces to. They cannot
-estimate the distance between two outlined structures, and they do not apply
-the number inside a clinical sentence. Scaling from 3B to 72B
+estimate the distance between two outlined structures, on anatomy or on a
+blank synthetic background, and they do not apply the number inside a
+clinical sentence. Scaling from 3B to 72B
 parameters sharpens the reading of the number and leaves the label at
 chance. Third, two instruments validated in 2D do not transfer. The
 grounding contrast inverts, and likelihood scoring awards a perfect safety
@@ -267,6 +269,7 @@ Sources & VQA-RAD 120, SLAKE 60, & MSD~\cite{antonelli2022msd}: liver 118, lung 
 Units & 300 cases & 588 CT volumes \\
 Probes & 2{,}556 MCQ & 9{,}484 (8{,}476 growth-contact) \\
 Counterfactuals & 240 triplets & 4{,}238 matched pairs \\
+Text perturbations & PR, NEG, SDR by radiologists & same operators on the template \\
 Options & five (A--E, E = refusal) & two (yes / no) \\
 Label source & radiologist pipeline (3 stages) & distance transform \\
 Annotation cost & four radiologists & none \\
@@ -425,6 +428,30 @@ the \texttt{plain} arm is bit-exact against the published rendering path
 and that the annotated arms agree with it outside their annotation. The last
 check is a property of pixels, since two different renderings can both score
 50\%.
+
+\subsubsection{Text-side perturbations} The 2D suite perturbs the question
+while the image stays intact. The volumetric probe is a template, so the same
+three operators apply to every item and the gold stays computed: a
+\emph{paraphrase} (PR) rewrites the question with one of three templates,
+chosen per matched pair so that both members share it, and preserves the
+gold; a \emph{negation} (NEG) asks whether the grown lesion would \emph{stay
+clear of} the target and inverts the gold; a \emph{specificity drop} (SDR)
+removes the qualifier ``in every direction'' and preserves the gold, since
+isotropic growth is the default reading. All three run on the published
+\texttt{plain} rendering with the scoring path unchanged.
+
+\subsubsection{Metric-channel control} The distance sub-task asks how many
+millimetres separate the red-outlined lesion from the cyan-outlined structure.
+A model that cannot read a metric distance off any image would fail it for
+reasons unrelated to CT, so the same question, legend, options, scale bar,
+colours and scoring rule are asked on three backgrounds: the item's real
+rendering; the real rendering with its annotations erased and two synthetic
+outlines drawn over the anatomy at a known surface gap; and three
+uniform-grey panels with the same synthetic outlines. The synthetic gaps
+follow the gap distribution of the 300 real items, and each gold is
+recomputed from the drawn masks with the same distance transform the corpus
+uses. The pixel scale of the synthetic bar is the panel's own, so the three
+backgrounds differ only in what surrounds the outlines.
 
 \subsection{Metrics and Composite Score}
 \label{sec:metrics}
@@ -713,6 +740,24 @@ Med3DVLM-7B & native & 80 & 50.0 [48.2, 51.8] & 100.0 & 100.0 \\
 \end{tabular}
 \end{table}
 
+\begin{table}[!t]
+\caption{Volumetric audit under the 2D columns, growth-matched subset. PR,
+NEG and SDR are the text-side perturbations on the published rendering; LPA
+and $\sfr$ are content-free calibrated, $\sfr$ on the cleanest trap family;
+VGR is pooled over the four organs; CS follows Eq.~(\ref{eq:mcs}) with
+$\mathrm{Safe}=100-\sfr$. --- not run.}
+\label{tab:headline3d_2dcols}
+\centering
+\fontsize{7.2}{8.8}\selectfont
+\setlength\tabcolsep{2.5pt}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Model & Original & PR & NEG & SDR & LPA & $\sfr\downarrow$ & VGR & CS \\
+\midrule
+\input{figs/tab_headline3d.tex}
+\end{tabular}
+\end{table}
+
 \subsubsection{Headline} The growth-matched subset is constructed so that a single
 threshold on the growth amount scores 50.8\%, against 69.2\% on the full
 corpus. On this subset all thirteen models lie between 48.7\% and 51.0\%,
@@ -728,6 +773,22 @@ measurements show that the volumetric pathway is not inert. Replacing the
 volume with zeros costs 4.3 to 10.4 accuracy points across four organs and
 two model families, and the image changes a large share of answers for five
 models (below).
+
+\subsubsection{Text-side perturbations} Under the three text-side operators
+the four clean-channel models stay at chance
+(Table~\ref{tab:headline3d_2dcols}): paraphrase 47.8--51.4\%, negation
+49.5--50.0\% and specificity drop 49.4--50.0\%, every interval containing 50.
+Negation is ignored rather than mishandled. Every model answers ``no'' on
+99.2--100\% of negated probes, so a question and its negation receive the
+same answer; the share of negated probes answered consistently with the
+model's own answer to the original is 0.0\% for Qwen2.5-VL-7B, 27.6\% for
+InternVL3-8B, 52.3\% for Qwen2.5-VL-32B and 79.5\% for Qwen3-VL-8B, the last
+only because its original answers were mostly ``yes''. Under paraphrase the
+models keep their original answer on 54.4--100\% of items. In 2D the same
+three columns span 29.7--80.7\%, 15.6--83.1\% and 25.0--79.9\% and negation
+costs every model accuracy relative to the original; in 3D there is no
+accuracy to lose, and the operator that should invert the answer leaves it
+where it was.
 
 \subsubsection{Identification control} In the published condition the
 lesion the question names has no voxel on any slice shown for 42.0\% of
@@ -801,6 +862,33 @@ slices.
   answers land against the near-uniform gold: every model collapses onto one
   or two buckets, Qwen2.5-VL-32B onto ``15'' for 298 items.}
   \label{fig:subtask}
+\end{figure*}
+
+\subsubsection{Metric-channel control} The distance sub-task is at chance on
+every background (Fig.~\ref{fig:metric}). With two synthetic outlines on
+uniform grey panels and a 10~mm bar, the four models score 25.7\%, 26.7\%,
+25.7\% and 28.3\% (Qwen2.5-VL-7B, InternVL3-8B, Qwen3-VL-8B,
+Qwen2.5-VL-32B); with the same synthetic outlines drawn over the real
+anatomy, 25.3\%, 26.0\%, 25.0\% and 28.3\%; on the real lesion and target,
+26.3\%, 27.7\%, 23.7\% and 28.3\%. All twelve volume-clustered intervals
+contain 25\%, and each model keeps its answer habit across backgrounds:
+Qwen2.5-VL-32B answers ``15'' on 296--300 of 300 items whether the outlines
+enclose anatomy or nothing at all. The metric channel is absent on a blank
+background as it is on a CT, so the deficit belongs to the models and the
+clinical task inherits it.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.96\textwidth]{figs/fig_metric.pdf}
+  \caption{\textbf{The metric channel is absent on any background.} (a)~One
+  item's axial panel under the three backgrounds: synthetic outlines on
+  uniform grey, the same synthetic outlines drawn over the real anatomy after
+  its annotations were erased, and the real lesion and target. (b)~Distance
+  sub-task accuracy per model and background with volume-clustered 95\%
+  intervals, chance 25\%. The synthetic gaps follow the gap distribution of
+  the 300 real items, and each gold is recomputed from the drawn masks with
+  the corpus's distance transform.}
+  \label{fig:metric}
 \end{figure*}
 
 \subsubsection{What the decision variable tracks} Two manipulations
@@ -982,6 +1070,12 @@ with clean-image contributions of 2.8 and 0.0 points, and the decision
 variable ranks the label at 0.47--0.52 with the volume present. Under one
 protocol, the image is decisive in one regime and inert in the other.
 
+\subsubsection{Text robustness} Paraphrase, negation and specificity drop
+span 29.7--80.7\%, 15.6--83.1\% and 25.0--79.9\% across the sixteen 2D
+models, with the radiologist at 92.7, 90.7 and 91.5; in 3D the four
+clean-channel models sit at 47.8--51.4\% on all three, and 99.2--100\% of
+negated probes receive ``no''.
+
 \subsubsection{Grounding} VGR spans $+3.6$ to $+49.5$~pp across capable 2D
 models and is positive for every one of them; in 3D it spans $-8.3$ to
 $+0.8$~pp, is negative in every organ for both verified-channel models, and
@@ -1052,13 +1146,19 @@ outlined and a metric scale bar in the panel, the same models that localise
 the lesion at up to 81.7\% and answer \emph{is 21.4 greater than or equal to
 18.16?} at 100\% estimate the separation between the two outlines at chance.
 Categorical information survives the pipeline, and metric information does
-not. Three ordinary explanations were tested directly. The input was rebuilt
+not. Four ordinary explanations were tested directly. The input was rebuilt
 to give the model what a reader would be given, the visible volume was
-multiplied by 5.7$\times$ and the structures were magnified, and a tenfold
-parameter range was spanned. None of these changed the metric result. The
-failure is a missing metric channel in models that otherwise see what they
-are shown, not a general incapacity, and remedies aimed at the encoder are
-aimed at the part that already works.
+multiplied by 5.7$\times$ and the structures were magnified, a tenfold
+parameter range was spanned, and the anatomy was replaced by two synthetic
+outlines on a blank background. None of these changed the metric result.
+The missing metric channel is therefore a property of the models and not of
+CT: they cannot read a distance off a blank page with a scale bar, which
+agrees with reports that general-domain VLMs fail elementary geometric
+readouts~\cite{rahmanzadehgervi2024blind,kamath2023whatsup} and that metric
+spatial reasoning has required dedicated training~\cite{chen2024spatialvlm}.
+The clinical task inherits that limit. The failure is a missing metric
+channel in models that otherwise see what they are shown, and remedies aimed
+at the encoder are aimed at the part that already works.
 
 \subsection{A Component That Is Not Visual}
 
@@ -1146,14 +1246,15 @@ where harm is greatest. Replacing annotation with computation in CT removed
 the two objections that suite could not answer from inside, scale and
 pretraining overlap, at no annotation cost, and the finding replicated and
 worsened. Decomposing the computed probe localised the volumetric
-failure to a single absent step, the decision variable was shown to track
+failure to a single absent step, metric estimation, which fails on synthetic
+outlines as it fails on anatomy; the decision variable was shown to track
 the question rather than the volume, and the audit exposed two instruments
 that do not survive the change of modality.
 
 The audit has a defined scope. Thirteen models were run on the
-counterfactual corpus, four on the grounding arms and two on the trap
-families, and the accuracy endpoint rests on the four non-degenerate
-responders. The volumetric labels are computed and reproduce their own
+counterfactual corpus, four on the text-side perturbations, the metric
+control and the grounding arms, and two on the trap families; the accuracy
+endpoint rests on the four non-degenerate responders. The volumetric labels are computed and reproduce their own
 provenance, and the oracle arms establish that the task is solvable; how
 radiologists perform on the same renderings is a separate question. The
 2~mm margin excludes lesions already in contact with their target, the
