@@ -1,5 +1,4 @@
-%% Journal extension for IEEE Transactions on Medical Imaging
-%% Base: ../neurips_2026.tex (conference version, 2D audit)
+%% IEEE Transactions on Medical Imaging manuscript
 %% Adds: volumetric audit, cross-modality analysis
 %% Build: latexmk -pdf medvigil_tmi.tex   (from this directory)
 %%
@@ -46,7 +45,7 @@
 \newcommand{\figfix}[1]{\textcolor{red}{\textbf{[FIGURE TO REDRAW]}~#1}}
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO]}~#1}}
 
-%% Shorthands kept from the conference source so adapted paragraphs stay
+%% Shorthands
 %% diffable against it.
 \newcommand{\sfr}{\mathrm{SFR}}
 \newcommand{\sfrw}{\mathrm{SFR}_{w}}
@@ -57,10 +56,7 @@
 Answer Through Broken Evidence}
 
 \author{Hanqi~Jiang, Junhao~Chen, Mingyu~Kang, Hyeokjae~Kwon, Yi~Pan, Lifeng~Chen, Weihang~You, Haozhen~Gong, Hui~Ren, Quanzheng~Li, Tianming~Liu, and Xiang~Li
-\thanks{Manuscript received \todo{date}. This article extends a conference
-version presented at the NeurIPS Datasets and Benchmarks
-Track~\cite{jiang2026medvigil}; Sections~\ref{sec:methods_3d},
-\ref{sec:results_3d} and \ref{sec:results_cross} are new. \todo{funding}}
+\thanks{Manuscript received \todo{date}. \todo{funding}}
 \thanks{H. Jiang, Y. Pan, J. Chen, L. Chen, W. You and T. Liu are with the
 University of Georgia, Athens, GA, USA. H. Jiang, Y. Pan, H. Ren, Q. Li and
 X. Li are with Harvard Medical School, Boston, MA, USA.}
@@ -169,24 +165,23 @@ behaviour is to recognise that the basis for an answer has failed. The
 measurable failure mode is \emph{silent failure under perturbed evidence}, a
 non-refusal answer that accepts the perturbation (Fig.~\ref{fig:motivation}).
 
-The conference version of this work~\cite{jiang2026medvigil} operationalises
-the contract in 2D with a 300-case suite supervised by four board-certified
-radiologists. Two annotate every case in parallel, a senior radiologist
+We first operationalise the contract in 2D with a 300-case suite supervised
+by four board-certified radiologists. Two annotate every case in parallel, a senior radiologist
 consolidates the manifest, and a fourth radiologist from a separate
 institution, blinded to construction, answers every probe as a human
-reference. An audit of sixteen models over 2{,}556 probes showed that
+reference. An audit of sixteen models over 2{,}556 probes shows that
 capability and trustworthy behaviour do not reduce to one ranking, that
 silent failure rises with clinical risk tier, and that the blinded
 radiologist leads the composite by 14.1 points.
 
-Two objections cannot be settled from inside that result, and the conference
-version records both as open. The first is scale. Four clinicians can author
+Two objections cannot be settled from inside that result. The first is
+scale. Four clinicians can author
 about 300 cases, and a reader may ask whether the finding survives an order
 of magnitude. The second is pretraining overlap. The suite draws on VQA-RAD,
 SLAKE, ROCO and public radiograph collections that almost certainly
-intersect the pretraining mixtures of every proprietary model audited. The
-conference version argues that the perturbations postdate those corpora,
-which is sound, but it is an argument and not a measurement. Both objections
+intersect the pretraining mixtures of every proprietary model audited. One
+can argue that the perturbations postdate those corpora, which is sound, but
+it is an argument and not a measurement. Both objections
 share a root cause. The labels are annotated, so probes are expensive and
 tied to public images.
 
@@ -202,10 +197,9 @@ Decathlon~\cite{antonelli2022msd}, against 2{,}556 probes over 300 cases.
 Because each probe asks about a state that never occurred, memorisation is
 excluded by construction.
 
-In this paper we present a two-regime evaluation suite. It combines the
-annotation-backed 2D audit of the conference version with a new
-simulator-backed volumetric audit under the same framework, metrics and
-composite, and it covers thirteen volumetric and sixteen 2D model
+In this paper we present a two-regime evaluation suite. It combines an
+annotation-backed 2D audit with a simulator-backed volumetric audit under one
+framework, metrics and composite, and it covers thirteen volumetric and sixteen 2D model
 configurations over 335{,}522 scored probes. Three results follow. First,
 the silent-failure finding replicates and worsens under computed labels, the
 2D protocol's text-side columns replicate at chance, and dataset recognition
@@ -219,7 +213,7 @@ clinical sentence. Scaling from 3B to 72B
 parameters sharpens the reading of the number and leaves the label at
 chance. Third, two instruments validated in 2D do not transfer. The
 grounding contrast inverts, and likelihood scoring awards a perfect safety
-score to a constant refusal; both corrections apply to the conference
+score to a constant refusal; both corrections apply to the 2D
 protocol as well. The suite, harness and cached outputs are publicly
 available.\footnote{\todo{final release URLs for the suite, harness and cached outputs}}
 
@@ -227,9 +221,9 @@ available.\footnote{\todo{final release URLs for the suite, harness and cached o
 \section{Materials and Methods}
 \label{sec:methods}
 
-The evaluation comprises two suites under one framework (Table~\ref{tab:suites}):
-the conference version's 2D suite, with clinician-authored labels, and a new
-volumetric suite, with labels computed from geometry. Both are scored by the
+The evaluation comprises two suites under one framework
+(Table~\ref{tab:suites}): a 2D suite with clinician-authored labels and a
+volumetric suite with labels computed from geometry. Both are scored by the
 same metrics and composite, so the differences in
 Section~\ref{sec:results_cross} are differences in what the modality affords.
 
@@ -266,7 +260,7 @@ Section~\ref{sec:metrics}. CRT = clinical risk tier.}
 \setlength\tabcolsep{2pt}
 \begin{tabular}{lll}
 \toprule
- & 2D (conference) & Volumetric (this work) \\
+  & 2D suite & Volumetric suite \\
 \midrule
 Sources & VQA-RAD 120, SLAKE 60, & MSD~\cite{antonelli2022msd}: liver 118, lung 63, \\
  & ROCO 60, CXR 60 & pancreas 281, colon 126 \\
@@ -327,9 +321,7 @@ perturbation that violates a construction invariant: a paraphrase must
 preserve the gold, a negation must invert it, a trap must contradict the
 image, and an ROI-masked variant must remove the answer-relevant region.
 Failed perturbations are dropped, not patched. A fourth radiologist from a separate institution, blinded
-to construction, answers every probe as the human reference. Full per-stage
-detail and inter-annotator agreement are in the conference
-version~\cite{jiang2026medvigil}.
+to construction, answers every probe as the human reference.
 
 \subsection{The Volumetric Suite: Simulator-Backed Construction}
 \label{sec:methods_3d}
@@ -1130,10 +1122,10 @@ $\sfrw=0.0\%$.
 \section{Discussion}
 \label{sec:discussion}
 
-In this paper, we extend evidence-conditional evaluation of medical VLMs
-from a clinician-annotated 2D suite to a volumetric suite whose labels are
-computed from geometry, and audit twenty-nine model configurations under one
-framework. The 2D finding survives the change of modality and worsens, the
+In this paper we evaluate evidence-conditional trustworthiness of medical
+VLMs in two regimes, a clinician-annotated 2D suite and a volumetric suite
+whose labels are computed from geometry, and audit twenty-nine model
+configurations under one framework. The 2D finding survives the change of modality and worsens, the
 volumetric labels cost nothing to produce and cannot have been memorised,
 and the composite probe decomposes into steps that fail selectively. We
 discuss which models carry the volumetric claim, why one chance-level
