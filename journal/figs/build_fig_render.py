@@ -1,7 +1,7 @@
-"""Render one growth-contact probe under the four identification-control conditions,
-using the repository's own renderer (no model is run).  Row 1: the axial panel of each
-condition, cropped to the body.  Row 2: the full identified montage as the model receives it.
-Outlines are thickened for display only.  Run from journal/."""
+"""Fig.: what the volumetric models are shown.  One growth-contact probe under the four identification
+conditions, rendered with the repository's own slice selection, windowing, orientation and resampling.
+Outlines are drawn as anti-aliased contours of the exact resampled masks (display only; the model
+receives 1-px pixel outlines).  Run from journal/."""
 import sys, os, numpy as np
 D3 = "/rodata/azradonc_dev/m253405/MedVIGIL-3D"; MSD = "/rodata/azradonc_dev/m253405/MSD"
 sys.path.insert(0, f"{D3}/spatialgen"); sys.path.insert(0, D3)
@@ -9,74 +9,74 @@ import run_identification_control as ric
 from run_pipeline import label_map
 from lesion_binding import LESION_LABEL, find_lesions
 from scene_graph import load_ras
+from render import window, to_display
 sys.path.insert(0, os.path.dirname(__file__)); import house as H
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from scipy.ndimage import binary_dilation
+from matplotlib.patches import Rectangle
+from scipy.ndimage import label as cc_label
 TASK, VID, LK, TARGET = "Task10_Colon", "colon_111", "lesion1", "liver"
+LES_C, TAR_C = "#ff3c3c", "#3cc8ff"
 vol, affine = load_ras(f"{MSD}/{TASK}/imagesTr/{VID}.nii.gz")
 gt, _ = load_ras(f"{MSD}/{TASK}/labelsTr/{VID}.nii.gz")
 seg, _ = load_ras(f"{D3}/cfqa_{TASK}/seg_cache/{VID}_seg.nii.gz")
 spacing = np.abs(np.diag(affine)[:3]); vol = vol.astype(np.int16)
 lesion = dict(find_lesions(gt == LESION_LABEL[TASK], affine))[LK]
 name2lab = {v: k for k, v in label_map().items()}; tmask = seg == name2lab[TARGET]
-panels = {}
-for cond in ric.IMAGE_CONDITIONS:
-    arr, geom = ric.render(vol, lesion, tmask, spacing, cond); panels[cond] = arr
-    print(cond, arr.shape, {k: v for k, v in geom.items() if not isinstance(v, (list, dict))})
-def thicken(arr, it):
-    out = arr.copy()
-    for rgb in (ric.LESION_RGB, ric.TARGET_RGB, [255, 255, 255]):
-        m = np.all(arr == np.array(rgb, dtype=arr.dtype), axis=2)
-        if m.any(): out[binary_dilation(m, iterations=it)] = rgb
+grey3d = window(vol, "soft_tissue")
+
+def exact_panels(cond):
+    """(grey rgb, filled lesion mask, filled target mask, iso mm/px) per panel, same slices as the model's montage."""
+    _, geom = ric.render(vol, lesion, tmask, spacing, cond)
+    out = []
+    for a, k in zip((2, 1, 0), geom["slices"]):
+        sl = [slice(None)] * 3; sl[a] = int(np.clip(k, 0, vol.shape[a] - 1))
+        g, le, tg = (to_display(x[tuple(sl)], a) for x in (grey3d, lesion, tmask))
+        rem = [i for i in (0, 1, 2) if i != a]
+        g, le, tg, iso = ric._isotropic(g, le, tg, float(spacing[rem[1]]), float(spacing[rem[0]]))
+        out.append((np.dstack([g] * 3), le, tg, iso))
+    print(cond, "slices", geom["slices"], "lesion px", [int(x[1].sum()) for x in out], "target px", [int(x[2].sum()) for x in out])
     return out
-from scipy.ndimage import label as cc_label
-def body_bbox(p, margin):
-    body = p[..., 1] > 30; body[-12:, :] = False
-    lab, n = cc_label(body)
+def body_bbox(g, margin):
+    body = g[..., 1] > 30; lab, n = cc_label(body)
     if n > 1:
         sizes = np.bincount(lab.ravel()); sizes[0] = 0; body = lab == sizes.argmax()
     ys, xs = np.nonzero(body)
-    return (max(0, ys.min() - margin), min(p.shape[0] - 12, ys.max() + margin), max(0, xs.min() - margin), min(p.shape[1], xs.max() + margin))
-def axial_crop(arr):
-    gut = np.all(arr == 128, axis=(0, 2)); x = int(np.argmax(gut)) if gut.any() else arr.shape[1]
-    p = arr[:, :x]; y0, y1, x0, x1 = body_bbox(p, 10)
-    return p[y0:y1, x0:x1]
-TITLES = [("plain", "centre slices\nno annotation"), ("bestslice", "slices on which both\nstructures are visible"),
-          ("overlay", "centre slices\nlegend names a red outline"), ("identified", "joint-visibility slices\noutlines and a 10 mm bar")]
-fig = plt.figure(figsize=(7.2, 4.5)); gs = GridSpec(2, 4, figure=fig, height_ratios=[0.9, 1.35], hspace=0.26, wspace=0.06)
-for k, (cond, desc) in enumerate(TITLES):
-    ax = fig.add_subplot(gs[0, k]); ax.imshow(thicken(axial_crop(panels[cond]), 1), interpolation="none")
+    return (max(0, ys.min() - margin), min(g.shape[0], ys.max() + margin), max(0, xs.min() - margin), min(g.shape[1], xs.max() + margin))
+def draw(ax, g, le, tg, iso, lw, annotate, bar, crop):
+    y0, y1, x0, x1 = crop; g, le, tg = g[y0:y1, x0:x1], le[y0:y1, x0:x1], tg[y0:y1, x0:x1]
+    ax.imshow(g, interpolation="none")
+    if annotate:
+        for m, col in ((tg, TAR_C), (le, LES_C)):
+            if m.any(): ax.contour(m.astype(float), levels=[0.5], colors=[col], linewidths=lw, antialiased=True)
+    if bar:
+        hh = g.shape[0]; ax.add_patch(Rectangle((6, hh - 10), 10.0 / iso, 3, fc="white", ec="none"))
     ax.set_xticks([]); ax.set_yticks([]); ax.grid(False)
     for sp in ax.spines.values(): sp.set_edgecolor("#c9c6c1"); sp.set_linewidth(0.6)
-    ax.set_title(f"({'abcd'[k]})  \\texttt{{{cond}}}" if False else f"({'abcd'[k]})  {cond}", fontsize=7.2, loc="left", pad=3)
+    return g.shape
+
+P = {cond: exact_panels(cond) for cond in ric.IMAGE_CONDITIONS}
+fig = plt.figure(figsize=(7.2, 4.4)); FW, FH = fig.get_size_inches()
+gs = GridSpec(1, 4, figure=fig, top=0.96, bottom=0.60, left=0.05, right=0.985, wspace=0.06)
+TITLES = [("plain", "centre slices\nno annotation"), ("bestslice", "slices on which both\nstructures are visible"),
+          ("overlay", "centre slices\nlegend names a red outline"), ("identified", "joint-visibility slices\noutlines and a 10 mm bar")]
+for k, (cond, desc) in enumerate(TITLES):
+    g, le, tg, iso = P[cond][0]                                   # the axial panel
+    ax = fig.add_subplot(gs[0, k])
+    draw(ax, g, le, tg, iso, 0.75, annotate=cond in ("overlay", "identified"), bar=cond == "identified", crop=body_bbox(g, 10))
+    ax.set_title(f"({'abcd'[k]})  {cond}", fontsize=7.2, loc="left", pad=3)
     ax.text(0.5, -0.05, desc, transform=ax.transAxes, ha="center", va="top", fontsize=6.0, color=H.CHARCOAL, linespacing=1.15)
-# ---- (e): the three identified panels, each cropped to the body and shown at one physical scale (mm per inch equal across panels)
-def split(arr):
-    gut = np.all(arr == 128, axis=(0, 2)); cols, start = [], None
-    for x, g in enumerate(gut):
-        if not g and start is None: start = x
-        if g and start is not None: cols.append((start, x)); start = None
-    if start is not None: cols.append((start, arr.shape[1]))
-    return [arr[:, a:b] for a, b in cols]
-def bar_len(p):
-    row = p[p.shape[0] - 7, 6:, :]; white = np.all(row == 255, axis=1); n = 0
-    while n < len(white) and white[n]: n += 1
-    return n
-views = []
-for p in split(panels["identified"]):
-    n = bar_len(p); iso = 10.0 / n if n >= 4 else 0.78
-    y0, y1, x0, x1 = body_bbox(p, 6)
-    c = thicken(p[y0:y1, x0:x1], 2).copy(); nb = int(round(10.0 / iso)); h = c.shape[0]
-    c[h - 10:h - 5, 8:8 + nb] = [255, 255, 255]                      # 10 mm bar re-drawn for the crop
-    views.append((c, iso))
-# each panel fills the row height, as render.montage scales panels to a common height for the model
-ratios = [c.shape[1] / c.shape[0] for c, _ in views]
-sub = gs[1, :].subgridspec(1, 3, width_ratios=ratios, wspace=0.03)
-for k, ((c, iso), name) in enumerate(zip(views, ["axial", "coronal", "sagittal"])):
-    ax = fig.add_subplot(sub[0, k]); ax.imshow(c, interpolation="none"); ax.set_xticks([]); ax.set_yticks([]); ax.grid(False)
-    for sp in ax.spines.values(): sp.set_edgecolor("#c9c6c1"); sp.set_linewidth(0.6)
+# row (e): the three identified panels at ONE physical scale, top-aligned; the question under the shorter axial panel
+views = [(g, le, tg, iso, body_bbox(g, 6)) for g, le, tg, iso in P["identified"]]
+w_mm = [(c[3] - c[2]) * iso for g, le, tg, iso, c in views]; h_mm = [(c[1] - c[0]) * iso for g, le, tg, iso, c in views]
+GAP = 0.08; LEFT, RIGHT = 0.05 * FW, 0.985 * FW; ROW_TOP, ROW_BOT = 0.475 * FH, 0.035 * FH
+scale = min((RIGHT - LEFT - 2 * GAP) / sum(w_mm), (ROW_TOP - ROW_BOT) / max(h_mm))
+x = LEFT + ((RIGHT - LEFT) - (sum(w_mm) * scale + 2 * GAP)) / 2
+fig.text(x / FW, (ROW_TOP + 0.06) / FH, "(e)  identified, as the model receives it: the three panels at one physical scale, cropped to the body", fontsize=7.2, ha="left", va="bottom")
+for k, ((g, le, tg, iso, crop), name) in enumerate(zip(views, ["axial", "coronal", "sagittal"])):
+    w_in, h_in = w_mm[k] * scale, h_mm[k] * scale
+    ax = fig.add_axes([x / FW, (ROW_TOP - h_in) / FH, w_in / FW, h_in / FH])
+    draw(ax, g, le, tg, iso, 0.9, annotate=True, bar=True, crop=crop)
     ax.text(0.03, 0.96, name, transform=ax.transAxes, ha="left", va="top", fontsize=6.4, color="white", bbox=dict(boxstyle="round,pad=0.25", fc="black", ec="none", alpha=0.55))
-    if k == 0: ax.set_title("(e)  identified, as the model receives it: the three panels, cropped to the body", fontsize=7.2, loc="left", pad=3)
-print("view sizes (px, iso):", [(c.shape, round(iso, 3)) for c, iso in views])
-fig.savefig("figs/fig_render.pdf", bbox_inches="tight", dpi=450); plt.close(fig); print("wrote figs/fig_render.pdf")
+    x += w_in + GAP
+fig.savefig("figs/fig_render.pdf", dpi=450); plt.close(fig); print("wrote figs/fig_render.pdf")
