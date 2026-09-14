@@ -30,9 +30,17 @@ titles = {"plain": "plain: the published input (centre slices, no annotation)",
           "overlay": "overlay: centre slices, lesion in red, target in cyan",
           "identified": "identified: joint-visibility slices, outlines and a 10 mm bar"}
 fig, axes = plt.subplots(2, 2, figsize=(7.2, 2.75))
+from scipy.ndimage import binary_dilation
+def thicken(arr):
+    """Display only: the 1-px outlines and the 3-px bar vanish when the montage is resampled to column width."""
+    out = arr.copy()
+    for rgb in (ric.LESION_RGB, ric.TARGET_RGB, [255, 255, 255]):
+        m = np.all(arr == np.array(rgb, dtype=arr.dtype), axis=2)
+        if m.any(): out[binary_dilation(m, iterations=1)] = rgb
+    return out
 for ax, (letter, cond) in zip(axes.ravel(), zip("abcd", ric.IMAGE_CONDITIONS)):
-    ax.imshow(panels[cond]); ax.set_xticks([]); ax.set_yticks([]); ax.grid(False)
+    ax.imshow(thicken(panels[cond]), interpolation="none"); ax.set_xticks([]); ax.set_yticks([]); ax.grid(False)
     for sp in ax.spines.values(): sp.set_edgecolor("#c9c6c1"); sp.set_linewidth(0.6)
     ax.set_title(f"({letter})  {titles[cond]}", fontsize=6.8, loc="left", pad=3)
-fig.tight_layout(w_pad=0.6, h_pad=1.4); fig.savefig("figs/fig_render.pdf", bbox_inches="tight", dpi=300); plt.close(fig)
+fig.tight_layout(w_pad=0.6, h_pad=1.4); fig.savefig("figs/fig_render.pdf", bbox_inches="tight", dpi=450); plt.close(fig)
 print("wrote figs/fig_render.pdf")
