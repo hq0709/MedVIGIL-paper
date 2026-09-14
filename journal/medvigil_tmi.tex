@@ -403,19 +403,20 @@ identification conditions.
   \centering
   \includegraphics[width=0.96\textwidth]{figs/fig_render.pdf}
   \caption{\textbf{What the volumetric models are shown.} One growth-contact
-  probe (liver, lesion 5, target heart: \emph{if this lesion grew by
-  16.2~mm in every direction, would it contact the heart?}) rendered by the
-  released harness under the four identification conditions. (a)~The
-  published \texttt{plain} input takes the three centre slices: the lesion
-  the question names has no voxel on any of them, as for 42.0\% of
-  growth-matched probes. (b)~\texttt{bestslice} chooses the slices on which
-  both structures are visible. (c)~\texttt{overlay} keeps the centre slices
-  and adds the legend sentence, so the prompt describes a red outline the
-  image does not contain. (d)~\texttt{identified} combines joint-visibility
-  slices, both outlines and a 10~mm bar drawn from each panel's own spacing;
-  it is byte-identical to the reader-study rendering and is the input of the
-  sub-task decomposition (Fig.~\ref{fig:subtask}). Outlines and bars are
-  thickened for display; the models receive the 1-px originals.}
+  probe (colon, lesion 1, target liver; surface gap 3.97~mm, so growth of
+  1.0~mm gives ``no'' and 7.5~mm gives ``yes'') rendered by the released
+  harness. (a--d)~The axial panel under the four identification conditions.
+  The published \texttt{plain} input takes the three centre slices, on which
+  the lesion the question names has no voxel, as for 42.0\% of growth-matched
+  probes; \texttt{bestslice} re-points the panels at slices on which both
+  structures are visible; \texttt{overlay} keeps the centre slices and adds
+  the legend sentence, so the prompt describes a red outline the image does
+  not contain; \texttt{identified} combines joint-visibility slices, both
+  outlines and a 10~mm bar drawn from each panel's own spacing, and is
+  byte-identical to the reader-study rendering and the input of the sub-task
+  decomposition (Fig.~\ref{fig:subtask}). (e)~The full \texttt{identified}
+  montage as the model receives it. Outlines and bars are thickened for
+  display; the models receive the 1-px originals.}
   \label{fig:render}
 \end{figure*}
 
