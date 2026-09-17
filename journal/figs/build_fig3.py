@@ -1,4 +1,4 @@
-"""Unified MedVIGIL audit summary — replaces vis.png.
+"""Unified 2D audit summary — replaces vis.png.
 
 A single figure that puts everything from the previous two-panel composite
 into one consistently-scaled layout, with larger fonts:
