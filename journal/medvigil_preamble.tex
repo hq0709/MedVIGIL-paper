@@ -1,0 +1,35 @@
+%% Shared preamble for medvigil_tmi.tex (TMI template) and medvigil_preprint.tex
+%% (standard IEEEtran). Loaded right after the document class and its style file.
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{hyperref}
+\usepackage{booktabs,multirow}
+\usepackage{array}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{url}
+
+\graphicspath{{./figures/}{./}{../}{journal/}}
+\newcommand{\symbolimg}[2][0.3cm]{\ensuremath{\vcenter{\hbox{\includegraphics[height=#1]{#2}}}}}
+\newcommand{\openai}{\symbolimg[0.27cm]{icons/openai.png}}
+\newcommand{\claude}{\symbolimg[0.27cm]{icons/claude.png}}
+\newcommand{\gemini}{\symbolimg[0.27cm]{icons/gemini.png}}
+\newcommand{\qwen}{\symbolimg[0.27cm]{icons/qwen.png}}
+\newcommand{\moonshot}{\symbolimg[0.27cm]{icons/moonshot.png}}
+\newcommand{\llavamed}{\symbolimg[0.27cm]{icons/llava-med.png}}
+\newcommand{\huatuo}{\symbolimg[0.27cm]{icons/huggingface.png}}
+\newcommand{\doctor}{\symbolimg[0.27cm]{icons/doctor.png}}
+
+%% ---------------------------------------------------------------------------
+%% Editorial scaffolding, removed before submission. A placeholder must never
+%% silently become final copy, so both macros print in red.
+%% ---------------------------------------------------------------------------
+\newcommand{\figfix}[1]{\textcolor{red}{\textbf{[FIGURE TO REDRAW]}~#1}}
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO]}~#1}}
+
+%% Shorthands
+\newcommand{\sfr}{\mathrm{SFR}}
+\newcommand{\sfrw}{\mathrm{SFR}_{w}}

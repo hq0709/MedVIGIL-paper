@@ -1,0 +1,20 @@
+%% Preprint of the TMI submission, typeset with the standard IEEEtran journal class.
+%% Content lives in medvigil_body.tex and is shared with medvigil_tmi.tex.
+%% Build: latexmk -pdf <this file>   (from this directory)
+\documentclass[journal]{IEEEtran}
+\usepackage{xcolor}
+\InputIfFileExists{medvigil_preamble.tex}{}{\input{journal/medvigil_preamble.tex}}
+
+%% Version-specific front matter
+\newcommand{\versionthanks}{\thanks{This work has been submitted to the IEEE for
+possible publication. Copyright may be transferred without notice, after which
+this version may no longer be accessible.}}
+\newcommand{\runninghead}{Preprint}
+
+\begin{document}
+
+%% Title, authors, abstract, all sections and references live in medvigil_body.tex,
+%% shared with medvigil_tmi.tex.
+\InputIfFileExists{medvigil_body.tex}{}{\input{journal/medvigil_body.tex}}
+
+\end{document}
