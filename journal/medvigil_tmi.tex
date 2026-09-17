@@ -202,8 +202,8 @@ excluded by construction.
 
 In this paper we present a two-regime evaluation suite. It combines an
 annotation-backed 2D audit with a simulator-backed volumetric audit under one
-framework, metrics and composite, and it covers thirteen volumetric and sixteen 2D model
-configurations over 335{,}522 scored probes. Three results follow. First,
+framework, metrics and composite, and it covers sixteen 2D and thirteen volumetric model configurations over
+355{,}062 scored probes. Three results follow. First,
 the silent-failure finding replicates and worsens under computed labels, the
 2D protocol's text-side columns replicate at chance, and dataset recognition
 is measured directly instead of argued. Second, the
@@ -404,8 +404,8 @@ the input from \texttt{plain} (the montage above) through joint-visibility
 slices and red/cyan outlines of lesion and target to \texttt{identified}
 (both, plus a 10~mm scale bar drawn from the panel's own spacing). An
 \emph{input-richness} arm then holds annotation at that level and shows
-three planes, nine planes, twenty-five contiguous axial slices, or the same
-planes cropped and magnified. Fig.~\ref{fig:render} shows one probe under the four
+three planes, twenty-five contiguous axial slices, or the same planes cropped
+and magnified. Fig.~\ref{fig:render} shows one probe under the four
 identification conditions.
 
 \begin{figure*}[!t]
@@ -594,7 +594,8 @@ Suite & Family & Models & Input \\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:models} lists the 29 configurations. 2D models are queried
+Table~\ref{tab:models} lists the 29 audited configurations with the two
+text-only baselines and the scale arm. 2D models are queried
 at $T=0$ with a single-letter prompt, no chain of thought and no voting; two
 text-only baselines bound the language-prior contribution. The thirteen
 volumetric models span eight families and both input routes. The three
@@ -736,7 +737,7 @@ four times that of GPT-4o).
 \subsection{Volumetric Audit}
 \label{sec:results_3d}
 
-\subsubsection{Response-channel control} Seven montage-fed models answer all
+\subsubsection{Response-channel control} Eight montage-fed models answer all
 140 known-answer controls correctly at the 42.9\% yes-rate the set implies
 (Table~\ref{tab:headline3d}). SmolVLM2-2.2B fails one phrasing (121/140).
 Four models answer from a fixed direction instead of from the image.
@@ -833,8 +834,9 @@ where it was.
 lesion the question names has no voxel on any slice shown for 42.0\% of
 growth-matched probes, and both structures appear together on only 54.2\%.
 Table~\ref{tab:ident} holds the probe fixed and varies the input
-(Fig.~\ref{fig:render}). Twenty
-cells across five models and four conditions span 48.2--52.6\%. The two
+(Fig.~\ref{fig:render}). The
+eighteen cells, four conditions for four models and two for Qwen2.5-VL-72B,
+span 48.2--52.6\%. The two
 largest, Qwen3-VL-8B at 52.4 [50.3, 54.6] and Qwen2.5-VL-32B at 52.6
 [50.7, 54.6] under \texttt{identified}, lie within three points of chance,
 which is the size of exclusion expected about once among twelve paired
@@ -988,14 +990,17 @@ lie between the two groups, at 18.5\% and 19.7\%.
 \end{figure*}
 
 \subsubsection{Ceilings} The reference rule applied to stored provenance
-scores 100.0\% on 8{,}476 probes. Every model scores 100.0\% on the numeric
-oracle, \emph{``Is 21.4 greater than or equal to 18.16?''}, with balanced
-predictions and no pair answered identically, under both likelihood and
-greedy scoring. The text oracle supplies the same two numbers inside the
+scores 100.0\% on 8{,}476 probes. All five models run on the ceiling arms
+(Qwen2.5-VL 7B, 32B and 72B, InternVL3-8B and Qwen3-VL-8B) score 100.0\% on
+the numeric oracle, \emph{``Is 21.4 greater than or equal to 18.16?''}, with
+balanced predictions and no pair answered identically; the four with a
+greedy run score 100.0\% under greedy decoding as well. The text oracle supplies the same two numbers inside the
 clinical sentence and removes the image: Qwen2.5-VL-7B, InternVL3-8B and
 Qwen3-VL-8B score 50.0\% with one constant answer on 1{,}368 of 1{,}368
 items; Qwen2.5-VL-32B 51.1\% (``no'' on 1{,}353); Qwen2.5-VL-72B 52.4\%
-(``yes'' on 1{,}335). Greedy decoding yields the same constants. The three
+(``yes'' on 1{,}335). Greedy decoding yields the same constants for four of
+the five models; Qwen2.5-VL-32B leaves 82\% of its greedy answers
+unparseable and scores 18.0\%. The three
 forms of one comparison sit side by side in Fig.~\ref{fig:metric}d: the
 numbers alone are solved, the numbers inside the clinical sentence are not,
 and the image adds nothing to the sentence.
@@ -1009,9 +1014,9 @@ items adds the untouched volume (\texttt{full}) and a blank one
 evidence region costs $-3.5$ to $+1.8$ points (\texttt{full} minus
 \texttt{roi\_masked}); removing everything but the evidence region costs
 $+2.2$ to $+8.1$ (\texttt{full} minus \texttt{roi\_only}); the whole volume is
-worth $+4.3$ to $+10.4$ over blank (\texttt{full} minus \texttt{zero}). Lung
-and colon reproduce the original measurements to the decimal when re-run
-with the mask fill recorded per item.
+worth $+4.3$ to $+10.4$ over blank (\texttt{full} minus \texttt{zero}). For lung
+and colon, a second run that records the mask fill per item gives the same
+values to the decimal.
 
 \begin{figure*}[!t]
   \centering
@@ -1214,7 +1219,8 @@ at the encoder are aimed at the part that already works.
 Supplying the two distances in words and removing the image still collapses
 every model to a single constant answer, while the same comparison stripped
 of clinical wording is solved at 100\%. Greedy decoding gives the same
-constants, so this is not an artefact of likelihood scoring. The task is
+constants for four of the five models and an unparseable answer for most
+items of the fifth, so this is not an artefact of likelihood scoring. The task is
 solvable, as the ceiling arms show, and the collapse reproduces with no
 image present. Any account of the volumetric null must therefore include a
 component that is not visual. The clinical sentence costs the model the
@@ -1300,19 +1306,10 @@ outlines as it fails on anatomy; the decision variable was shown to track
 the question rather than the volume, and the audit exposed two instruments
 that do not survive the change of modality.
 
-The audit has a defined scope. Thirteen models were run on the
-counterfactual corpus, four on the text-side perturbations, the metric
-control and the grounding arms, and two on the trap families; the accuracy
-endpoint rests on the four non-degenerate responders. The volumetric labels are computed and reproduce their own
-provenance, and the oracle arms establish that the task is solvable; how
-radiologists perform on the same renderings is a separate question. The
-2~mm margin excludes lesions already in contact with their target, the
-proprietary 2D rows are a dated snapshot, and inference-time compute was not
-evaluated in 3D.
-
 Future work includes a volumetric reader study on the released 104-probe
-form, the inference-time-compute wave, and the extension of the computed
-construction to further geometric relations and modalities. Both suites,
+form, probes on lesions within 2~mm of their target, inference-time compute
+in the volumetric regime, and the extension of the computed construction to
+further geometric relations and modalities. Both suites,
 the harness and every cached model output are released, so the computed
 construction is available as a low-cost test of whether a medical VLM knows
 when its evidence has failed.
