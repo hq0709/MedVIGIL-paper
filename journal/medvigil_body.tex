@@ -34,7 +34,7 @@ remove both limits by computing probe answers instead of annotating them.
 Whether a lesion would contact a critical structure after isotropic growth
 follows from one distance transform over an expert lesion mask and an
 automatic anatomy segmentation. This yields 9{,}484 verifiable probes over
-588 CT volumes at no annotation cost, each asking about a state that never
+587 CT volumes at no annotation cost, each asking about a state that never
 occurred. The silent-failure finding replicates and worsens. Dataset
 recognition measures 0.0--5.0\% against a live positive control. The failure
 is localised: models perceive the annotation and perform the underlying
@@ -143,7 +143,7 @@ expert lesion mask and an automatic anatomy segmentation, the question
 aorta?''} is decided by whether the surface gap is at most $d$. One Euclidean
 distance transform answers every such query for that lesion.
 Probe generation costs no clinician time, so the corpus is bounded by
-compute: 9{,}484 probes over 588 CT volumes of the Medical Segmentation
+compute: 9{,}484 probes over 587 CT volumes of the Medical Segmentation
 Decathlon~\cite{antonelli2022msd}, against 2{,}556 probes over 300 cases.
 Because each probe asks about a state that never occurred, memorisation is
 excluded by construction.
@@ -214,8 +214,8 @@ Section~\ref{sec:metrics}. CRT = clinical risk tier.}
   & 2D suite & Volumetric suite \\
 \midrule
 Sources & VQA-RAD 120, SLAKE 60, & MSD~\cite{antonelli2022msd}: liver 118, lung 63, \\
- & ROCO 60, CXR 60 & pancreas 281, colon 126 \\
-Units & 300 cases & 588 CT volumes \\
+ & ROCO 60, CXR 60 & pancreas 281, colon 125 \\
+Units & 300 cases & 587 CT volumes \\
 Probes & 2{,}556 MCQ & 9{,}484 (8{,}476 growth-contact) \\
 Counterfactuals & 240 triplets & 4{,}238 matched pairs \\
 Text perturbations & PR, NEG, SDR by radiologists & same operators on the template \\
@@ -290,7 +290,7 @@ over two masks, so it can be checked to the voxel.
 
 \subsubsection{Materials} We use the four Medical Segmentation Decathlon
 tasks~\cite{antonelli2022msd} with lesion labels: liver, lung, pancreas and
-colon (588 volumes, Table~\ref{tab:suites}). Lesion instances $L$ are the
+colon (587 volumes, Table~\ref{tab:suites}). Lesion instances $L$ are the
 connected components of the expert lesion label with at least 20 voxels.
 Target structures $A_k$ are 29 anatomical structures whose contact would
 change management (great vessels, heart, spinal cord, solid organs, bowel,
