@@ -1,4 +1,4 @@
-\bstctlcite{TMIcontrol}
+\bstctlcite{TMIsubmissionctl}
 
 %% Body shared by medvigil_tmi.tex and medvigil_preprint.tex: edit content here.
 
@@ -294,17 +294,15 @@ lesion-to-target surface gap is at most $g$. One Euclidean distance transform
 $D=\mathrm{EDT}(\lnot L)$, computed with the voxel spacing, therefore answers
 every growth query for that lesion: $\mathrm{gap}(L,A_k)=\min_{v\in A_k}D(v)$.
 Algorithm~\ref{alg:probes} emits, for each $(L,A_k)$ pair with a testable
-gap, one growth amount below the gap and one above it. The two members of a
-\emph{matched pair} therefore have opposite answers by construction. Labels
-are balanced, chance is 50\%, and a model that answers both members
-identically is not computing the geometry, which can be measured without
-reference to correctness (Section~\ref{sec:discussion}). A margin $m=2$~mm
-removes lesions already in contact, and a 40~mm cap removes growth that is
-no longer clinically meaningful, so the corpus contains no gap below 2~mm
-(range 2.01--40.00~mm; Section~\ref{sec:conclusion}). Two secondary families use the
-same transform: \emph{nearest-on-growth} (which of four comparably close
-structures is reached first) and \emph{resection volume}. Risk tiers follow
-the target: aorta, heart and spinal cord L5, major organs L4,
+gap, one growth amount below the gap and one above it, so the two members of
+a \emph{matched pair} have opposite answers by construction: labels are
+balanced, chance is 50\%, and a model that answers both members identically
+is not computing the geometry, which is measurable without reference to
+correctness. A margin $m=2$~mm removes lesions already in contact and a
+40~mm cap removes growth that is no longer clinically meaningful, so no gap
+falls below 2~mm (range 2.01--40.00~mm). Two secondary families use the same
+transform, \emph{nearest-on-growth} and \emph{resection volume}, and risk
+tiers follow the target: aorta, heart and spinal cord L5, major organs L4,
 presence-of-finding L3, vertebrae L2, sternum and ribs L1.
 
 \begin{algorithm}[!t]
@@ -333,12 +331,11 @@ soft tissue (centre 40~HU, width 400~HU) and resampled to isotropic pixels
 so that anisotropic slice spacing does not distort the distances the model
 is asked to judge; native volumetric models receive the volume directly.
 This \texttt{plain} montage is the control arm of every input manipulation
-in Section~\ref{sec:results_3d}. The \emph{identification control} holds the
-probe fixed and varies the input through joint-visibility slices and
-red/cyan outlines to \texttt{identified} (both, plus a 10~mm scale bar drawn
-from the panel's own spacing, Fig.~\ref{fig:render}); an
-\emph{input-richness} arm holds annotation at that level and shows three
-planes, twenty-five contiguous axial slices, or the same planes magnified.
+in Section~\ref{sec:results_3d}. The \emph{identification control} varies
+the input through joint-visibility slices and red/cyan outlines to
+\texttt{identified} (both, plus a 10~mm bar, Fig.~\ref{fig:render}); an
+\emph{input-richness} arm holds annotation there and shows three planes,
+twenty-five contiguous axial slices, or the same planes magnified.
 
 \begin{figure}[!tb]
   \centering
@@ -353,10 +350,10 @@ planes, twenty-five contiguous axial slices, or the same planes magnified.
   the prompt describes an outline the image does not contain;
   \texttt{identified} combines joint-visibility slices, both outlines and a
   10~mm bar, and is byte-identical to the reader-study rendering and to the
-  input of the sub-task decomposition (Fig.~\ref{fig:subtask}). (e)~The
-  three \texttt{identified} panels as the model receives them, at one
-  physical scale. Outlines are drawn as contours for display; the models
-  receive 1-px pixel outlines.}
+  input of the sub-task decomposition (Fig.~\ref{fig:subtask}). (e)~The three
+  \texttt{identified} panels as the model receives them, at one physical
+  scale. Outlines are contours for display; the models receive 1-px pixel
+  outlines.}
   \label{fig:render}
 \end{figure}
 
@@ -388,13 +385,13 @@ reasons unrelated to CT, so the same question, legend, options, scale bar,
 colours and scoring rule are asked on three backgrounds: the item's real
 rendering; the real rendering with its annotations erased and two synthetic
 outlines drawn over the anatomy at a known gap; and uniform-grey panels with
-the same synthetic outlines. The synthetic gaps follow the gap distribution
-of the 300 real items and each gold is recomputed from the drawn masks, so
-the three backgrounds differ only in what surrounds the outlines.
+the same outlines. The synthetic gaps follow the real gap distribution and
+each gold is recomputed from the drawn masks, so the backgrounds differ only
+in what surrounds the outlines.
 
-\begin{figure}[!tb]
+\begin{figure*}[!t]
   \centering
-  \includegraphics[width=\linewidth]{journal/figures/fig3.png}
+  \includegraphics[width=0.75\textwidth]{journal/figures/fig3.png}
   \caption{\textbf{One evaluation for both suites.} Standard VQA asks whether
   an answer is correct; this evaluation asks whether it remains supported as
   the evidence changes. (a)~Matched 2D and 3D cases with valid evidence and
@@ -406,7 +403,7 @@ the three backgrounds differ only in what surrounds the outlines.
   correction, expressed uncertainty, or a silent failure. (e)~Capability,
   safety and grounding feed the risk-weighted composite.}
   \label{fig:eval}
-\end{figure}
+\end{figure*}
 
 \subsection{Metrics and Composite Score}
 \label{sec:metrics}
@@ -601,9 +598,8 @@ M3D-LaMed-Phi3-4B passes 107/140 (97\% on yes-gold, 61\% on no-gold),
 M3D-LaMed-Llama2-7B 80/140 (100\% / 25\%), Idefics3-8B 82/140 (3\% / 98\%),
 and Med3DVLM-7B 80/140 (0\% / 100\%). All three native volumetric systems
 and one general-purpose montage model fail the gate, and this set is not the
-one an architectural reading would predict. Run under both framings inside
-one library stack, native framing recovers M3D-LaMed-Phi3 by $+29.3$ points
-(74.3\% native against 45.0\% montage) and M3D-LaMed-Llama2 by $+5.7$.
+one an architectural reading would predict. Within one library stack, native framing recovers M3D-LaMed-Phi3 by
+$+29.3$ points (74.3\% against 45.0\%) and M3D-LaMed-Llama2 by $+5.7$, while
 Med3DVLM answers ``no'' to all 140 controls under either framing.
 
 \begin{table}[!tb]
@@ -706,10 +702,10 @@ Qwen2.5-VL-72B 89$\rightarrow$99\%. Qwen2.5-VL-7B answers ``no'' to all
 \subsubsection{Sub-task decomposition} The four sub-tasks are asked
 separately on the \texttt{identified} rendering, in the same four-option
 format and under the same scoring (300 probes per cell, stratified over
-organs, chance 25\%). The four models with clean response channels localise
-the red-outlined lesion to its organ at 67.7\%, 41.0\%, 81.7\% and 76.0\%
-(Qwen2.5-VL-7B, InternVL3-8B, Qwen3-VL-8B, Qwen2.5-VL-32B), and at 57.3\%,
-15.0\%, 49.7\% and 52.0\% once the outlines and the legend are removed. They
+organs, chance 25\%). The four models with clean response channels localise the red-outlined
+lesion to its organ at 67.7\%, 41.0\%, 81.7\% and 76.0\% (Qwen2.5-VL-7B,
+InternVL3-8B, Qwen3-VL-8B, Qwen2.5-VL-32B), and at 15.0--57.3\% once the
+outlines and the legend are removed. They
 name the cyan-outlined target at 34.3\%, 31.3\%, 60.0\% and 45.0\%. With a
 10~mm bar in the panel they estimate the separation in millimetres at
 25.7\%, 26.3\%, 23.0\% and 28.3\% (Fig.~\ref{fig:subtask}), intervals
@@ -926,10 +922,10 @@ scores $\sfrw=0.0\%$.
 
 We evaluate evidence-conditional trustworthiness in two regimes, a
 clinician-annotated 2D suite and a volumetric suite whose labels are
-computed from geometry, across twenty-nine model configurations under one
-framework. The 2D finding survives the change of modality and worsens, the
-volumetric labels cost nothing to produce and cannot have been memorised,
-and the composite probe decomposes into steps that fail selectively.
+computed from geometry, across twenty-nine model configurations. The 2D
+finding survives the change of modality and worsens, the volumetric labels
+cannot have been memorised, and the composite probe decomposes into steps
+that fail selectively.
 
 \subsection{Which Models Carry the Claim, and What Fails in Them}
 
@@ -978,11 +974,10 @@ Remedies aimed at the encoder are aimed at the part that already works.
 One component of the failure is not visual at all. Supplying the two
 distances in words and removing the image still collapses every model to a
 single constant answer, while the same comparison stripped of clinical
-wording is solved at 100\%; greedy decoding gives the same constants for
+wording is solved at 100\%, and greedy decoding gives the same constants for
 four of the five models. The clinical sentence costs the model the
-arithmetic it otherwise performs. This was measurable only because the
-labels were computed, which allowed the same items to be asked again in text
-with their gold intact.
+arithmetic it otherwise performs, which was measurable only because the
+computed labels allowed the same items to be asked again in text.
 
 \subsection{What the Volumetric Regime Adds}
 
@@ -1002,18 +997,16 @@ answer about the image does not produce one about the anatomy either.
 
 Two instruments change meaning in the volumetric regime. The grounding
 contrast subtracts an arm that removes the evidence region from one that
-removes everything else. In 2D the two arms occupy comparable image area and
-the difference approximates grounding; in a volume the region is roughly
-1\% of the voxels and its complement 99\%, so the same difference confounds
-grounding with intactness and VGR inverts instead of shrinking. A Ground
-axis at its floor still contributes about 50 to a harmonic mean and reads as
-partial competence, so in the volumetric regime the Ground axis should gate
-the composite instead of averaging into it, and a system whose matched-pair
-violation exceeds a threshold should have its CS reported as undefined. The
-second instrument is the scoring rule: any sighted-versus-blind difference
-scored against per-arm baselines inherits the artefact that a model's
-content-free answer differs with and without an image, so the two arms need
-a common baseline.
+removes everything else: in 2D the two arms occupy comparable image area,
+while in a volume the region is roughly 1\% of the voxels and its complement
+99\%, so the difference confounds grounding with intactness and VGR inverts
+instead of shrinking. A Ground axis at its floor still contributes about 50
+to a harmonic mean, so it should gate the composite instead of averaging
+into it, and a system whose matched-pair violation exceeds a threshold
+should have its CS reported as undefined. The scoring rule is the second:
+any sighted-versus-blind difference scored against per-arm baselines
+inherits the artefact that a model's content-free answer differs with and
+without an image, so the two arms need a common baseline.
 
 \subsection{Clinical Reading and Deployment}
 
@@ -1031,9 +1024,9 @@ response-channel gate as separate axes, because they fail independently
 here and a composite hides which one failed.
 The safest mitigation sits upstream of the model: a clinical pipeline should
 validate image presence, integrity, modality and resolution before a request
-reaches a VLM, and route a failed check to a reader instead of to a system
-that answers fluently through it. A model that cannot say that a scan is not
-a CT will not say that a lesion does not reach the aorta.
+reaches a VLM, and route a failed check to a reader. A model that cannot say
+that a scan is not a CT will not say that a lesion does not reach the
+aorta.
 
 \section{Conclusion}
 \label{sec:conclusion}
