@@ -63,17 +63,14 @@ computed tomography, visual grounding, silent failure, counterfactual probing.
   \centering
   \includegraphics[width=\linewidth]{journal/figures/fig1.png}
   \caption{\textbf{A fluent answer and a safe refusal look alike until the
-  evidence is checked.} (a)~2D. A chest radiograph is asked ``Is there a
-  right apical pneumothorax?'' (gold ``yes''). In the matched case the apex
-  region is masked and the question is edited to ask about a \emph{left}
-  apical pneumothorax: the silent failure measures a pneumothorax in the
-  masked apex on the wrong side, the safe response states that the region
-  cannot be measured and corrects the premise. (b)~3D. An axial abdominal CT
-  with the lesion outlined in red and the counterfactual growth boundary
-  dashed in yellow. The surface gap is $d=10.2$~mm and the growth is 16~mm,
-  so the computed gold is ``yes''; the silent failure answers ``no'' against
-  the computed geometry. The CT is an illustrative case from the MSD
-  hepatic-vessel task (CC~BY-SA~4.0) and the responses are illustrative.}
+  evidence is checked.} (a)~2D: the apex region is masked and the question is
+  edited to ask about a \emph{left} apical pneumothorax, against a gold of
+  ``yes'' on the right. The silent failure measures a pneumothorax in the
+  masked apex on the wrong side; the safe response reports that the region
+  cannot be measured and corrects the premise. (b)~3D: the surface gap is
+  $d=10.2$~mm and the growth 16~mm, so the computed gold is ``yes'' and the
+  silent failure answers ``no''. Illustrative case from the MSD
+  hepatic-vessel task (CC~BY-SA~4.0).}
   \label{fig:motivation}
 \end{figure}
 
@@ -226,18 +223,13 @@ Chance & 20\% & 50\% (balanced) \\
   \centering
   \includegraphics[width=\linewidth]{journal/figures/fig2.png}
   \caption{\textbf{Two constructions, one evaluation.} (a)~2D,
-  annotation-backed: 300 source cases from VQA-RAD, SLAKE, ROCO and chest
-  radiograph collections; two radiologists screen and annotate each case
-  (gold, A--E candidates, ROI, laterality, risk tier L1--L5); image and text
-  perturbations are drafted as controlled variants of the same case; a
-  senior radiologist finalises the gold keys, enforces the construction
-  invariants and drops invalid probes. (b)~3D, simulator-backed: one
-  Euclidean distance transform per lesion, computed with physical voxel
-  spacing, gives the surface gap $d$ to each target; a matched pair states
-  one growth below the gap and one above it ($d=10.2$~mm, $g^{-}=8$,
-  $g^{+}=16$~mm); a provenance gate recomputes every label
-  $y=\mathbf{1}[g\ge d]$ from the stored geometry. Both banks enter the
-  shared evaluation of Fig.~\ref{fig:eval}.}
+  annotation-backed: two radiologists annotate each of 300 cases and jointly
+  author its text-side perturbations, and a senior radiologist enforces the
+  construction invariants. (b)~3D, simulator-backed: one Euclidean distance
+  transform per lesion gives the surface gap $d$ to each target, a matched
+  pair states one growth below it and one above ($d=10.2$, $g^{-}=8$,
+  $g^{+}=16$~mm), and a provenance gate recomputes every label
+  $y=\mathbf{1}[g\ge d]$.}
   \label{fig:pipeline}
 \end{figure}
 
@@ -298,7 +290,7 @@ gap, one growth amount below the gap and one above it, so the two members of
 a \emph{matched pair} have opposite answers by construction: labels are
 balanced, chance is 50\%, and a model that answers both members identically
 is not computing the geometry, which is measurable without reference to
-correctness. A margin $m=2$~mm removes lesions already in contact and a
+correctness (Section~\ref{sec:discussion}). A margin $m=2$~mm removes lesions already in contact and a
 40~mm cap removes growth that is no longer clinically meaningful, so no gap
 falls below 2~mm (range 2.01--40.00~mm). Two secondary families use the same
 transform, \emph{nearest-on-growth} and \emph{resection volume}, and risk
@@ -341,19 +333,14 @@ twenty-five contiguous axial slices, or the same planes magnified.
   \centering
   \includegraphics[width=\linewidth]{figs/fig_render_1col.pdf}
   \caption{\textbf{What the volumetric models are shown.} One growth-contact
-  probe (colon, lesion 1, target liver; surface gap 3.97~mm). (a--d)~The
-  axial panel under the four identification conditions. The published
-  \texttt{plain} input takes the three centre slices, on which the lesion
-  the question names has no voxel, as for 42.0\% of growth-matched probes;
-  \texttt{bestslice} re-points the panels at slices showing both structures;
-  \texttt{overlay} keeps the centre slices and adds the legend sentence, so
-  the prompt describes an outline the image does not contain;
-  \texttt{identified} combines joint-visibility slices, both outlines and a
-  10~mm bar, and is byte-identical to the reader-study rendering and to the
-  input of the sub-task decomposition (Fig.~\ref{fig:subtask}). (e)~The three
-  \texttt{identified} panels as the model receives them, at one physical
-  scale. Outlines are contours for display; the models receive 1-px pixel
-  outlines.}
+  probe (colon lesion, target liver, gap 3.97~mm) under the four
+  identification conditions. The published \texttt{plain} input takes the
+  three centre slices, on which the lesion the question names has no voxel,
+  as for 42.0\% of growth-matched probes; \texttt{identified} combines
+  joint-visibility slices, both outlines and a 10~mm bar, and is
+  byte-identical to the reader-study rendering. (e)~The three
+  \texttt{identified} panels at one physical scale. Outlines are contours
+  for display; the models receive 1-px outlines.}
   \label{fig:render}
 \end{figure}
 
@@ -392,16 +379,15 @@ in what surrounds the outlines.
 \begin{figure*}[!t]
   \centering
   \includegraphics[width=0.75\textwidth]{journal/figures/fig3.png}
-  \caption{\textbf{One evaluation for both suites.} Standard VQA asks whether
-  an answer is correct; this evaluation asks whether it remains supported as
-  the evidence changes. (a)~Matched 2D and 3D cases with valid evidence and
-  a well-posed premise. (b)~Controlled interventions: the image is full,
-  ROI-masked, ROI-only or blank, the premise is paraphrased, negated or
-  false, with a laterality flip in 2D and a matched growth pair in 3D.
-  (c)~Each answer is matched against physician gold in 2D or computed gold
-  in 3D and (d)~classed as a supported answer, a safe abstention or premise
-  correction, expressed uncertainty, or a silent failure. (e)~Capability,
-  safety and grounding feed the risk-weighted composite.}
+  \caption{\textbf{One evaluation for both suites.} (a)~Matched 2D and 3D
+  cases with valid evidence and a well-posed premise. (b)~Controlled
+  interventions on the image (full, ROI-masked, ROI-only, blank) and on the
+  premise (paraphrase, negation, false premise), with a laterality flip in
+  2D and a matched growth pair in 3D. (c,~d)~Each answer is matched against
+  physician gold in 2D or computed gold in 3D and classed as a supported
+  answer, a safe abstention or premise correction, expressed uncertainty, or
+  a silent failure. (e)~Capability, safety and grounding feed the
+  risk-weighted composite.}
   \label{fig:eval}
 \end{figure*}
 
@@ -569,7 +555,8 @@ at 60.0\%, and the two open-weight medical systems sit about twenty points
 below the leader at CS 44.7 (LLaVA-Med 7B) and 50.4 (HuatuoGPT-V 7B).
 Silent failure rises with clinical risk tier for most models. GPT-4o answers
 87.3\% of L1 original probes correctly and fabricates on 68.2\%, 75.6\% and
-68.9\% of L3, L4 and L5 traps; Claude Opus 4.7, the safest model, retains
+68.9\% of L3, L4 and L5 traps, and GPT-5.4-mini on 69.8\% and 67.6\% of L4
+and L5; Claude Opus 4.7, the safest model, retains
 30.9\% L3 and 28.4\% L5 trap $\sfr$ against the radiologist's 5.9\% and
 12.2\%. The risk-weighted $\sfrw$ ranges from 25.2 (Opus 4.7) to 76.1
 (Qwen3.5-9B); the radiologist is at 9.3.
@@ -583,8 +570,11 @@ sweep at $\sigma\in\{0,2,4,8,16,32,64\}$~px with a no-image control, the
 language-takeover point $L^{\star}$, the smallest $\sigma$ at which the
 residual visual contribution falls below 20\% of the clean-image
 contribution, varies by a factor of four (16--64~px) and does not track CS:
-GPT-4o is the most visually anchored ($L^{\star}=64$) and Qwen3.5-397B has
-the smallest contribution (40.5~pp) with the earliest takeover.
+GPT-4o is the most visually anchored ($L^{\star}=64$), Claude Sonnet 4.6
+has the largest visual contribution (65.9\%$\rightarrow$9.1\%) but falls
+back at $\sigma=32$, Qwen3.5-397B has the smallest contribution (40.5~pp)
+with the earliest takeover, and HuatuoGPT-V 7B has the highest no-image
+floor (20.6\%).
 
 
 \subsection{Volumetric Audit}
@@ -691,7 +681,8 @@ Qwen2.5-VL-72B, span 48.2--52.6\%. The two largest, Qwen3-VL-8B
 at 52.4 [50.3, 54.6] and Qwen2.5-VL-32B at 52.6 [50.7, 54.6] under
 \texttt{identified}, lie within three points of chance, the size of
 exclusion expected about once among twelve paired contrasts on two endpoints
-(Section~\ref{sec:metrics}). Splitting \texttt{overlay} by whether the red
+(Section~\ref{sec:metrics}). Qwen2.5-VL-72B, sharded across two 80~GB
+cards, sits at 49.2\% and 50.0\%. Splitting \texttt{overlay} by whether the red
 outline was actually drawn (793 against 575 probes) gives 49.3--50.7\% with
 it and 48.7--51.3\% without it. What does rise with the information supplied
 is the share of matched pairs answered identically, which geometry forbids:
@@ -704,8 +695,8 @@ separately on the \texttt{identified} rendering, in the same four-option
 format and under the same scoring (300 probes per cell, stratified over
 organs, chance 25\%). The four models with clean response channels localise the red-outlined
 lesion to its organ at 67.7\%, 41.0\%, 81.7\% and 76.0\% (Qwen2.5-VL-7B,
-InternVL3-8B, Qwen3-VL-8B, Qwen2.5-VL-32B), and at 15.0--57.3\% once the
-outlines and the legend are removed. They
+InternVL3-8B, Qwen3-VL-8B, Qwen2.5-VL-32B), and at 57.3\%, 15.0\%, 49.7\% and 52.0\%
+once the outlines and the legend are removed. They
 name the cyan-outlined target at 34.3\%, 31.3\%, 60.0\% and 45.0\%. With a
 10~mm bar in the panel they estimate the separation in millimetres at
 25.7\%, 26.3\%, 23.0\% and 28.3\% (Fig.~\ref{fig:subtask}), intervals
@@ -714,18 +705,18 @@ onto one or two buckets against near-uniform gold (85/67/79/69):
 Qwen2.5-VL-32B answers ``15'' on 298 of 300 items. Richer input does not
 move the estimate. On three planes, twenty-five contiguous axial slices and
 magnified crops, InternVL3-8B scores 27.7\%, 26.0\% and 25.3\% and
-Qwen2.5-VL-32B 28.3\% throughout; all eight intervals contain 25.
+Qwen2.5-VL-32B 28.3\% throughout; all eight intervals contain 25, and
+InternVL3-8B's modal share rises from 48\% to 76\% under twenty-five
+slices.
 
 \begin{figure}[!tb]
   \centering
   \includegraphics[width=\linewidth]{figs/fig_subtask.pdf}
   \caption{\textbf{Perception works, naming partly works, metric estimation
   is absent.} (a)~Sub-task accuracy on the \texttt{identified} rendering with
-  volume-clustered 95\% intervals: which organ holds the red-outlined lesion,
-  the same with outlines and legend removed, which structure is outlined in
-  cyan, and how many millimetres separate them. (b)~Where the 300 distance
-  answers land against the near-uniform gold: every model collapses onto one
-  or two buckets, Qwen2.5-VL-32B onto ``15'' for 298 items.}
+  volume-clustered 95\% intervals. (b)~Where the 300 distance answers land
+  against the near-uniform gold: every model collapses onto one or two
+  buckets, Qwen2.5-VL-32B onto ``15'' for 298 items.}
   \label{fig:subtask}
 \end{figure}
 
@@ -750,14 +741,12 @@ model's modal answer and its share are the same on all three backgrounds
   \caption{\textbf{Two ways the evidence contract breaks in the volume: a
   channel the models lack on any image, and a clinical sentence that
   disables the arithmetic they have.} (a)~One item under three backgrounds:
-  synthetic outlines on uniform grey, the same outlines over real anatomy
-  with its annotations erased, and the real lesion and target. (b)~Distance
-  sub-task accuracy per model and background, volume-clustered 95\%
-  intervals; synthetic gaps follow the real gap distribution and every gold
-  is recomputed from the drawn masks. (c)~The modal answer and its share:
-  the habit does not change with what the outlines enclose. (d)~The
-  comparison the probe reduces to, posed as two numbers, as the same numbers
-  inside the clinical sentence with no image, and as the published image.}
+  synthetic outlines on grey, the same outlines over real anatomy with its
+  annotations erased, and the real lesion and target. (b)~Distance sub-task
+  accuracy per model and background, volume-clustered 95\% intervals.
+  (c)~The modal answer and its share: the habit does not change with what
+  the outlines enclose. (d)~The same comparison as two numbers, as those
+  numbers inside the clinical sentence, and as the published image.}
   \label{fig:metric}
 \end{figure}
 
@@ -797,14 +786,11 @@ two native M3D-LaMed variants lie between the groups, at 18.5\% and
   \centering
   \includegraphics[width=\linewidth]{figs/fig_decision.pdf}
   \caption{\textbf{The decision variable reads the question, not the volume.}
-  (a)~AUROC of $\log p_{\text{yes}}-\log p_{\text{no}}$ on the growth-matched
-  subset with volume-clustered 95\% intervals, three comparisons per model:
-  within the 363 complete matched pairs, where volume and rendering are
-  identical and only the growth number in the question differs; against the
-  computed label over all 1{,}368 probes; and across the 182 probes whose
-  question sentence is identical and only the volume differs.
-  $^{\dagger}$Native volumetric input. (b)~The growth-number and label AUROCs
-  across Qwen2.5-VL 3B--72B on the published rendering.}
+  (a)~AUROC of $\log p_{\text{yes}}-\log p_{\text{no}}$ with volume-clustered
+  95\% intervals: within matched pairs, where only the growth number
+  differs; against the computed label; and across probes whose sentence is
+  identical and only the volume differs. $^{\dagger}$Native volumetric
+  input. (b)~The two AUROCs across Qwen2.5-VL 3B--72B.}
   \label{fig:decision}
 \end{figure}
 
@@ -842,10 +828,10 @@ five trap families over 3{,}200 probes for two models under identical forward
 passes scored two ways. Under raw likelihood both models refuse 100\% of traps
 and score $\sfrw=0.0\%$, while also selecting the refusal string on 85.8\%
 and 97.9\% of answerable probes, and raw scoring reports $\sfrw=0.0\%$ for
-every model on every family. Under content-free calibration the same passes
-separate: Qwen2.5-VL-7B declines 76.7\% of unsatisfiable premises at
-$\sfrw=23.3\%$ and CS 49.1; M3D-LaMed declines 2.0\% at $\sfrw=97.3\%$ and
-CS 7.1. On the cleanest trap family, calibrated $\sfr$ is
+every model on every family. Their composites are 0.0 and 2.0. Under
+content-free calibration the same passes separate: Qwen2.5-VL-7B declines
+76.7\% of unsatisfiable premises, evenly across tiers, at $\sfrw=23.3\%$ and
+CS 49.1; M3D-LaMed declines 2.0\% at $\sfrw=97.3\%$ and CS 7.1. On the cleanest trap family, calibrated $\sfr$ is
 43.7\% (Qwen2.5-VL-7B), 71.5\% (InternVL3-8B), 73.2\% (Qwen2.5-VL-32B) and
 96.4\% (M3D-LaMed).
 
@@ -891,7 +877,7 @@ differences below are differences in what the modality affords.
 withholding it from six models lowers original-probe accuracy by 24.7 to
 69.7 points, two text-only baselines score 1.7\% and 4.0\% on the same
 probes, and the clean-image contribution under the blur sweep is
-34.7--56.3 points. In 3D the same subtraction on the growth-matched subset
+34.7--56.3 points, with language taking over only at $L^{\star}=16$--64~px. In 3D the same subtraction on the growth-matched subset
 runs from $-1.3$ to $+1.0$ points across thirteen models, the blur sweep
 gives $L^{\star}\in\{0,8\}$ with contributions of 2.8 and 0.0 points, and
 the decision variable ranks the label at 0.47--0.52 with the volume
@@ -932,8 +918,9 @@ that fail selectively.
 Thirteen models at 48.7--51.0\% are not thirteen independent measurements.
 On a label-balanced binary corpus, a model that places a fraction $m$ of its
 answers on one option has accuracy confined to $[m-\tfrac12,\ \tfrac32-m]$
-regardless of what it computes, and seven of the thirteen sit at
-$m\ge0.96$. Removing those seven and the three native systems that fail the
+regardless of what it computes. Seven of the thirteen sit at $m\ge0.96$,
+and InternVL3-14B's 50.1\% is confined to $[46.5, 53.5]$ before any
+reasoning is considered. Removing those seven and the three native systems that fail the
 response-channel gate leaves four models that carry the volumetric accuracy
 claim, each with an interval containing 50, which is why the modal share is
 reported beside every accuracy in Table~\ref{tab:headline3d}. The same bound
