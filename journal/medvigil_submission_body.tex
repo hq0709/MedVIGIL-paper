@@ -80,25 +80,24 @@ computed tomography, visual grounding, silent failure, counterfactual probing.
 \IEEEPARstart{M}{edical} vision--language models (VLMs) have moved from
 research prototypes into clinical imaging workflows, open and proprietary
 alike~\cite{li2023llavamed,chen2024huatuogptvision},
-in tasks from report assistance to decision support~\cite{wu2023radfm}.
+in tasks from report assistance to decision support.
 As they approach deployment, accuracy on intact inputs is no longer a
 sufficient description of behaviour. A model must also behave safely when
 the answer-relevant region is obscured, when the question embeds a premise
 the image contradicts, or when the requested quantity cannot be recovered
 from what was acquired.
 
-Current systems often do not. Frontier VLMs reach top rank on medical
-benchmarks without receiving an
-image~\cite{asadi2026mirageillusionvisualunderstanding} and underperform
-young children on tasks requiring genuine perception~\cite{chen2026babyvision}.
+Current systems often do not. Frontier VLMs reach top rank on medical benchmarks
+without receiving an
+image~\cite{asadi2026mirageillusionvisualunderstanding}.
 In medicine this is hard to detect: the literature is rich enough that a
 plausible answer can be assembled from question templates alone, so a
 fabricated answer reads like a grounded one and leaves no trace in an
 accuracy score.
 
 Existing evaluation is not designed to detect this failure. Medical VQA
-datasets~\cite{lau2018vqarad,liu2021slake} and the systems
-trained on them~\cite{li2023llavamed,wu2023radfm} presume
+datasets~\cite{lau2018vqarad,liu2021slake} and the systems trained on
+them~\cite{li2023llavamed} presume
 valid inputs, as does a concurrent audit of grounding
 pathologies~\cite{chen2026auditfrontier}. Hallucination benchmarks~\cite{li2023pope} score unsupported content under
 otherwise valid inputs, HEAL-MedVQA tests grounding through
@@ -238,7 +237,7 @@ Chance & 20\% & 50\% (balanced) \\
   one growth below the gap and one above it ($d=10.2$~mm, $g^{-}=8$,
   $g^{+}=16$~mm); a provenance gate recomputes every label
   $y=\mathbf{1}[g\ge d]$ from the stored geometry. Both banks enter the
-  shared evaluation of Section~\ref{sec:metrics}.}
+  shared evaluation of Fig.~\ref{fig:eval}.}
   \label{fig:pipeline}
 \end{figure}
 
@@ -393,6 +392,22 @@ the same synthetic outlines. The synthetic gaps follow the gap distribution
 of the 300 real items and each gold is recomputed from the drawn masks, so
 the three backgrounds differ only in what surrounds the outlines.
 
+\begin{figure}[!tb]
+  \centering
+  \includegraphics[width=\linewidth]{journal/figures/fig3.png}
+  \caption{\textbf{One evaluation for both suites.} Standard VQA asks whether
+  an answer is correct; this evaluation asks whether it remains supported as
+  the evidence changes. (a)~Matched 2D and 3D cases with valid evidence and
+  a well-posed premise. (b)~Controlled interventions: the image is full,
+  ROI-masked, ROI-only or blank, the premise is paraphrased, negated or
+  false, with a laterality flip in 2D and a matched growth pair in 3D.
+  (c)~Each answer is matched against physician gold in 2D or computed gold
+  in 3D and (d)~classed as a supported answer, a safe abstention or premise
+  correction, expressed uncertainty, or a silent failure. (e)~Capability,
+  safety and grounding feed the risk-weighted composite.}
+  \label{fig:eval}
+\end{figure}
+
 \subsection{Metrics and Composite Score}
 \label{sec:metrics}
 
@@ -505,7 +520,7 @@ a leaderboard entry. $\downarrow$ lower is safer. $^{\dagger}$Trained on
 PubMedVision, which overlaps VQA-RAD and SLAKE.}
 \label{tab:headline2d}
 \centering
-\fontsize{7.5}{9}\selectfont
+\fontsize{7}{8.4}\selectfont
 \setlength\tabcolsep{3.5pt}
 \begin{tabular}{lrrrrrrrrr}
 \toprule
@@ -557,8 +572,7 @@ at 60.0\%, and the two open-weight medical systems sit about twenty points
 below the leader at CS 44.7 (LLaVA-Med 7B) and 50.4 (HuatuoGPT-V 7B).
 Silent failure rises with clinical risk tier for most models. GPT-4o answers
 87.3\% of L1 original probes correctly and fabricates on 68.2\%, 75.6\% and
-68.9\% of L3, L4 and L5 traps, and GPT-5.4-mini on 69.8\% and 67.6\% of L4
-and L5; Claude Opus 4.7, the safest model, retains
+68.9\% of L3, L4 and L5 traps; Claude Opus 4.7, the safest model, retains
 30.9\% L3 and 28.4\% L5 trap $\sfr$ against the radiologist's 5.9\% and
 12.2\%. The risk-weighted $\sfrw$ ranges from 25.2 (Opus 4.7) to 76.1
 (Qwen3.5-9B); the radiologist is at 9.3.
@@ -567,16 +581,13 @@ The paired ROI design separates two unsafe regimes. Gemini 3 Flash is
 vision-anchored but unsafe (VGR $+41.1$~pp, $\sfr$ 37.2\%): it uses the ROI
 when present and fails to refuse when the ROI is removed. GPT-5.4-nano is
 prior-driven and unsafe ($-27.1$~pp, 51.7\%). The two regimes are separable
-because VGR and trap $\sfr$ vary independently. Under an isotropic Gaussian
-blur sweep at $\sigma\in\{0,2,4,8,16,32,64\}$~px with a no-image control,
-the language-takeover point $L^{\star}$, the smallest $\sigma$ at which the
+because VGR and trap $\sfr$ vary independently. Under an isotropic Gaussian blur
+sweep at $\sigma\in\{0,2,4,8,16,32,64\}$~px with a no-image control, the
+language-takeover point $L^{\star}$, the smallest $\sigma$ at which the
 residual visual contribution falls below 20\% of the clean-image
-contribution, varies by a factor of four across four representative models
-(16--64~px) and does not track CS: GPT-4o is the most visually anchored
-($L^{\star}=64$), Qwen3.5-397B has
-the smallest contribution (40.5~pp) and the earliest takeover, and
-HuatuoGPT-V 7B has the highest no-image floor (20.6\%, four times that of
-GPT-4o).
+contribution, varies by a factor of four (16--64~px) and does not track CS:
+GPT-4o is the most visually anchored ($L^{\star}=64$) and Qwen3.5-397B has
+the smallest contribution (40.5~pp) with the earliest takeover.
 
 
 \subsection{Volumetric Audit}
@@ -602,7 +613,7 @@ labels exactly balanced, chance 50\%). Gate: known-answer controls passed of
 matched pairs answered identically, which geometry forbids.}
 \label{tab:headline3d}
 \centering
-\fontsize{7.5}{9}\selectfont
+\fontsize{7}{8.4}\selectfont
 \setlength\tabcolsep{3pt}
 \begin{tabular}{llrrrr}
 \toprule
@@ -684,8 +695,7 @@ Qwen2.5-VL-72B, span 48.2--52.6\%. The two largest, Qwen3-VL-8B
 at 52.4 [50.3, 54.6] and Qwen2.5-VL-32B at 52.6 [50.7, 54.6] under
 \texttt{identified}, lie within three points of chance, the size of
 exclusion expected about once among twelve paired contrasts on two endpoints
-(Section~\ref{sec:metrics}). Qwen2.5-VL-72B, sharded across two 80~GB
-cards, sits at 49.2\% and 50.0\%. Splitting \texttt{overlay} by whether the red
+(Section~\ref{sec:metrics}). Splitting \texttt{overlay} by whether the red
 outline was actually drawn (793 against 575 probes) gives 49.3--50.7\% with
 it and 48.7--51.3\% without it. What does rise with the information supplied
 is the share of matched pairs answered identically, which geometry forbids:
@@ -708,9 +718,7 @@ onto one or two buckets against near-uniform gold (85/67/79/69):
 Qwen2.5-VL-32B answers ``15'' on 298 of 300 items. Richer input does not
 move the estimate. On three planes, twenty-five contiguous axial slices and
 magnified crops, InternVL3-8B scores 27.7\%, 26.0\% and 25.3\% and
-Qwen2.5-VL-32B 28.3\% throughout; all eight intervals contain 25, and
-InternVL3-8B's modal share rises from 48\% to 76\% under twenty-five
-slices.
+Qwen2.5-VL-32B 28.3\% throughout; all eight intervals contain 25.
 
 \begin{figure}[!tb]
   \centering
@@ -852,7 +860,7 @@ over option strings; Calib. = content-free calibration against a common
 baseline.}
 \label{tab:scoring}
 \centering
-\fontsize{7.5}{9}\selectfont
+\fontsize{7}{8.4}\selectfont
 \setlength\tabcolsep{4pt}
 \begin{tabular}{lrrrr}
 \toprule
@@ -883,17 +891,16 @@ Pancreas-CT collection'', from which none of these volumes come.
 The two audits share a framework, metric set and composite, so the
 differences below are differences in what the modality affords.
 
-\subsubsection{Image contribution} In 2D the image accounts for the
-score. Withholding it from six models lowers original-probe accuracy by 24.7
-to 69.7 points, two text-only baselines score
-1.7\% and 4.0\% on the same probes, and under the blur sweep the clean-image
-contribution is 34.7--56.3 points, with language taking over only at
-$L^{\star}=16$--64~px. In 3D the same subtraction on
-the growth-matched subset runs from $-1.3$ to $+1.0$ points across thirteen
-models. The blur sweep on two of these models gives $L^{\star}\in\{0,8\}$
-with clean-image contributions of 2.8 and 0.0 points, and the decision
-variable ranks the label at 0.47--0.52 with the volume present. Under one
-protocol, the image is decisive in one regime and inert in the other.
+\subsubsection{Image contribution} In 2D the image accounts for the score:
+withholding it from six models lowers original-probe accuracy by 24.7 to
+69.7 points, two text-only baselines score 1.7\% and 4.0\% on the same
+probes, and the clean-image contribution under the blur sweep is
+34.7--56.3 points. In 3D the same subtraction on the growth-matched subset
+runs from $-1.3$ to $+1.0$ points across thirteen models, the blur sweep
+gives $L^{\star}\in\{0,8\}$ with contributions of 2.8 and 0.0 points, and
+the decision variable ranks the label at 0.47--0.52 with the volume
+present. Under one protocol, the image is decisive in one regime and inert
+in the other.
 
 \subsubsection{Text robustness} Paraphrase, negation and specificity drop
 span 29.7--80.7\%, 15.6--83.1\% and 25.0--79.9\% across the sixteen 2D
@@ -903,16 +910,15 @@ negated probes receive ``no''.
 
 \subsubsection{Grounding} VGR spans $+3.6$ to $+49.5$~pp across capable 2D
 models and is positive for every one of them; in 3D it spans $-8.3$ to
-$+0.8$~pp, is negative in every organ for both verified-channel models, and
-is exactly $+0.0$ in four of four organs for one model. The radiologist's 2D
-VGR is $+4.5$.
+$+0.8$~pp and is negative in every organ for both verified-channel models.
+The radiologist's 2D VGR is $+4.5$.
 
 \subsubsection{Safety} 2D $\sfr$ ranges 22.0--54.3\% against the
 radiologist's 5.8\%. Calibrated volumetric $\sfr$ on the cleanest trap family
-is 43.7\%, 71.5\%, 73.2\% and 96.4\%. The first value lies inside the 2D
-range and the other three above it, and the highest belongs to the only
-purpose-built medical volumetric model in the set. Uncalibrated, every volumetric model scores
-$\sfrw=0.0\%$.
+is 43.7\%, 71.5\%, 73.2\% and 96.4\%: the first inside the 2D range, the
+other three above it, the highest belonging to the only purpose-built
+medical volumetric model in the set. Uncalibrated, every volumetric model
+scores $\sfrw=0.0\%$.
 
 %% ===========================================================================
 \section{Discussion}
@@ -930,10 +936,8 @@ and the composite probe decomposes into steps that fail selectively.
 Thirteen models at 48.7--51.0\% are not thirteen independent measurements.
 On a label-balanced binary corpus, a model that places a fraction $m$ of its
 answers on one option has accuracy confined to $[m-\tfrac12,\ \tfrac32-m]$
-regardless of what it computes. Seven of the thirteen sit at $m\ge0.96$, so
-their accuracy near 50\% follows from their answer distribution, and
-InternVL3-14B's 50.1\% is confined to $[46.5, 53.5]$ before any reasoning is
-considered. Removing those seven and the three native systems that fail the
+regardless of what it computes, and seven of the thirteen sit at
+$m\ge0.96$. Removing those seven and the three native systems that fail the
 response-channel gate leaves four models that carry the volumetric accuracy
 claim, each with an interval containing 50, which is why the modal share is
 reported beside every accuracy in Table~\ref{tab:headline3d}. The same bound
@@ -965,8 +969,7 @@ to give the model what a reader would be given, the visible volume was
 multiplied by 5.7$\times$ and the structures magnified, a tenfold parameter
 range was spanned, and the anatomy was replaced by two synthetic outlines on
 a blank background. None changed the metric result, so the missing metric
-channel is a property of the models and not of CT: they cannot read a
-distance off a blank page with a scale bar, which agrees with reports
+channel is a property of the models and not of CT, which agrees with reports
 that general-domain VLMs fail elementary geometric
 readouts~\cite{rahmanzadehgervi2024blind} and that metric
 spatial reasoning has required dedicated training~\cite{chen2024spatialvlm}.
@@ -989,8 +992,7 @@ known-answer questions correctly, and is indispensable in 3D, where none of
 the three native volumetric systems passes. A pinned output channel scores
 50\% and cannot be told apart in an accuracy table from systems that fail
 for other reasons, and the four models that fail here are not the four an
-architectural reading would predict. Seven questions on twenty volumes
-anticipate what the trap families take days to establish. The control also
+architectural reading would predict. The control also
 anticipates the safety axis: every
 failure is a failure of polarity. Among the four models measured on both
 instruments, the one that answers the controls' ``no'' items at 61\%
@@ -1022,11 +1024,11 @@ contact question fluently and at chance, and nothing in its output marks the
 difference. The only purpose-built medical volumetric model in the set
 fabricates on 96.4\% of calibrated traps, and none of the three native
 systems can answer \emph{``Is this a CT scan?''} reliably: medical
-fine-tuning does not yet translate into safer behaviour. Two consequences
-follow for use. An audit should report clean-input capability, the
-risk-weighted silent-failure rate, the grounding decomposition,
-language-prior controls and the response-channel gate as separate axes,
-because they fail independently here and a composite hides which one failed.
+fine-tuning does not yet translate into safer behaviour. An audit should
+therefore report clean-input capability, the risk-weighted silent-failure
+rate, the grounding decomposition, language-prior controls and the
+response-channel gate as separate axes, because they fail independently
+here and a composite hides which one failed.
 The safest mitigation sits upstream of the model: a clinical pipeline should
 validate image presence, integrity, modality and resolution before a request
 reaches a VLM, and route a failed check to a reader instead of to a system
