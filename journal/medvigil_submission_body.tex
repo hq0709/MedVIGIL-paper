@@ -46,9 +46,7 @@ occurred. The silent-failure finding replicates and worsens. Dataset
 recognition measures 0.0--5.0\% against a live positive control. The failure
 is localised: models perceive the annotation and perform the numeric comparison, but they cannot estimate distance from the image, on anatomy or on a
 blank synthetic background, and their decision variable ranks the growth number in the question at AUROC up
-to 0.96 while ranking the computed label at 0.47--0.52. Two metrics
-validated in 2D do not survive the change of modality, and we report the
-corrections. The suite, harness and cached outputs are released.
+to 0.96 while ranking the computed label at 0.47--0.52. Two metrics require adjustment for volumetric evaluation. The suite, harness and cached outputs are released.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -112,10 +110,7 @@ measurable failure mode is \emph{silent failure under perturbed evidence}, a
 non-refusal answer that accepts the perturbation (Fig.~\ref{fig:motivation}).
 
 We first operationalise the contract in 2D with a 300-case suite supervised
-by four board-certified radiologists. Two annotate every case in parallel, a senior radiologist
-consolidates the manifest, and a fourth radiologist from a separate
-institution, blinded to construction, answers every probe as a human
-reference. An audit of sixteen models over 2{,}556 probes shows that
+by four board-certified radiologists. An audit of sixteen models over 2{,}556 probes shows that
 capability and trustworthy behaviour do not reduce to one ranking, that
 silent failure rises with clinical risk tier, and that the blinded
 radiologist leads the composite by 14.1 points.
@@ -138,16 +133,14 @@ Decathlon~\cite{antonelli2022msd}, against 2{,}556 probes over 300 cases.
 Because each probe asks about a state that never occurred, memorisation is
 excluded by construction.
 
-In this paper we present a two-regime evaluation suite. It combines an
-annotation-backed 2D audit with a simulator-backed volumetric audit under one
-framework, metrics and composite, and it covers sixteen 2D and thirteen volumetric model configurations over
+We combine annotation-backed 2D and simulator-backed volumetric audits using shared metrics
+and a composite score, covering sixteen 2D and thirteen volumetric model configurations over
 355{,}062 scored probes. Three results follow. First,
 the silent-failure finding replicates and worsens under computed labels, the
 2D protocol's text-side columns replicate at chance, and dataset recognition
 is measured directly instead of argued. Second, the
 failure is localised. Models perceive an outlined lesion, read the growth
-number in the question (their decision variable ranks it at AUROC up to
-0.96), and perform the numeric comparison the task reduces to. They cannot
+number in the question, and perform the numeric comparison the task reduces to. They cannot
 estimate the distance between two outlined structures, on anatomy or on a
 blank synthetic background, and they do not apply the number inside a
 clinical sentence. Scaling from 3B to 72B
@@ -239,8 +232,7 @@ The 2D suite contains 300 cases from VQA-RAD~\cite{lau2018vqarad},
 SLAKE~\cite{liu2021slake}, ROCO~\cite{pelka2018roco}, and chest radiograph
 collections from MIMIC-CXR~\cite{johnson2019mimiccxr} and
 CheXpert~\cite{irvin2019chexpert}, stratified across five clinical risk
-tiers with a thirty-case minimum per tier; credentialed cases ship as
-reconstruction pointers. Each case carries the image, question, gold answer, a five-option set whose
+tiers with a thirty-case minimum per tier. For cases requiring access approval, reconstruction references are provided. Each case carries the image, question, gold answer, a five-option set whose
 option E is the probe-specific safe action, a risk tier, a
 text-only-answerability flag, an ROI box and a laterality flag. All sources
 in both suites are public and de-identified, MIMIC-CXR and CheXpert are used
@@ -263,10 +255,8 @@ reference.
 \subsection{The Volumetric Suite: Simulator-Backed Construction}
 \label{sec:methods_3d}
 
-The volumetric suite replaces annotation with computation. Every probe asks
-about a state that does not exist in the scan, so no report or language
-prior can supply the answer. Every answer follows from a deterministic rule
-over two masks, so it can be checked to the voxel.
+Volumetric probes simulate lesion growth, with labels computed deterministically from lesion and
+target masks.
 
 \subsubsection{Materials} We use the four Medical Segmentation Decathlon
 tasks~\cite{antonelli2022msd} with lesion labels: liver, lung, pancreas and
@@ -378,8 +368,7 @@ in what surrounds the outlines.
 \subsection{Metrics and Composite Score}
 \label{sec:metrics}
 
-Every metric is an exact-match rate over a probe family; no judge model is
-used.
+Probe responses are scored by exact match without a judge model.
 
  \emph{Capability} is $\mathrm{Acc}_{\mathrm{orig}}$ on original probes
 and, in 2D, paraphrase (PR), negation (NEG) and specificity-drop (SDR)
@@ -577,8 +566,7 @@ Med3DVLM answers ``no'' to all 140 controls under either framing.
 \begin{table}[!tb]
 \caption{Volumetric headline on the growth-matched subset (1{,}368 probes,
 labels exactly balanced, chance 50\%). Gate: known-answer controls passed of
-140. Modal: share of answers on the most frequent option. Pair:
-matched pairs answered identically, which geometry forbids.}
+140. Modal: share of answers on the most frequent option. Pair: matched pairs receiving identical answers despite opposite labels.}
 \label{tab:headline3d}
 \centering
 \fontsize{7}{8.4}\selectfont
@@ -700,18 +688,13 @@ anatomy, 25.3\%, 26.0\%, 25.0\% and 28.3\%; on the real lesion and target,
 26.3\%, 27.7\%, 23.7\% and 28.3\%. All twelve volume-clustered intervals
 contain 25\%, and each model keeps its answer habit across backgrounds:
 Qwen2.5-VL-32B answers ``15'' on 296--300 of 300 items whether the outlines
-enclose anatomy or nothing at all. The metric channel is absent on a blank
-background as it is on a CT, so the deficit belongs to the models and the
-clinical task inherits it. The answer given in its place is a habit: each
-model's modal answer and its share are the same on all three backgrounds
+enclose anatomy or nothing at all. Distance-estimation errors persist on synthetic backgrounds
 (Fig.~\ref{fig:metric}c).
 
 \begin{figure}[!tb]
   \centering
   \includegraphics[width=\linewidth]{figs/fig_metric.pdf}
-  \caption{\textbf{Two ways the evidence contract breaks in the volume: a
-  channel the models lack on any image, and a clinical sentence that
-  disables the arithmetic they have.} (a)~One item under three backgrounds:
+  \caption{\textbf{Controls for distance estimation and numerical comparison.} (a)~One item under three backgrounds:
   synthetic outlines on grey, the same outlines over real anatomy with its
   annotations erased, and the real lesion and target. (b)~Distance sub-task
   accuracy per model and background, volume-clustered 95\% intervals.
@@ -758,7 +741,7 @@ two native M3D-LaMed variants lie between the groups, at 18.5\% and
 \begin{figure}[!tb]
   \centering
   \includegraphics[width=\linewidth]{figs/fig_decision.pdf}
-  \caption{\textbf{The decision variable reads the question, not the volume.}
+  \caption{\textbf{Decision-score discrimination of growth values and computed labels.}
   (a)~AUROC of $\log p_{\text{yes}}-\log p_{\text{no}}$ with volume-clustered
   95\% intervals: within matched pairs, where only the growth number
   differs; against the computed label; and across probes whose sentence is
@@ -879,12 +862,7 @@ scores $\sfrw=0.0\%$.
 \section{Discussion}
 \label{sec:discussion}
 
-We evaluate evidence-conditional trustworthiness in two regimes, a
-clinician-annotated 2D suite and a volumetric suite whose labels are
-computed from geometry, across twenty-nine model configurations. The 2D
-finding survives the change of modality and worsens, the volumetric labels
-cannot have been memorised, and the composite probe decomposes into steps
-that fail selectively.
+We evaluate evidence-conditional trustworthiness across 29 model configurations using a clinician-annotated 2D suite and a volumetric suite with geometry-derived labels. The volumetric evaluation shows higher silent-failure rates and identifies failures in specific task components.
 
 \subsection{Which Models Carry the Claim, and What Fails in Them}
 
@@ -941,10 +919,8 @@ computed labels allowed the same items to be asked again in text.
 
 \subsection{What the Volumetric Regime Adds}
 
-One control generalises beyond this corpus. The \emph{response-channel
-control} was unnecessary in 2D, where every audited model answers seven
-known-answer questions correctly, and is indispensable in 3D, where none of
-the three native volumetric systems passes. A pinned output channel scores
+One control generalises beyond this corpus. All audited 2D models pass the response-channel control, whereas none of the three native
+volumetric systems does. A pinned output channel scores
 50\% and cannot be told apart in an accuracy table from systems that fail
 for other reasons, and the four models that fail here are not the four an
 architectural reading would predict. The control also
