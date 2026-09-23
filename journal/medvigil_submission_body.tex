@@ -277,11 +277,9 @@ $L$, so contact with $A_k$ after growth holds if and only if the minimum
 lesion-to-target surface gap is at most $g$. One Euclidean distance transform
 $D=\mathrm{EDT}(\lnot L)$, computed with the voxel spacing, therefore answers
 every growth query for that lesion: $\mathrm{gap}(L,A_k)=\min_{v\in A_k}D(v)$.
-For each $(L,A_k)$ pair with a testable gap the generator emits one growth
-amount below the gap, $g^{-}=\max(1,\ \mathrm{gap}-m-\mathcal{U}(0,0.3\,\mathrm{gap}))$,
-and one above it, $g^{+}=\mathrm{gap}+m+\mathcal{U}(0,5)$, keeping only
-complete pairs, so the two members of a \emph{matched pair} have opposite
-answers by construction: labels are
+Algorithm~\ref{alg:probes} emits, for each $(L,A_k)$ pair with a testable
+gap, one growth amount below the gap and one above it, so the two members of
+a \emph{matched pair} have opposite answers by construction: labels are
 balanced, chance is 50\%, and a model that answers both members identically
 is not computing the geometry, which is measurable without reference to
 correctness (Section~\ref{sec:discussion}). A margin $m=2$~mm removes lesions already in contact and a
@@ -290,6 +288,26 @@ falls below 2~mm (range 2.01--40.00~mm). Two secondary families use the same
 transform, \emph{nearest-on-growth} and \emph{resection volume}, and risk
 tiers follow the target: aorta, heart and spinal cord L5, major organs L4,
 presence-of-finding L3, vertebrae L2, sternum and ribs L1.
+
+\begin{algorithm}[!t]
+\caption{Computed counterfactual growth-contact probes for one lesion}
+\label{alg:probes}
+\begin{algorithmic}[1]
+\REQUIRE lesion mask $L$, target masks $\{A_k\}$, voxel spacing $s$, margin
+$m$, cap $G$, generator $\mathcal{U}$
+\STATE $D \gets \mathrm{EDT}(\lnot L;\, s)$ \COMMENT{one transform per lesion}
+\FOR{each target $A_k$ with $A_k\neq\emptyset$}
+  \STATE $\mathrm{gap} \gets 0$ if $L\cap A_k\neq\emptyset$ else $\min_{v\in A_k} D(v)$
+  \IF{$\mathrm{gap}\le m$ \OR $\mathrm{gap}>G$}
+    \STATE \textbf{continue} \COMMENT{vacuous or implausible}
+  \ENDIF
+  \STATE $g^{-} \gets \max\!\bigl(1,\ \mathrm{gap}-m-\mathcal{U}(0,\,0.3\,\mathrm{gap})\bigr)$
+  \STATE $g^{+} \gets \mathrm{gap}+m+\mathcal{U}(0,\,5)$
+  \STATE emit $\bigl(q(g^{-}),\,\text{no}\bigr)$ and $\bigl(q(g^{+}),\,\text{yes}\bigr)$ with provenance $(\mathrm{gap}, g)$
+\ENDFOR
+\STATE keep only complete pairs
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Rendering} General-purpose VLMs receive the volume as a
 montage of three orthogonal slices through the volume centre, windowed to
@@ -446,7 +464,9 @@ at $T=0$ with a single-letter prompt, no chain of thought and no voting; two
 text-only baselines bound the language-prior contribution. The thirteen
 volumetric models span eight families and both input routes. The three
 native systems were chosen because they disagree in vision tower, backbone
-and volume-axis convention. InternVL3-78B and Llama-3.2-90B-Vision exceed two 80~GB cards and
+and volume-axis convention. Aria-25B-MoE was excluded because its
+checkpoint left 338 language-model tensors uninitialised, a load the harness
+refuses; InternVL3-78B and Llama-3.2-90B-Vision exceed two 80~GB cards and
 were not run, since quantising would change the claim under test.
 
 \subsubsection{Response-channel control} Before any volumetric score is
@@ -543,9 +563,11 @@ because VGR and trap $\sfr$ vary independently. Under an isotropic Gaussian blur
 language-takeover point $L^{\star}$, the smallest $\sigma$ at which the
 residual visual contribution falls below 20\% of the clean-image
 contribution, varies by a factor of four (16--64~px) and does not track CS:
-GPT-4o is the most visually anchored ($L^{\star}=64$), Qwen3.5-397B has the
-smallest contribution (40.5~pp) with the earliest takeover, and HuatuoGPT-V
-7B has the highest no-image floor (20.6\%).
+GPT-4o is the most visually anchored ($L^{\star}=64$), Claude Sonnet 4.6 has
+the largest visual contribution (65.9\%$\rightarrow$9.1\%) but falls back at
+$\sigma=32$, Qwen3.5-397B has the smallest contribution (40.5~pp) with the
+earliest takeover, and HuatuoGPT-V 7B has the highest no-image floor
+(20.6\%).
 
 
 \subsection{Volumetric Audit}
