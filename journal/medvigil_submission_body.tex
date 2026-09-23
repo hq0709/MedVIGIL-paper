@@ -161,7 +161,7 @@ available.\footnote{Code: \url{https://github.com/hq0709/broken-evidence}. Data 
 The evaluation comprises two suites under one framework
 (Table~\ref{tab:suites}): a 2D suite with clinician-authored labels and a
 volumetric suite with labels computed from geometry. Both are scored by the
-same metrics and composite, so the differences in
+same metrics and composite (Fig.~\ref{fig:eval}), so the differences in
 Section~\ref{sec:results_cross} are differences in what the modality affords.
 
 \subsection{Evidence-Conditional Trustworthiness}
@@ -283,9 +283,11 @@ $L$, so contact with $A_k$ after growth holds if and only if the minimum
 lesion-to-target surface gap is at most $g$. One Euclidean distance transform
 $D=\mathrm{EDT}(\lnot L)$, computed with the voxel spacing, therefore answers
 every growth query for that lesion: $\mathrm{gap}(L,A_k)=\min_{v\in A_k}D(v)$.
-Algorithm~\ref{alg:probes} emits, for each $(L,A_k)$ pair with a testable
-gap, one growth amount below the gap and one above it, so the two members of
-a \emph{matched pair} have opposite answers by construction: labels are
+For each $(L,A_k)$ pair with a testable gap the generator emits one growth
+amount below the gap, $g^{-}=\max(1,\ \mathrm{gap}-m-\mathcal{U}(0,0.3\,\mathrm{gap}))$,
+and one above it, $g^{+}=\mathrm{gap}+m+\mathcal{U}(0,5)$, keeping only
+complete pairs, so the two members of a \emph{matched pair} have opposite
+answers by construction: labels are
 balanced, chance is 50\%, and a model that answers both members identically
 is not computing the geometry, which is measurable without reference to
 correctness (Section~\ref{sec:discussion}). A margin $m=2$~mm removes lesions already in contact and a
@@ -294,26 +296,6 @@ falls below 2~mm (range 2.01--40.00~mm). Two secondary families use the same
 transform, \emph{nearest-on-growth} and \emph{resection volume}, and risk
 tiers follow the target: aorta, heart and spinal cord L5, major organs L4,
 presence-of-finding L3, vertebrae L2, sternum and ribs L1.
-
-\begin{algorithm}[!t]
-\caption{Computed counterfactual growth-contact probes for one lesion}
-\label{alg:probes}
-\begin{algorithmic}[1]
-\REQUIRE lesion mask $L$, target masks $\{A_k\}$, voxel spacing $s$, margin
-$m$, cap $G$, generator $\mathcal{U}$
-\STATE $D \gets \mathrm{EDT}(\lnot L;\, s)$ \COMMENT{one transform per lesion}
-\FOR{each target $A_k$ with $A_k\neq\emptyset$}
-  \STATE $\mathrm{gap} \gets 0$ if $L\cap A_k\neq\emptyset$ else $\min_{v\in A_k} D(v)$
-  \IF{$\mathrm{gap}\le m$ \OR $\mathrm{gap}>G$}
-    \STATE \textbf{continue} \COMMENT{vacuous or implausible}
-  \ENDIF
-  \STATE $g^{-} \gets \max\!\bigl(1,\ \mathrm{gap}-m-\mathcal{U}(0,\,0.3\,\mathrm{gap})\bigr)$
-  \STATE $g^{+} \gets \mathrm{gap}+m+\mathcal{U}(0,\,5)$
-  \STATE emit $\bigl(q(g^{-}),\,\text{no}\bigr)$ and $\bigl(q(g^{+}),\,\text{yes}\bigr)$ with provenance $(\mathrm{gap}, g)$
-\ENDFOR
-\STATE keep only complete pairs
-\end{algorithmic}
-\end{algorithm}
 
 \subsubsection{Rendering} General-purpose VLMs receive the volume as a
 montage of three orthogonal slices through the volume centre, windowed to
@@ -458,10 +440,11 @@ harm weights and grounding normalisations.
 \subsection{Audited Models and Protocol}
 \label{sec:protocol}
 
-Twenty-nine configurations are audited. The 2D suite covers sixteen
-models from OpenAI, Anthropic, Google, Qwen and Moonshot, the open medical
-models LLaVA-Med-v1.5-7B and HuatuoGPT-Vision-7B, and two text-only
-baselines; the volumetric suite covers thirteen, ten montage-fed
+Twenty-nine vision-capable configurations are audited, alongside two
+text-only baselines and one scale arm. The 2D suite covers sixteen models
+from OpenAI, Anthropic, Google, Qwen and Moonshot, including the open
+medical models LLaVA-Med-v1.5-7B and HuatuoGPT-Vision-7B, and the two
+text-only baselines; the volumetric suite covers thirteen, ten montage-fed
 (Qwen2.5-VL 3B/7B/32B, Qwen3-VL-8B, InternVL3 8B/14B, SmolVLM2-2.2B,
 LLaVA-OneVision-7B, Idefics3-8B, Pixtral-12B) and three that receive the
 volume (M3D-LaMed-Phi3-4B, M3D-LaMed-Llama2-7B, Med3DVLM-7B), plus
@@ -670,12 +653,34 @@ costs every model accuracy relative to the original; in 3D there is no
 accuracy to lose, and the operator that should invert the answer leaves it
 where it was.
 
+\begin{table}[!tb]
+\caption{Identification control on the growth-matched subset. \texttt{plain}
+is the published condition; \texttt{identified} gives joint-visibility
+slices, both outlines and a 10~mm scale bar. Pooled accuracy; intervals
+for the two cells that exclude 50 are given in the text.}
+\label{tab:ident}
+\centering
+\fontsize{7}{8.4}\selectfont
+\setlength\tabcolsep{3pt}
+\begin{tabular}{lrrrr}
+\toprule
+Model & plain & bestslice & overlay & identified \\
+\midrule
+Qwen2.5-VL-7B & 50.0 & 50.0 & 50.0 & 50.0 \\
+InternVL3-8B & 50.0 & 50.3 & 49.6 & 50.4 \\
+Qwen3-VL-8B & 48.2 & 49.9 & 49.5 & 52.4 \\
+Qwen2.5-VL-32B & 50.7 & 51.2 & 51.0 & 52.6 \\
+Qwen2.5-VL-72B & 49.2 & --- & --- & 50.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsubsection{Identification control} In the published condition the
 lesion the question names has no voxel on any slice shown for 42.0\% of
 growth-matched probes, and both structures appear together on only 54.2\%.
-Holding the probe fixed and varying the input (Fig.~\ref{fig:render}), the
-eighteen cells, four conditions for four models and two for
-Qwen2.5-VL-72B, span 48.2--52.6\%. The two largest, Qwen3-VL-8B
+Table~\ref{tab:ident} holds the probe fixed and varies the input
+(Fig.~\ref{fig:render}); the eighteen cells, four conditions for four models
+and two for Qwen2.5-VL-72B, span 48.2--52.6\%. The two largest, Qwen3-VL-8B
 at 52.4 [50.3, 54.6] and Qwen2.5-VL-32B at 52.6 [50.7, 54.6] under
 \texttt{identified}, lie within three points of chance, the size of
 exclusion expected about once among twelve paired contrasts on two endpoints
@@ -754,9 +759,10 @@ Within a matched pair, the volume, rendering and target are identical and
 only the growth number in the question differs, with opposite labels. The
 variable ranks the two members correctly at AUROC 0.61--0.96 for nine models
 (Qwen2.5-VL-72B 0.959, Qwen3-VL-8B 0.891, Idefics3-8B 0.879, InternVL3-8B
-0.855, Qwen2.5-VL-32B 0.853), so the number is read and moves the score in
-the right direction, and two rank it backwards (SmolVLM2-2.2B 0.39,
-M3D-LaMed-Llama2-7B 0.42). Across volumes that share an identical question
+0.855, Qwen2.5-VL-32B 0.853, InternVL3-14B 0.787, Qwen2.5-VL-7B 0.775,
+Med3DVLM-7B 0.737, LLaVA-OneVision-7B 0.610), so the number is read and
+moves the score in the right direction, and two rank it backwards
+(SmolVLM2-2.2B 0.39, M3D-LaMed-Llama2-7B 0.42). Across volumes that share an identical question
 sentence and differ only in the image, the same variable ranks the label at
 0.46--0.53 for every model, every interval containing 0.5. The variable
 depends on the sentence and not on the volume. Scale sharpens the reading of
@@ -773,7 +779,8 @@ perturbation of the option log-probabilities, the mean decision gap between
 the top two options, and the share of probes whose argmax differs between
 arms. Six models perturb their scores measurably and change almost no
 answers: Qwen2.5-VL-7B moves 0.355~nats against a 1.657-nat gap and flips
-0.0\% of 2{,}262 probes [0.0, 0.0], and five others flip 0.0--1.2\%. Five
+0.0\% of 2{,}262 probes [0.0, 0.0], Idefics3-8B and Med3DVLM-7B also flip
+0.0\%, and SmolVLM2, Qwen2.5-VL-3B and LLaVA-OneVision flip 0.1--1.2\%. Five
 show the opposite pattern, changing 30.3\% (InternVL3-8B), 48.9\%, 57.3\%,
 77.4\% and 92.0\% [90.7, 93.4] (InternVL3-14B) of their answers when shown
 the volume while their confound-free accuracies stay at 48.7--51.0\%. The
@@ -846,7 +853,7 @@ baseline.}
 \toprule
  & \multicolumn{2}{c}{M3D-LaMed-Phi3} & \multicolumn{2}{c}{Qwen2.5-VL-7B} \\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}
- & Raw & Calib. & Raw & Calib. \\
+Metric & Raw & Calib. & Raw & Calib. \\
 \midrule
 $\mathrm{Acc}_{\mathrm{orig}}$ & 0.0 & 45.5 & 0.5 & 39.5 \\
 Trap refused & 100.0 & 2.0 & 100.0 & 76.7 \\
@@ -893,7 +900,7 @@ models and is positive for every one of them; in 3D it spans $-8.3$ to
 $+0.8$~pp and is negative in every organ for both verified-channel models.
 The radiologist's 2D VGR is $+4.5$.
 
-\subsubsection{Safety} 2D $\sfr$ ranges 22.0--54.3\% against the
+\subsubsection{Safety} 2D $\sfr$ ranges 22.0--62.8\% against the
 radiologist's 5.8\%. Calibrated volumetric $\sfr$ on the cleanest trap family
 is 43.7\%, 71.5\%, 73.2\% and 96.4\%: the first inside the 2D range, the
 other three above it, the highest belonging to the only purpose-built
@@ -1002,7 +1009,10 @@ contact question fluently and at chance, and nothing in its output marks the
 difference. The only purpose-built medical volumetric model in the set
 fabricates on 96.4\% of calibrated traps, and none of the three native
 systems can answer \emph{``Is this a CT scan?''} reliably: medical
-fine-tuning does not yet translate into safer behaviour. An audit should
+fine-tuning does not yet translate into safer behaviour. The corpus bounds
+the reading in one direction: probe generation excludes every lesion within
+2~mm of its target, so the cases in which management actually turns are
+outside this audit by construction. An audit should
 therefore report clean-input capability, the risk-weighted silent-failure
 rate, the grounding decomposition, language-prior controls and the
 response-channel gate as separate axes, because they fail independently
