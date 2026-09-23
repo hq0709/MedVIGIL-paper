@@ -96,7 +96,8 @@ datasets~\cite{lau2018vqarad,liu2021slake} and the systems trained on
 them~\cite{li2023llavamed} presume
 valid inputs, as does a concurrent audit of grounding
 pathologies~\cite{chen2026auditfrontier}. Hallucination benchmarks~\cite{li2023pope} score unsupported content under
-otherwise valid inputs, HEAL-MedVQA tests grounding through
+otherwise valid inputs, measurement hallucinations are corrected after the
+fact in report generation~\cite{heiman2025factchexcker}, HEAL-MedVQA tests grounding through
 localisation~\cite{nguyen2025healmedicine}, and abstention
 benchmarks~\cite{kirichenko2025abstentionbench} treat refusal
 decision-theoretically. None targets the case in which giving an answer
@@ -339,9 +340,9 @@ reference rule re-derived from each probe's stored provenance reproduces the
 emitted label on 8{,}476 of 8{,}476 growth-contact probes. A regenerated
 segmentation cache reproduces the stored gaps to a median of 0.001~mm with
 zero answer flips. A render-parity test on a synthetic volume asserts that
-the \texttt{plain} arm is bit-exact against the published rendering path
-and that the annotated arms agree with it outside their annotation. The last
-check is a property of pixels, since two different renderings can both score
+the \texttt{plain} arm is bit-exact against the published rendering path and
+that the annotated arms agree with it outside their annotation, a check on
+pixels rather than on scores, since two different renderings can both score
 50\%.
 
 \subsubsection{Text-side perturbations} The 2D suite perturbs the question
@@ -422,11 +423,11 @@ uses $\sfrw$.
 model emits. The volumetric suite is scored by \emph{likelihood over the
 option strings}, never by parsing free text, because native volumetric
 models answer in referring-expression templates whose wording embeds the
-answer words. Over options of unequal length, a refusal string can dominate the
-likelihood regardless of content and pin the argmax to one option for every
-item. On a balanced corpus this scores 50\%, which an accuracy table cannot
+answer words. Over options of unequal length the likelihood favours the
+string, not the content~\cite{holtzman2021surface}, so a refusal string can
+pin the argmax to one option for every item. On a balanced corpus this scores 50\%, which an accuracy table cannot
 distinguish from chance. Two controls therefore accompany every volumetric result.
-\emph{Content-free calibration} subtracts the answer-string prior measured
+\emph{Content-free calibration}~\cite{zhao2021calibrate} subtracts the answer-string prior measured
 on a contentless question against a common baseline. \emph{Greedy-decoding
 variants} (suffix \texttt{-gen}) parse a decoded answer, so that a scoring
 artefact and a genuine chance result can be told apart.
@@ -918,10 +919,9 @@ to give the model what a reader would be given, the visible volume was
 multiplied by 5.7$\times$ and the structures magnified, a tenfold parameter
 range was spanned, and the anatomy was replaced by two synthetic outlines on
 a blank background. None changed the metric result, so the missing metric
-channel is a property of the models and not of CT, which agrees with reports
-that general-domain VLMs fail elementary geometric
-readouts~\cite{rahmanzadehgervi2024blind} and that metric
-spatial reasoning has required dedicated training~\cite{chen2024spatialvlm}.
+channel is a property of the models and not of CT, which agrees with reports that general-domain VLMs fail elementary
+geometric readouts and that metric spatial reasoning has required dedicated
+training~\cite{rahmanzadehgervi2024blind}.
 Remedies aimed at the encoder are aimed at the part that already works.
 
 One component of the failure is not visual at all. Supplying the two

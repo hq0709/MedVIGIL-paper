@@ -110,7 +110,9 @@ datasets~\cite{lau2018vqarad,liu2021slake,zhang2023pmcvqa} and the systems
 trained on them~\cite{li2023llavamed,moor2023medflamingo,wu2023radfm} presume
 valid inputs, as does a concurrent audit of grounding
 pathologies~\cite{chen2026auditfrontier}. Hallucination benchmarks~\cite{rohrbach2018chair,li2023pope,chen2024medihallv1,chang2025medheval,gu2024medvh}
-score unsupported content under otherwise valid inputs, HEAL-MedVQA tests
+score unsupported content under otherwise valid inputs, measurement
+hallucinations are corrected after the fact in report
+generation~\cite{heiman2025factchexcker}, HEAL-MedVQA tests
 grounding through localisation~\cite{nguyen2025healmedicine}, and selective
 prediction~\cite{geifman2017selective,ren2023selfevaluation,wen2024knowyourlimits},
 abstention benchmarks~\cite{kirichenko2025abstentionbench,madhusudhan2026mmaqa,moratelli2026deflectionbench,li2025jba}
@@ -313,7 +315,7 @@ to 1.96~mm, which would change the geometry the labels refer to.
 \emph{``If this lesion grew by $g$~mm in every direction, would it contact
 the~$A_k$?''} Isotropic growth by $g$ yields the set of voxels within $g$ of
 $L$, so contact with $A_k$ after growth holds if and only if the minimum
-lesion-to-target surface gap is at most $g$. One Euclidean distance transform
+lesion-to-target surface gap is at most $g$. One Euclidean distance transform~\cite{maurer2003edt}
 $D=\mathrm{EDT}(\lnot L)$, computed with the voxel spacing, therefore answers
 every growth query for that lesion: $\mathrm{gap}(L,A_k)=\min_{v\in A_k}D(v)$.
 Algorithm~\ref{alg:probes} emits, for each $(L,A_k)$ pair with a testable
@@ -489,11 +491,11 @@ uses $\sfrw$.
 model emits. The volumetric suite is scored by \emph{likelihood over the
 option strings}, never by parsing free text, because native volumetric
 models answer in referring-expression templates whose wording embeds the
-answer words. Over options of unequal length, a refusal string can dominate the
-likelihood regardless of content and pin the argmax to one option for every
-item. On a balanced corpus this scores 50\%, which an accuracy table cannot
+answer words. Over options of unequal length the likelihood favours the string, not the
+content~\cite{holtzman2021surface}, so a refusal string can pin the argmax
+to one option for every item. On a balanced corpus this scores 50\%, which an accuracy table cannot
 distinguish from chance. Two controls therefore accompany every volumetric result.
-\emph{Content-free calibration} subtracts the answer-string prior measured
+\emph{Content-free calibration}~\cite{zhao2021calibrate} subtracts the answer-string prior measured
 on a contentless question against a common baseline. \emph{Greedy-decoding
 variants} (suffix \texttt{-gen}) parse a decoded answer, so that a scoring
 artefact and a genuine chance result can be told apart.
