@@ -7,27 +7,21 @@
 %% Section order follows TMI convention:
 %%   I Introduction · II Materials and Methods · III Results · IV Discussion
 %%   V Conclusion · References
-
 %% TMI template: ieeecolor.cls + tmi.sty + LOGO-tmi-web.eps, as distributed in
 %% the journal's TEX.zip (https://www.embs.org/tmi/authors-instructions/).
 %% Package order follows the template's own sample file.
 \documentclass[journal,twoside,web]{ieeecolor}
 \usepackage{tmi}
 \InputIfFileExists{medvigil_preamble.tex}{}{\input{journal/medvigil_preamble.tex}}
-
 %% ieeecolor's single-column caption path switches to the heading colour without a group; keep it local.
 \makeatletter
 \def\fnum@figure{{\color{subsectioncolor}\sf Fig.~\thefigure}}
 \def\fnum@table{{\color{subsectioncolor}\sf TABLE~\thetable}}
 \makeatother
-
 %% Version-specific front matter
-\newcommand{\versionthanks}{\thanks{Manuscript received \todo{date}. \todo{funding}}}
+\newcommand{\versionthanks}{}
 \newcommand{\runninghead}{\journalname}
-
 \begin{document}
-
 %% Trimmed body for the page-limited submission.
 \InputIfFileExists{medvigil_submission_body.tex}{}{\input{journal/medvigil_submission_body.tex}}
-
 \end{document}

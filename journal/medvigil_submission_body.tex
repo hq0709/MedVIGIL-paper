@@ -26,15 +26,13 @@ Mayo Clinic, Phoenix, AZ, USA.}
 %% ===========================================================================
 \begin{abstract}
 Medical vision--language models are evaluated on intact image--question
-pairs, but safe clinical use also requires a model to recognise when the
-evidence for an answer has failed. We formalise this requirement as an
+pairs, but safe clinical use requires recognising when evidence has failed. We formalise this requirement as an
 \emph{evidence contract} and measure its violation as \emph{silent failure},
-a fluent non-refusal answer given under perturbed evidence. A 300-case suite
+a fluent non-refusal answer under perturbed evidence. A 300-case suite
 authored by four board-certified radiologists shows the phenomenon in 2D
 across sixteen models. Capability and safe failure diverge, silent failure
 rises with clinical risk tier, and a radiologist blinded to construction
-leads the composite score by 14.1 points. Annotated labels limit such a suite
-to a few hundred items, and they cannot rule out pretraining overlap. We
+leads the composite score by 14.1 points. Annotated labels limit the suite to a few hundred items and cannot rule out pretraining overlap. We
 remove both limits by computing probe answers instead of annotating them.
 Whether a lesion would contact a critical structure after isotropic growth
 follows from one distance transform over an expert lesion mask and an
@@ -42,8 +40,7 @@ automatic anatomy segmentation. This yields 9{,}484 verifiable probes over
 587 CT volumes at no annotation cost, each asking about a state that never
 occurred. The silent-failure finding replicates and worsens. Dataset
 recognition measures 0.0--5.0\% against a live positive control. The failure
-is localised: models perceive the annotation and perform the underlying
-numeric comparison, but they cannot estimate distance from the image, on anatomy or on a
+is localised: models perceive the annotation and perform the numeric comparison, but they cannot estimate distance from the image, on anatomy or on a
 blank synthetic background, and their decision variable ranks the growth number in the question at AUROC up
 to 0.96 while ranking the computed label at 0.47--0.52. Two metrics
 validated in 2D do not survive the change of modality, and we report the
@@ -127,8 +124,7 @@ the perturbations postdate those corpora, but that is an argument and not a
 measurement. Both share a root cause: the labels are annotated, so probes
 are expensive and tied to public images.
 
-This article removes that root cause where it can be removed. Given an
-expert lesion mask and an automatic anatomy segmentation, the question
+Given an expert lesion mask and an automatic anatomy segmentation, the question
 \emph{``if this lesion grew $d$~mm in every direction, would it contact the
 aorta?''} is decided by whether the surface gap is at most $d$. One Euclidean
 distance transform answers every such query for that lesion.
@@ -219,9 +215,11 @@ Chance & 20\% & 50\% (balanced) \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[!tb]
+\begin{figure*}[!tb]
   \centering
-  \includegraphics[width=\linewidth]{journal/figures/fig2.png}
+  \includegraphics[width=0.8\textwidth,
+  trim={3.75bp 0 5bp 0},
+  clip]{journal/figures/fig2.png}
   \caption{\textbf{Two constructions, one evaluation.} (a)~2D,
   annotation-backed: two radiologists annotate each of 300 cases and jointly
   author its text-side perturbations, and a senior radiologist enforces the
@@ -231,7 +229,7 @@ Chance & 20\% & 50\% (balanced) \\
   $g^{+}=16$~mm), and a provenance gate recomputes every label
   $y=\mathbf{1}[g\ge d]$.}
   \label{fig:pipeline}
-\end{figure}
+\end{figure*}
 
 The 2D suite contains 300 cases from VQA-RAD~\cite{lau2018vqarad},
 SLAKE~\cite{liu2021slake}, ROCO~\cite{pelka2018roco}, and chest radiograph
@@ -254,7 +252,7 @@ the ROI box. A senior radiologist adjudicates disagreements and rejects any pert
 that violates a construction invariant: a paraphrase must preserve the gold,
 a negation must invert it, a trap must contradict the image, and an
 ROI-masked variant must remove the answer-relevant region. Failed
-perturbations are dropped, not patched. A fourth radiologist from a separate
+perturbations are excluded. A fourth radiologist from a separate
 institution, blinded to construction, answers every probe as the human
 reference.
 
@@ -378,7 +376,7 @@ in what surrounds the outlines.
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.75\textwidth]{journal/figures/fig3.png}
+  \includegraphics[width=\textwidth]{journal/figures/fig3.png}
   \caption{\textbf{One evaluation for both suites.} (a)~Matched 2D and 3D
   cases with valid evidence and a well-posed premise. (b)~Controlled
   interventions on the image (full, ROI-masked, ROI-only, blank) and on the
