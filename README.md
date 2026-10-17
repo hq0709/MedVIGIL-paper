@@ -25,7 +25,7 @@ Release inventory checked at dataset revision `5373ecdc8e20c467f1933b314b3a3164d
   figures/                    # All figures (PDF/PNG/SVG)
   icons/                      # Provider/model logo icons
   fonts/                      # Embedded fonts
-paper/                       # Synchronized duplicate conference source and PDF
+paper/                       # Synchronized duplicate conference source
 
 analysis/                     # Scripts that produce paper tables and figures
   recompute_mcs.py            # MCS recompute under corrected PR (Table 1)
@@ -51,13 +51,13 @@ data/
   clinician_baseline.csv      # Verified family/tier counts from mapped R4 answers
 ```
 
-## Building the PDF
+## Building the PDF locally
 
 ```bash
 tectonic neurips_2026.tex
 ```
 
-Output: `neurips_2026.pdf`. Check the compiled main-text page count before submission.
+Output: `neurips_2026.pdf` (generated locally; compiled manuscript PDFs are not tracked). Check the compiled main-text page count before submission.
 
 If you do not have tectonic, `latexmk -pdf neurips_2026.tex` works with TeX Live 2023 or newer; the `.bbl` is regenerated from `ref.bib` on first run.
 
@@ -114,14 +114,13 @@ Funding is disclosed only as grant number 1R01EB038426-01. The authors confirm n
 
 ## Latest revision files
 
-- [Clean manuscript PDF](neurips_2026.pdf) and [LaTeX source](neurips_2026.tex)
-- [Marked comparison PDF](neurips_2026_changes.pdf), [review source](neurips_2026_changes.tex) and [comparison/build notes](revision_notes/marked_changes_2026-10-17.txt)
+- [LaTeX source](neurips_2026.tex)
 - [README item scope](revision_notes/readme_scope_2026-10-17.txt) and [revision summary](revision_notes/revision_summary_2026-10-17.txt)
 - [Missing experimental results](revision_notes/missing_experiments_2026-10-17.txt)
 - [Main-text and appendix change scope](revision_notes/main_appendix_changes_2026-10-17.txt)
 - [NeurIPS 2026 requirements audit](revision_notes/neurips_2026_requirements.txt)
 - [Corrected Croissant metadata](croissant.json) and [validation notes](revision_notes/croissant_validation.txt)
 
-The marked copy compares against repository manuscript `0e66f8b`, not a separately retrieved initial-submission PDF. Blue marks additions and red marks removals; the restructured R4 appendix table is displayed in full before/after blocks. Graphics use the current artwork without an image-level comparison. The `paper/` conference copy is synchronized; journal and preprint variants are separate versions.
+Compiled manuscript PDFs and marked comparison materials are kept locally. Figure assets needed for compilation remain in the repository. The `paper/` conference copy is synchronized; journal and preprint variants are separate versions.
 
 Missing MedGemma columns and the broader artefact experiment remain open. The corrected metadata here does not imply that the Hugging Face copy or OpenReview forms have been updated. No conference submission or chair message has been performed.

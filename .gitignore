@@ -36,3 +36,8 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local compiled manuscripts and marked review materials
+*.[pP][dD][fF]
+/neurips_2026_changes.tex
+/revision_notes/marked_changes_2026-10-17.txt
