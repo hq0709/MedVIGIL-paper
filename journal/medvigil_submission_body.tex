@@ -11,8 +11,7 @@ Answer Through Broken Evidence}
 %% Authors who are not IEEE members carry no tag.
 \author{Hanqi~Jiang, Junhao~Chen, Mingyu~Kang, Hyeokjae~Kwon, Lifeng~Chen, Weihang~You, Yi~Pan, Haozhen~Gong, Caiwen~Jiang, Zhengliang~Liu, Wei~Liu, Hui~Ren, Quanzheng~Li, Tianming~Liu, and Xiang~Li
 \versionthanks
-\thanks{H. Jiang, J. Chen, L. Chen, W. You, Y. Pan and T. Liu are with the
-University of Georgia, Athens, GA, USA. Z. Liu is with the School of
+\thanks{H. Jiang, J. Chen, L. Chen, W. You, Y. Pan, Z. Liu and T. Liu are with the School of
 Computing, University of Georgia, Athens, GA, USA. H. Jiang, Y. Pan, H. Ren,
 Q. Li and X. Li are with Harvard Medical School, Boston, MA, USA.}
 \thanks{M. Kang is with Chungbuk National University, Cheongju, South Korea.
@@ -97,7 +96,7 @@ them~\cite{li2023llavamed} presume
 valid inputs, as does a concurrent audit of grounding
 pathologies~\cite{chen2026auditfrontier}. Hallucination benchmarks~\cite{li2023pope} score unsupported content under
 otherwise valid inputs, measurement hallucinations are corrected after the
-fact in report generation~\cite{heiman2025factchexcker}, HEAL-MedVQA tests grounding through
+fact in report generation, HEAL-MedVQA tests grounding through
 localisation~\cite{nguyen2025healmedicine}, and abstention
 benchmarks~\cite{kirichenko2025abstentionbench} treat refusal
 decision-theoretically. None targets the case in which giving an answer
@@ -424,7 +423,7 @@ model emits. The volumetric suite is scored by \emph{likelihood over the
 option strings}, never by parsing free text, because native volumetric
 models answer in referring-expression templates whose wording embeds the
 answer words. Over options of unequal length the likelihood favours the
-string, not the content~\cite{holtzman2021surface}, so a refusal string can
+string, not the content, so a refusal string can
 pin the argmax to one option for every item. On a balanced corpus this scores 50\%, which an accuracy table cannot
 distinguish from chance. Two controls therefore accompany every volumetric result.
 \emph{Content-free calibration}~\cite{zhao2021calibrate} subtracts the answer-string prior measured
