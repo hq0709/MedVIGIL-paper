@@ -56,7 +56,7 @@ CSV bytes were downloaded and locally rehashed. All 780 image hashes and byte si
 RAI and provenance narratives reproduce author-supplied release documentation and are not independent verification of credentials, annotation histories, or account retention settings.
 The repository git commit is not a SHA256 archive checksum and was not placed in a checksum property. No repository archive is needed for the revised individual-file resource representation.
 The official validate command is metadata/static validation. Table loading used local CSVs previously downloaded from their immutable URLs; the audit did not perform a full image download, independently rehash all image bytes, decode image pixels, or verify third-party clinical/annotation claims.
-No metadata was uploaded to OpenReview, Hugging Face, or GitHub.
+No metadata was uploaded during the validation audit. The corrected file was subsequently committed and pushed to this GitHub repository; Hugging Face and OpenReview were not updated by this task.
 
 PRIMARY REFERENCES
 Croissant 1.0 specification: https://docs.mlcommons.org/croissant/docs/croissant-spec.html

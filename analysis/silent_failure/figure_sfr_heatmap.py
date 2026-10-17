@@ -24,10 +24,10 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "figures"
+OUT_DIR = ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "figures"
 SFR_TIER_CSV = ROOT / "results" / "sfr_by_tier.csv"
 SUMMARY_CSV = ROOT / "results" / "metrics_summary.csv"
-FONT_DIR = ROOT / "fonts"
+FONT_DIR = ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "fonts"
 
 for fp in (FONT_DIR / "mscorefonts" / "Comic.TTF",
            FONT_DIR / "mscorefonts" / "Comicbd.TTF"):
@@ -60,13 +60,13 @@ MODEL_META = [
     ("huatuogpt-vision-7b",       "Huatuo",   "HuatuoGPT-V-7B"),
 ]
 ICON_PATHS = {
-    "OpenAI":    ROOT / "icons" / "openai.png",
-    "Claude":    ROOT / "icons" / "claude.png",
-    "Gemini":    ROOT / "icons" / "gemini.png",
-    "Qwen":      ROOT / "icons" / "qwen.png",
-    "Moonshot":  ROOT / "icons" / "moonshot.png",
-    "LLaVA-Med": ROOT / "icons" / "llava-med.png",
-    "Huatuo":    ROOT / "icons" / "huggingface.png",
+    "OpenAI":    ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "icons" / "openai.png",
+    "Claude":    ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "icons" / "claude.png",
+    "Gemini":    ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "icons" / "gemini.png",
+    "Qwen":      ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "icons" / "qwen.png",
+    "Moonshot":  ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "icons" / "moonshot.png",
+    "LLaVA-Med": ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "icons" / "llava-med.png",
+    "Huatuo":    ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "icons" / "huggingface.png",
 }
 TIERS = ["L1", "L2", "L3", "L4", "L5"]
 WEIGHTS = {"L1": 1, "L2": 2, "L3": 3, "L4": 5, "L5": 8}

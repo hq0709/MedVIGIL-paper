@@ -1,10 +1,10 @@
 """Visual-information-decay ablation figure + crossover table.
 
-Reads the stored results/blur_aggregate.csv and writes:
-  figures/fig_visual_decay.{pdf,png,svg}
-  figures/visual_decay_crossover.csv
-  figures/visual_decay_crossover.tex
-  figures/fig_visual_decay_per_tier.{pdf,png}
+Reads results/blur_sweep/aggregate.csv (produced by aggregate.py) and writes:
+  paper/MedVIGIL/figures/fig_visual_decay.{pdf,png,svg}
+  paper/MedVIGIL/figures/visual_decay_crossover.csv
+  paper/MedVIGIL/figures/visual_decay_crossover.tex
+  paper/MedVIGIL/figures/fig_visual_decay_per_tier.{pdf,png}
 
 Main figure: 1 row x 4 columns, one panel per model. x = blur sigma (log
 scale), y = MCQ exact-letter accuracy. Two solid lines per panel:
@@ -32,9 +32,17 @@ from matplotlib import font_manager
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
-AGG_CSV = ROOT / "results" / "blur_aggregate.csv"
-OUT_DIR = ROOT / "figures"
-FONT_DIR = ROOT / "fonts"
+AGG_CSV = ROOT / "results" / "blur_sweep" / "aggregate.csv"
+OUT_DIR = ROOT / "paper" / "MedVIGIL" / "figures"
+FONT_DIR = ROOT / "paper" / "MedVIGIL" / "fonts"
+
+# Look in either MedVIGIL/ or MedVIGIL_NeurIPS2026/ depending on local layout.
+for cand in (ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "figures",
+             ROOT / "paper" / "MedVIGIL" / "figures"):
+    if cand.parent.exists():
+        OUT_DIR = cand
+        FONT_DIR = cand.parent / "fonts"
+        break
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 

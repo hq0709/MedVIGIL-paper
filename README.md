@@ -89,7 +89,7 @@ python3 analysis/silent_failure/figure_audit_summary.py
 python3 analysis/visual_decay/figure_visual_decay.py
 ```
 
-For a fresh evaluation, follow the [harness instructions](https://github.com/hq0709/MedVIGIL/blob/abda0797cce67b5f3205817bcb796945b6fe7277/scripts/README.md): validate the downloaded release with `scripts/bench_validate_full.py`, run a model, then aggregate its new `results/baselines/*.jsonl` outputs with `scripts/bench_aggregate.py`. The manuscript defines PR as T-CF exact-match accuracy; the current `bench_aggregate.py` legacy agreement-based PR must be corrected before computing manuscript MCS. Public evaluations cover 2,002 probes; full-benchmark evaluation additionally requires the credentialed arm. The current public runner's prompt and token budgets differ from the manuscript's historical audit description, so re-running it alone does not establish exact reproduction of the historical results.
+For a fresh evaluation, follow the [harness instructions](https://github.com/hq0709/MedVIGIL/blob/abda0797cce67b5f3205817bcb796945b6fe7277/scripts/README.md). The public subset covers 2,002 probes; evaluation on all 2,556 additionally requires the credentialed arm. The historical per-model response caches are not bundled in this repository.
 
 ## Citation
 
@@ -106,26 +106,22 @@ For a fresh evaluation, follow the [harness instructions](https://github.com/hq0
 
 The paper LaTeX source and analysis scripts in this repository are released under the MIT License (see `LICENSE`). MedVIGIL annotations are released under CC BY-NC-SA 4.0; source assets keep their upstream licences (VQA-RAD CC0, SLAKE CC BY-SA 4.0, ROCO CC BY-NC-SA 4.0). MIMIC-CXR and CheXpert content is withheld under the applicable credentialed data use agreements; see the manuscript's documentation appendix and the dataset datasheet.
 
-## Revision status
+## README-scoped revision
 
-This is an author-review revision. The supplied reading key and accompanying gold table now validate all 2,556 actual clinician answers on 300 cases. R4 has MCS 83.3, SFR 5.8%, VGR +4.7 pp, and ROI-only accuracy 91.1%. Full-source identity records remain local; the source bundle contains aggregate results and public reference metadata. Missing MedGemma columns and the multi-model/multi-strength artefact study are not invented. R4 qualifications are confirmed as Radiology, 20 years. The original OpenReview author responses have been checked; MedGemma-4b-it reports three metrics on all 2,556 probes, while the wider realistic-corruption study remains a promise. The study team confirms no competing interests. Funding is disclosed only as grant number 1R01EB038426-01. Historical model configurations and missing experimental results remain separately documented. No numerical 10% change budget is imposed; main-text and appendix changes are reported separately for review. The full R4 image mapping has been supplied and checked. No OpenReview submission or chair notification has been performed.
+The latest revision follows the supplied camera-ready checklist and necessary consistency updates. Broader scientific/editorial rewrites from the preceding revision have been withdrawn pending author confirmation. The abstract retains its original research definition and narrative, with only the checklist-required first-use definition of gold, drafting disclosure and release information synchronized. The original model artwork and unrelated figure generators have been restored.
 
-The authoritative author-response notes are in [the OpenReview forum](https://openreview.net/forum?id=VSlJ79obBe): `jMd4JQzL9Z` (uY8M), `yAaOKMI6SG` (oLpk), and `Kncvby3FCL` (H68D), all last modified 28 July 2026. The original oLpk response lists different R4 credentials; this revision uses the study team's latest confirmation. Its older R4 +4.5 pp VGR and selected case claims are superseded by the mapped answer re-score.
-
-The final review also corrects the main-text prompt-control conclusion, historical-versus-public reproduction claims, sample-scope and confidence-interval interpretations, and visual-token example descriptions. The public harness does contain `scripts/bench_visual_token_ablation.py`; historical raw sample records remain a separate archival gap. See the bundled revision notes, missing-result list and 2026 requirements audit.
-
-Figure generators now write to root `figures/` and use the bundled root `fonts/` and `icons/`. The audit summary, MCS components, SFR heatmap, capability/safety scatter and blur figures can be regenerated from the included aggregate CSVs. Full visual-token figure regeneration additionally requires historical per-sample outputs, grounding and example images; its script stops explicitly if these are absent. Cached figures are retained as historical reported artifacts, and this is distinct from replaying model queries. The obsolete unreferenced `vis.png` is excluded from the final source package.
+Funding is disclosed only as grant number 1R01EB038426-01. The authors confirm no competing interests. R4 is Radiology, 20 years; its mapped full-benchmark results remain MCS 83.3, SFR 5.8% and VGR +4.7 pp. The private reading pack, complete image key, nonpublic gold records and credentialed per-probe outputs are not published.
 
 ## Latest revision files
 
-The reviewed conference manuscript is available as [PDF](neurips_2026.pdf) and [LaTeX source](neurips_2026.tex). The `paper/` conference copy is synchronized; journal and preprint variants are separate versions.
-
-A separate [marked comparison PDF](neurips_2026_changes.pdf) shows additions in blue and removals in red against the original manuscript (`0e66f8b`). It includes the appendix and checklist, with the R4 table shown before and after. See the [comparison notes and build instructions](revision_notes/marked_changes_2026-10-17.txt) and [review source](neurips_2026_changes.tex). Figures use the revised artwork without an image-level comparison; this review copy is separate from the clean manuscript.
-
-- [Revision summary and remaining author-record requirements](revision_notes/revision_summary_2026-10-17.txt)
+- [Clean manuscript PDF](neurips_2026.pdf) and [LaTeX source](neurips_2026.tex)
+- [Marked comparison PDF](neurips_2026_changes.pdf), [review source](neurips_2026_changes.tex) and [comparison/build notes](revision_notes/marked_changes_2026-10-17.txt)
+- [README item scope](revision_notes/readme_scope_2026-10-17.txt) and [revision summary](revision_notes/revision_summary_2026-10-17.txt)
 - [Missing experimental results](revision_notes/missing_experiments_2026-10-17.txt)
 - [Main-text and appendix change scope](revision_notes/main_appendix_changes_2026-10-17.txt)
 - [NeurIPS 2026 requirements audit](revision_notes/neurips_2026_requirements.txt)
 - [Corrected Croissant metadata](croissant.json) and [validation notes](revision_notes/croissant_validation.txt)
 
-The corrected metadata file here has been validated locally; this does not imply that the Hugging Face copy or OpenReview forms have been updated. The private R4 reading pack, full image key, nonpublic gold records and credentialed per-probe outputs are not published. The documented experiment and archival gaps remain open.
+The marked copy compares against repository manuscript `0e66f8b`, not a separately retrieved initial-submission PDF. Blue marks additions and red marks removals; the restructured R4 appendix table is displayed in full before/after blocks. Graphics use the current artwork without an image-level comparison. The `paper/` conference copy is synchronized; journal and preprint variants are separate versions.
+
+Missing MedGemma columns and the broader artefact experiment remain open. The corrected metadata here does not imply that the Hugging Face copy or OpenReview forms have been updated. No conference submission or chair message has been performed.

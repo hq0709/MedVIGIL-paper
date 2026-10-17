@@ -1,48 +1,27 @@
-MARKED MANUSCRIPT COMPARISON - 17 OCTOBER 2026
+MedVIGIL 标注修改版（2026-10-17）
 
-Purpose
-This is a review copy showing edits to the conference manuscript, appendix and
-checklist. Use neurips_2026.pdf for the clean manuscript. The comparison has
-50 pages because it retains deleted text and displays the restructured R4
-appendix table twice; its pagination is not the clean submission pagination.
+比较范围
+- 原始版本：0e66f8b2f93afacbae5ad34826cde71ae8d0e209。
+- 修订版本：README-scoped revision 17 Oct 2026。
+- 正式稿 neurips_2026.tex 的 SHA-256：bbf9a6f71d8c8844724a052e8384536d323548e787df84395e75faf986f1c2a9。
+- neurips_2026_changes.pdf 共 47 页，仅供审阅修改；正式提交仍使用无标注论文。
 
-Compared source revisions
-Baseline: 0e66f8b2f93afacbae5ad34826cde71ae8d0e209
-Revised:  96f2d0e3e3a01f3b2d083d5218893e8c1bad8ca0
-The reviewed manuscript in that revised commit has 43 total pages, with 10 pages
-of main text. Adding this comparison does not change the clean manuscript.
+阅读说明
+- 蓝色为新增文字，红色为删除文字，黑色为保留文字。
+- 数学、引用以及图形内部不自动标记差异。图形和参考文献采用修订稿文件，不能据此认定这些部分没有变化。
+- R4 附录表的结构发生变化，为保证可读性，完整列出原版（红色）和修订版（蓝色）；两版表中文字及数值分别保持其来源内容。
+- Checklist 已分别从两版源文件内联，标注源无需再加载 checklist.tex。
 
-Reading the comparison
-Blue text marks additions; red text marks removals; black text is retained.
-The structurally revised R4 appendix table is shown in two complete blocks:
-red baseline and blue revised. Cells are copied from their respective source
-commits. Both versions of checklist.tex were inlined before the comparison.
-The comparison covers manuscript text, not repository scripts or metadata.
+复现
+将 neurips_2026_changes.tex 放在仓库根目录，与已有 neurips_2026.sty、ref.bib、figures/、icons/、fonts/ 配套。
+已用以下命令成功构建：
+tectonic --untrusted --keep-logs --keep-intermediates neurips_2026_changes.tex
+需要 Tectonic 所用的 TeX 资源缓存；首次构建可能需要下载依赖。
 
-Limits of the markup
-Figures use the revised artwork; image pixels and graphical labels are not
-compared. Math and citation markup are disabled for typesetting stability.
-Changes to these objects should be checked against the two source commits.
-The clean manuscript and the main/appendix change-scope notes remain the
-authoritative current text and scope record. This review PDF is not a claim
-that any outstanding experiment or archival requirement has been completed.
+标注生成使用 CTAN 官方 latexdiff-so（1.4.0），CFONT 类型，参数为：
+--type=CFONT --math-markup=0 --disable-citation-markup --graphics-markup=none
+两版 checklist 分别内联后进行比较，再对结构变化的 R4 表作完整 before/after 布局处理。辅助生成脚本不属于论文源码。
 
-Building the supplied review source
-From the repository root, run:
-  tectonic neurips_2026_changes.tex
-It uses the existing neurips_2026.sty, ref.bib, figures/, icons/ and fonts/.
-The embedded checklist is already part of neurips_2026_changes.tex.
-
-Comparison generation
-The starting comparison used the official CTAN standalone latexdiff-so,
-with these options:
-  --type=CFONT --math-markup=0 --disable-citation-markup
-  --graphics-markup=none
-Before running latexdiff, replace the single \input{checklist} in each
-revision of neurips_2026.tex with that revision's checklist.tex. The resulting
-review source also contains a legend and the R4 table layout repair described
-above. The supplied .tex preserves these review-only layout adjustments and
-can be compiled directly without rerunning latexdiff.
-
-The public review files contain no private answer sheet, full image mapping,
-credentialed gold records or per-probe clinician responses.
+验证
+本次构建没有 Overfull、未定义交叉引用、未定义引文、缺字或重复标签警告。日志有 29 个 Underfull 排版提示，以及不影响此次生成的 Fontconfig 配置提示。
+已逐页渲染，并重点检查首页说明、主表、R4 双版本表、案例标题衔接、资助/利益冲突声明和 Checklist。

@@ -24,10 +24,10 @@ import numpy as np
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "figures"
+OUT_DIR = ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "figures"
 SFR_TIER_CSV = ROOT / "results" / "sfr_by_tier.csv"
 SUMMARY_CSV = ROOT / "results" / "metrics_summary.csv"
-FONT_DIR = ROOT / "fonts"
+FONT_DIR = ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "fonts"
 
 for fp in (FONT_DIR / "mscorefonts" / "Comic.TTF",
            FONT_DIR / "mscorefonts" / "Comicbd.TTF"):

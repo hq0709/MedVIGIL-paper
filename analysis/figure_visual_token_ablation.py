@@ -16,7 +16,7 @@ from matplotlib.patches import Rectangle
 
 ROOT = Path(__file__).resolve().parents[1]
 
-FONT_DIR = ROOT / "fonts"
+FONT_DIR = ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "fonts"
 if not FONT_DIR.exists():
     for cand in (ROOT / "paper").glob("*"):
         if (cand / "fonts").exists():
@@ -36,12 +36,12 @@ plt.rcParams["pdf.fonttype"] = 42
 plt.rcParams["ps.fonttype"] = 42
 ANNOT_FONT = {"family": "DejaVu Sans"}
 
-BENCH = ROOT / "data"
+BENCH = ROOT / "data/medvlm_bench_v1"
 CSV_PATH = BENCH / "visual_token_ablation.csv"
 RAW_PATH = BENCH / "_visual_token_raw.jsonl"
 IMG_DIR  = BENCH / "images_visualtoken"
 GROUNDING = BENCH / "grounding.csv"
-OUT_DIR = ROOT / "figures"
+OUT_DIR = ROOT / "paper/MedVIGIL_NeurIPS2026/figures"
 OUT_BASE = OUT_DIR / "fig_visual_token_ablation"
 
 EXAMPLE_CASE = "MVB-0031"
@@ -208,10 +208,6 @@ def _render_curves(ax_ref, ax_sw, by_model):
 
 
 def main() -> None:
-    required = (CSV_PATH, RAW_PATH, GROUNDING, IMG_DIR)
-    missing = [str(p) for p in required if not p.exists()]
-    if missing:
-        raise SystemExit("Historical pilot raw records/images are required for the full figure; no placeholder figure was generated. Missing: " + ", ".join(missing))
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     by_model = _load_rows()
     bbox = _load_roi_bbox(EXAMPLE_CASE)
