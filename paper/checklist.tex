@@ -5,7 +5,7 @@
 \item {\bf Claims}
     \item[] Question: Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
     \item[] Answer: \answerYes{}
-    \item[] Justification: The abstract and Section~\ref{sec:introduction} state the three contributions exactly as the paper delivers them: the evidence-conditional trustworthiness framework with silent failure as the central measurable failure mode; \medvigil\ as a 300-case, four-radiologist evaluation suite with eight probe families, 240 counterfactual triplets, clinician-finalised risk tiers, and a seven-metric correctness-conditioned scoring suite; and the harmonic-mean \medvigil\ Composite Score (MCS) reported on a 16-model audit with a construction-blind \textsc{R4} reference baseline. The headline numbers cited in the abstract (Claude Opus 4.7 MCS $69.2$; \textsc{R4} $83.3$) match Table~\ref{tab:headline_results}.
+    \item[] Justification: The paper distinguishes the full 300-case, 2,556-probe benchmark from the public 240-case, 2,002-probe release, describes clinician-finalised labels and LLM-assisted drafting, and reports the verified full-probe R4 reference separately from the historical model audit. The claims are limited to the stated source mix and evaluation conditions.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the abstract and introduction do not include the claims made in the paper.
@@ -17,7 +17,7 @@
 \item {\bf Limitations}
     \item[] Question: Does the paper discuss the limitations of the work performed by the authors?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Section~\ref{sec:limitations} discusses three limitation families---(L1) audit scope (full-image corruptions, severity-aware metrics, and the released TR-coh axis are designed-but-deferred); (L2) annotation and human reference (ROI bboxes are benchmark regions, not segmentation labels; the human reference rests on a single construction-blind \textsc{R4}); and (L3) external validity and ablation breadth (pretraining-overlap with public corpora cannot be ruled out; thinking-mode / temperature / safety-prompt / medical-specialised-family ablations are pending). The original seven specific scoping issues are expanded in Appendix~\ref{app:limitations_detail}.
+    \item[] Justification: Section~\ref{sec:limitations} and Appendix~\ref{app:limitations_detail} discuss the single-reader reference, rectangular ROI controls, limited acquisition-artefact and prompt-ablation coverage, source/pretraining overlap, deferred metrics, the credentialed CXR boundary and missing historical run archives. These limit clinical generalisation and exact reproduction of the historical model audit.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper has no limitation while the answer \answerNo{} means that the paper has limitations, but those are not discussed in the paper.
@@ -33,7 +33,7 @@
 \item {\bf Theory assumptions and proofs}
     \item[] Question: For each theoretical result, does the paper provide the full set of assumptions and a complete (and correct) proof?
     \item[] Answer: \answerNA{}
-    \item[] Justification: \medvigil\ is a dataset-and-evaluation paper. We present formal definitions and an aggregation formula (Section~\ref{sec:metrics}, Appendix~\ref{app:metric_formulas}) but no theorems requiring proof.
+    \item[] Justification: This is a dataset-and-evaluation paper. It defines metrics and aggregation rules and provides the algebraic Grounding example, but does not claim a theorem requiring a separate proof.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include theoretical results.
@@ -46,8 +46,8 @@
 
 \item {\bf Experimental result reproducibility}
     \item[] Question: Does the paper fully disclose all the information needed to reproduce the main experimental results of the paper to the extent that it affects the main claims and/or conclusions of the paper (regardless of whether the code and data are provided or not)?
-    \item[] Answer: \answerYes{}
-    \item[] Justification: Appendix~\ref{app:reproducibility} gives the exact text-only prompt template (system + user message), greedy decoding settings ($T{=}0$, top-$p\,{=}\,1$, $\le 8$ output tokens), and a model-snapshot table (Table~\ref{tab:model_snapshots}) listing every audited configuration's provider-side identifier, access channel, and decoding mode. Probe expansion is deterministic from the released manifest, and per-probe cached letters are shipped in the GitHub repo so that a re-execution against the same provider-side snapshots reproduces the cached outputs up to provider-side stochasticity.
+    \item[] Answer: \answerNo{}
+    \item[] Justification: The fixed public probes, metric definitions and evaluation code support inspection and fresh evaluation, and the R4 reference is re-scored from complete supplied response, mapping and gold records. However, frozen historical model-run configurations and per-probe model outputs are not publicly archived, the current runner differs from the historical description, and immutable local-weight revisions are missing. Full-benchmark reconstruction also requires credentialed CXR access. We therefore do not claim complete independent reproduction of the historical model audit.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -66,8 +66,8 @@
 
 \item {\bf Open access to data and code}
     \item[] Question: Does the paper provide open access to the data and code, with sufficient instructions to faithfully reproduce the main experimental results, as described in supplemental material?
-    \item[] Answer: \answerYes{}
-    \item[] Justification: The dataset is hosted on Hugging Face (\url{https://huggingface.co/datasets/jhq0709/MedVIGIL}) and the evaluation harness on GitHub (\url{https://github.com/hq0709/MedVIGIL}); both URLs are in the abstract footnote. The release contains the 300-case manifest, the deterministic probe-expansion script, the per-model baseline runners, the integrity validator, the LLM-judge for the open-ended variant, the metric aggregator, and Croissant 1.0 metadata. Cached per-probe letters for the audit are also released so that any score in Section~\ref{sec:experiments} can be recomputed from the per-probe trace.
+    \item[] Answer: \answerNo{}
+    \item[] Justification: The public dataset provides 240 cases, 2,002 MCQ probes with open-ended twins and 180 triplets, with images, annotations and documentation, and the GitHub harness is publicly available. This does not constitute sufficient open material to faithfully reconstruct all main historical results: the original run configurations and per-probe model outputs are not publicly included, and the 60-case CXR arm requires qualified upstream access. The release and its limits are documented in Appendix~\ref{app:documentation}.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that paper does not include experiments requiring code.
@@ -83,8 +83,8 @@
 
 \item {\bf Experimental setting/details}
     \item[] Question: Does the paper specify all the training and test details (e.g., data splits, hyperparameters, how they were chosen, type of optimizer) necessary to understand the results?
-    \item[] Answer: \answerYes{}
-    \item[] Justification: \medvigil\ does not train any model; it audits frozen model snapshots. Section~\ref{sec:experiments} names the 16 audited configurations inline; Appendix~\ref{app:reproducibility} pins each one to its provider-side snapshot identifier or open-weight HuggingFace commit SHA, the access channel, and the decoding mode (greedy, $T{=}0$, no judge model, no chain-of-thought, no multi-sample voting). The audit period is $2026{-}04{-}09$ to $2026{-}05{-}04$.
+    \item[] Answer: \answerNo{}
+    \item[] Justification: The paper specifies the probe families, gold-based scoring, evaluated systems and reported historical inference protocol, and distinguishes these from the current public implementation. Some details required for a complete reconstruction remain unavailable, including frozen historical configurations, immutable revisions of local model weights and full acquisition-artefact strength parameters. The paper identifies these gaps rather than substituting current defaults for the original experiments.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -95,7 +95,7 @@
 \item {\bf Experiment statistical significance}
     \item[] Question: Does the paper report error bars suitably and correctly defined or other appropriate information about the statistical significance of the experiments?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Bootstrap $95$\% CIs on the top MCS positions and the Safety-axis ordering are reported in Appendix~\ref{app:bootstrap_appendix} (Table~\ref{tab:bootstrap_ci}). Wilson $95$\% CIs are reported on the visual-token ablation pilot proportions (Appendix~\ref{app:token_ablation}, Figure~\ref{fig:visual_token_ablation}). MCS robustness to the per-CRT harm weights and the Grounding-axis transform is reported in Appendix~\ref{app:mcs_sensitivity}.
+    \item[] Justification: The paper reports case-clustered bootstrap 95\% confidence intervals for the historical model audit, Wilson 95\% intervals for pilot proportions, and sensitivity to metric weights and transforms. The text specifies the unit of resampling and distinguishes sampling uncertainty from run-to-run or provider variability. Overlapping marginal confidence intervals are not used to assert a significant pairwise ranking.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -111,8 +111,8 @@
 
 \item {\bf Experiments compute resources}
     \item[] Question: For each experiment, does the paper provide sufficient information on the computer resources (type of compute workers, memory, time of execution) needed to reproduce the experiments?
-    \item[] Answer: \answerYes{}
-    \item[] Justification: Proprietary providers (OpenAI, Anthropic, Google, Together-hosted Qwen and Moonshot) are queried via API at greedy $T{=}0$ with at most $8$ output tokens, requiring no local compute beyond per-probe HTTP requests. The two open-weight medical-specific systems (LLaVA-Med-v1.5-mistral-7B, HuatuoGPT-Vision-7B) are run locally on a single 80\,GB-class GPU under the same greedy decoding policy. Per-model audit volume is up to $2{,}556$ probes; the visual-decay sweep adds $7$ blur levels $\times\,300$ cases $\times\,4$ models, and the visual-token ablation pilot adds $4$ ROI-mask steps $\times\,80$ cases $\times\,3$ models $\times\,5$ self-consistency samples (Appendix~\ref{app:reproducibility}).
+    \item[] Answer: \answerNo{}
+    \item[] Justification: The paper identifies API-based evaluation and local inference for the open-weight medical models and reports probe and ablation-job counts. It does not provide complete per-experiment execution times, exact hardware configurations, API token usage or total project compute, including failed or preliminary runs. The historical decoding description is not verified by the current runner; in particular, its larger output budgets and the temperature-0.7 pilot cannot be summarised as a universal greedy eight-token protocol.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -124,7 +124,7 @@
 \item {\bf Code of ethics}
     \item[] Question: Does the research conducted in the paper conform, in every respect, with the NeurIPS Code of Ethics \url{https://neurips.cc/public/EthicsGuidelines}?
     \item[] Answer: \answerYes{}
-    \item[] Justification: We have read the NeurIPS Code of Ethics. The benchmark uses public or appropriately licensed source corpora (VQA-RAD, SLAKE, ROCO) plus a credentialed CXR subset that is shipped only as reconstruction pointers (Appendix~\ref{app:documentation}, Table~\ref{tab:license_matrix}); no patient-identifiable data is redistributed. The radiologist annotators are research collaborators reviewing already-released or credentialed-access images, and the released benchmark is an evaluation artefact rather than a deployment-ready clinical instrument.
+    \item[] Justification: We have reviewed the NeurIPS Code of Ethics. The paper addresses upstream licences, de-identified source data, the complete public exclusion of the credentialed CXR arm, evaluation-time data flow and the evaluation-only intended use. Institutional review applicability and unavailable documentation are disclosed separately; provider-retention terms are not presented as substitutes for upstream data-use obligations.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the authors have not reviewed the NeurIPS Code of Ethics.
@@ -136,7 +136,7 @@
 \item {\bf Broader impacts}
     \item[] Question: Does the paper discuss both potential positive societal impacts and negative societal impacts of the work performed?
     \item[] Answer: \answerYes{}
-    \item[] Justification: \emph{Positive impact:} \medvigil\ surfaces silent-failure modes that are invisible to standard accuracy benchmarks but matter for clinical deployment, supplying a per-CRT, harm-weighted score that can be used by deployers to triage which models are not yet safe to integrate into a workflow. \emph{Negative impact and mitigation:} A high MCS is not a clinical-deployment licence; over-reliance on a benchmark score could under-protect patients in regimes the audit does not cover (full-image artefacts, severity-aware metrics, non-VQA workflows). Section~\ref{sec:limitations} and Appendix~\ref{app:limitations_detail} state these caveats explicitly, and the released benchmark card flags that ``a low MCS indicates that the model is not yet trustworthy under at least one audited evidence-failure condition,'' rather than that a high MCS indicates the converse.
+    \item[] Justification: The paper discusses the benefit of detecting unsafe non-refusal under evidence perturbations and the risks of treating MCS as a clinical-safety certification. It limits intended use to evaluation and identifies source overlap, limited clinical coverage and benchmark-specific optimisation as threats to interpretation and deployment.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that there is no societal impact of the work performed.
@@ -149,8 +149,8 @@
 
 \item {\bf Safeguards}
     \item[] Question: Does the paper describe safeguards that have been put in place for responsible release of data or models that have a high risk for misuse (e.g., pre-trained language models, image generators, or scraped datasets)?
-    \item[] Answer: \answerNA{}
-    \item[] Justification: \medvigil\ releases a benchmark and an evaluation harness; it does not release a generative model, scraped dataset, or any artefact whose redistribution itself poses a high misuse risk. Source images are public, permissively licensed, or shipped only as reconstruction pointers (credentialed CXR, Appendix~\ref{app:documentation}). The MCS is reported as a relative trustworthiness score, not as a clinical-deployment licence.
+    \item[] Answer: \answerYes{}
+    \item[] Justification: The release excludes all content and source mappings from the credentialed CXR arm and documents qualified access under upstream data-use agreements. Public assets retain their licences, and the datasheet states evaluation-only uses and clinical-use limitations. These safeguards address sensitive-data distribution and overinterpretation of the benchmark; no generative model is released.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper poses no such risks.
@@ -162,7 +162,7 @@
 \item {\bf Licenses for existing assets}
     \item[] Question: Are the creators or original owners of assets (e.g., code, data, models), used in the paper, properly credited and are the license and terms of use explicitly mentioned and properly respected?
     \item[] Answer: \answerYes{}
-    \item[] Justification: All four source datasets are cited and the per-source license matrix is in Appendix~\ref{app:documentation} (Table~\ref{tab:license_matrix}): VQA-RAD (CC0)~\cite{lau2018vqarad}, SLAKE (CC BY-SA 4.0)~\cite{liu2021slake}, ROCO (CC BY-NC-SA 4.0; PMC-OpenAccess subset), and the chest-X-ray collection (MIMIC-CXR~\cite{johnson2019mimiccxr} and CheXpert~\cite{irvin2019chexpert}, credentialed access via PhysioNet/Stanford). For credentialed sources we redistribute reconstruction pointers, not images. Each audited model is identified by its public snapshot or HuggingFace commit SHA in Appendix~\ref{app:reproducibility} (Table~\ref{tab:model_snapshots}).
+    \item[] Justification: The source corpora are credited and their licences and restrictions are listed in Table~\ref{tab:license_matrix}. MedVIGIL annotations use CC BY-NC-SA 4.0, while source assets retain their upstream licences. Credentialed CXR content and mappings are not publicly redistributed, and qualified access follows the upstream agreements and \texttt{CXR\_ACCESS.md}. Model sources and access channels are identified; missing immutable weight revisions are disclosed in Appendix~\ref{app:reproducibility}.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not use existing assets.
@@ -178,7 +178,7 @@
 \item {\bf New assets}
     \item[] Question: Are new assets introduced in the paper well documented and is the documentation provided alongside the assets?
     \item[] Answer: \answerYes{}
-    \item[] Justification: The released benchmark ships with: (i) Croissant 1.0 machine-readable metadata, (ii) a datasheet covering provenance, sensitive-data handling, intended/disallowed uses, and known limitations (Appendix~\ref{app:documentation}), (iii) the per-source license matrix, (iv) the four-radiologist construction record with pre-adjudication inter-annotator agreement, (v) the fixed prompt template and deterministic probe-expansion script (Appendix~\ref{app:reproducibility}), (vi) cached per-probe letters for every audited model, and (vii) a maintenance and correction policy with immutable case identifiers and versioned manifests.
+    \item[] Justification: The public dataset is accompanied by a datasheet, field and annotation protocol, credentialed-access documentation, and Croissant core and Responsible AI metadata. These distinguish GPT-5.5 drafting from R1/R2 review and P3 finalisation, describe intended uses and limitations, and state the public/credentialed release boundary and versioning policy. Historical model-response archives and individual adjudication logs are not claimed as released assets.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not release new assets.
@@ -189,8 +189,8 @@
 
 \item {\bf Crowdsourcing and research with human subjects}
     \item[] Question: For crowdsourcing experiments and research with human subjects, does the paper include the full text of instructions given to participants and screenshots, if applicable, as well as details about compensation (if any)?
-    \item[] Answer: \answerYes{}
-    \item[] Justification: The four board-certified radiologists (\textsc{R1}, \textsc{R2} attending; \textsc{P3} senior consolidating; \textsc{R4} construction-blind baseline) are research collaborators rather than crowdworkers. Section~\ref{sec:pipeline} and Appendix~\ref{app:case_schema_appendix} document the three-stage annotation protocol (neutral-question screening; dual annotation of CRT, gold answer, candidate set, ROI bbox, laterality flag, and the text-side perturbation library; senior consolidation against build-time invariants). Appendix~\ref{app:clinician_pilot} documents the human-baseline procedure used by \textsc{R4} (same MCQ wrapper as the audited models, no exposure to construction-time golds, no time budget on initial reads).
+    \item[] Answer: \answerNo{}
+    \item[] Justification: The paper describes the clinical collaborators, their roles and qualifications, the annotation workflow and the independent R4 reference procedure. The complete original instructions issued to the readers and the compensation arrangements are not included in the available documentation. We therefore do not claim that this reporting requirement is fully satisfied. No crowdsourcing platform was used.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not involve crowdsourcing nor research with human subjects.
@@ -200,8 +200,8 @@
 
 \item {\bf Institutional review board (IRB) approvals or equivalent for research with human subjects}
     \item[] Question: Does the paper describe potential risks incurred by study participants, whether such risks were disclosed to the subjects, and whether Institutional Review Board (IRB) approvals (or an equivalent approval/review based on the requirements of your country or institution) were obtained?
-    \item[] Answer: \answerNA{}
-    \item[] Justification: \medvigil\ uses already-released or credentialed-access source corpora and does not collect new patient-identifiable information. The radiologists are research collaborators reviewing existing artefacts under standard radiology practice; this activity is not human-subjects research under standard institutional policy and does not require IRB review. Specific institutional documentation, where applicable, will be provided with the camera-ready.
+    \item[] Answer: \answerNo{}
+    \item[] Justification: No new patient data were collected; the study reuses public or credentialed de-identified collections and involves clinical collaborators. The available materials do not include an institutional approval, exemption or determination that the clinician-evaluation activities fall outside human-subjects research. We therefore do not claim a documented approval or exemption, and the applicable institutional review status requires author confirmation.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not involve crowdsourcing nor research with human subjects.
@@ -213,8 +213,8 @@
 \item {\bf Declaration of LLM usage}
     \item[] Question: Does the paper describe the usage of LLMs if it is an important, original, or non-standard component of the core methods in this research? Note that if the LLM is used only for writing, editing, or formatting purposes and does \emph{not} impact the core methodology, scientific rigor, or originality of the research, declaration is not required.
     %this research?
-    \item[] Answer: \answerNA{}
-    \item[] Justification: For paper writing, LLMs were used only for grammar and wording polish. None of the released benchmark content was generated by an LLM: probe construction, ROI annotation, gold answers, the candidate-answer set, doctor-defined refusal letters, paraphrase / negation / specificity-drop / knowledge-only / hallucination-trap rewrites, and clinical risk tiers are all radiologist-authored, and the three image-side variants (ROI-masked, ROI-only, lr\_flip) are rendered programmatically with PIL from each case's radiologist-authored ROI bounding box. The released harness includes an optional judge-model script for scoring the auxiliary open-ended variant; this is a scoring tool, not part of the headline MCQ audit. The 16 audited VLMs are subjects of evaluation, not components of our pipeline.
+    \item[] Answer: \answerYes{}
+    \item[] Justification: GPT-5.5 drafted the paraphrase, negation, specificity-drop and knowledge-only rewrites, the false-premise traps and the triplets' V-CF conditions. R1 and R2 reviewed and edited every draft, and P3 adjudicated disagreements and finalised the released fields. Image variants were rendered from clinician-defined ROIs. The auxiliary open-ended judge is distinct from the headline MCQ scoring, which uses exact letter matches without an LLM judge.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the core method development in this research does not involve LLMs as any important, original, or non-standard components.

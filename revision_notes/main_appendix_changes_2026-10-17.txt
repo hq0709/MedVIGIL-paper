@@ -1,0 +1,33 @@
+正文与附录修改对照（2026-10-17，美国东部时间）
+
+本轮按用户要求，正文和附录分别呈现，不以 10% 作修改预算或合规阈值。
+对照基线为 GitHub 仓库提交 0e66f8b2f93afacbae5ad34826cde71ae8d0e209。此处是源文件审阅统计，未把 rebuttal 直接拼接成一个人为分母，也不是 NeurIPS 官方的改动度量。
+LaTeX 一整段常写在一行，重排断行会改变行数；字词差异也不等同于新增科学贡献。判断修改范围时，应结合对应审稿意见、rebuttal 与改动内容。
+正文范围为摘要至正文末，不含作者块、致谢、参考文献、附录或 Checklist。附录另列；原附录中致谢移位也会体现在源差异中。
+附录不计入十页正文篇幅，不代表它自动不受最终稿准确性和研究范围要求约束。
+
+正文
+{
+  "baseline_source_lines": 237,
+  "revised_source_lines": 238,
+  "baseline_changed_or_removed_lines": 29,
+  "revised_changed_or_added_lines": 30,
+  "baseline_words": 4421,
+  "revised_words": 4656,
+  "baseline_changed_or_removed_words": 841,
+  "revised_changed_or_added_words": 1076
+}
+
+附录
+{
+  "baseline_source_lines": 845,
+  "revised_source_lines": 889,
+  "baseline_changed_or_removed_lines": 107,
+  "revised_changed_or_added_lines": 151,
+  "baseline_words": 12613,
+  "revised_words": 11594,
+  "baseline_changed_or_removed_words": 4399,
+  "revised_changed_or_added_words": 3380
+}
+
+MedVIGIL_main_text.diff 和 MedVIGIL_appendix.diff 是拆分后的阅读对照，便于审阅，不直接作为仓库可应用补丁。完整文本源码补丁为 MedVIGIL_revision.patch。

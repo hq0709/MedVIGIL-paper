@@ -1,0 +1,64 @@
+MedVIGIL Croissant audit - 2026-10-16
+
+STATUS: Corrected complete public-release metadata created; official mlcroissant 1.1.1 validation completed successfully (exit 0, Done). All six official table recordsets also loaded with the expected counts from locally verified immutable-release CSVs. No upload was performed.
+
+Upstream immutable revision: 5373ecdc8e20c467f1933b314b3a3164d2cba6d5
+Original evidence: upstream Hugging Face croissant.json at the immutable revision above; a byte-for-byte local audit copy is retained.
+Original SHA256: ee9423149759fb570c635b4ee8fc1ebead83441e2ca2087b80993fe82567f80b
+Corrected output: croissant.json (repository root)
+Corrected SHA256: 778a318a7b56ccf8fd5c0bbdb80c38bd5effc5e8b129ac435ac2a0ffcb76dc6e
+Original evidence was preserved byte for byte; no remote content was changed or uploaded.
+
+CHANGES
+1. Replaced /resolve/main/ with the immutable HF revision in all six CSV contentUrl values.
+2. Removed the unhashable repo FileObject (whose sha256 was a GitHub issue URL) and its two dependent image FileSets.
+3. Replaced those three resources with 780 individual source/perturbed image FileObjects. Each has an immutable URL, exact size and actual SHA256 from the revision-pinned HF/LFS inventory. All 786 CSV/image resource URLs are pinned.
+4. Preserved the six verified table SHA256 values, all 64 field definitions, all six recordsets, all RAI/provenance narratives and all other dataset-level properties exactly at the JSON semantic level.
+No repository archive checksum or clinical/annotation evidence was invented. The original and the intermediate checksum-removed draft are preserved in work/release_audit.
+
+FULL JSON AND DATA CHECKS
+PASS: strict UTF-8 JSON parse with duplicate-key rejection and serialization round trip; 1098 object nodes inspected programmatically.
+PASS: six recordsets and 64 unique fields; every source file and column exists, and the metadata covers every column in each named table.
+PASS: 64 local references resolve to declared objects.
+PASS: all six named CSV source URLs were retrieved at the immutable revision; SHA256, exact byte length and parsed row count agree with the metadata and release documentation.
+
+manifest.csv: 240 rows; 33434 bytes; SHA256 2177942ceb0b2566e3f8a798e947dc47a6435aa37bad7ea3a1b84e526cb881b8
+  Source: https://huggingface.co/datasets/jhq0709/MedVIGIL/resolve/5373ecdc8e20c467f1933b314b3a3164d2cba6d5/manifest.csv
+grounding.csv: 240 rows; 67745 bytes; SHA256 860ca7fd35cc0ba68a4536a393ea1941d0216299f6621bb556d3628b4d30c407
+  Source: https://huggingface.co/datasets/jhq0709/MedVIGIL/resolve/5373ecdc8e20c467f1933b314b3a3164d2cba6d5/grounding.csv
+probes_mcq.csv: 2002 rows; 1227422 bytes; SHA256 037626541be69f54b6c4b366f0aa204d51b4434d42ee080f3c5b8027cb039adc
+  Source: https://huggingface.co/datasets/jhq0709/MedVIGIL/resolve/5373ecdc8e20c467f1933b314b3a3164d2cba6d5/probes_mcq.csv
+probes_open.csv: 2002 rows; 427076 bytes; SHA256 faa25846c13797481f46e7c8af598f6962d28d7708b931bc2465ee08e5b2d0a1
+  Source: https://huggingface.co/datasets/jhq0709/MedVIGIL/resolve/5373ecdc8e20c467f1933b314b3a3164d2cba6d5/probes_open.csv
+triplets.csv: 180 rows; 83416 bytes; SHA256 cddc2ddee781c7f2e4f95387d1341a685b650e20a613dbc66668d187ccd14d27
+  Source: https://huggingface.co/datasets/jhq0709/MedVIGIL/resolve/5373ecdc8e20c467f1933b314b3a3164d2cba6d5/triplets.csv
+visual_token_ablation.csv: 12 rows; 655 bytes; SHA256 e86c93c19278501e907463de50f6b594b542f6862ef301e858a241052e7684b7
+  Source: https://huggingface.co/datasets/jhq0709/MedVIGIL/resolve/5373ecdc8e20c467f1933b314b3a3164d2cba6d5/visual_token_ablation.csv
+
+PASS: 240 manifest cases, with source counts VQA-RAD 120 / SLAKE 60 / ROCO 60; no credentialed CXR case identifiers MVB-2181 through MVB-2240.
+PASS: case identifiers in grounding, probes and triplets resolve to the manifest.
+PASS: 780 individual image resources match the immutable public inventory: 240 source images and 540 perturbed images (150 masked / 150 ROI-only / 240 left-right-flipped). All 780 API entries have 64-character hexadecimal LFS SHA256 values and matching LFS/file byte sizes.
+PASS: all 3792 nonempty image pointers in manifest, MCQ probes and open probes resolve to declared image resources.
+
+OFFICIAL VALIDATOR
+Tool: mlcroissant 1.1.1, installed into work/release_audit/croissant-venv only. No global package changes.
+Command: mlcroissant validate --jsonld outputs/croissant.json
+Exit status: 0. Captured output: Done. No additional diagnostics were emitted by this invocation.
+Official Dataset.records() loading was also exercised against the six verified local CSV mappings: manifest 240 / grounding 240 / probes_mcq 2,002 / probes_open 2,002 / triplets 180 / visual_token_ablation 12. All passed.
+An intermediate draft that only removed repo.sha256 failed because a FileObject requires md5 or sha256. Replacing the unhashable container with individually hashed image resources resolved that error.
+The original upstream metadata returned exit status 0 (Done), despite its URL-shaped fake digest. This validator checks presence but did not reject that malformed digest during static validation. Its success alone is not content-integrity evidence.
+Logs: croissant_validator_output.txt, croissant_validator_exit.txt, croissant_original_validator_output.txt, croissant_original_validator_exit.txt, croissant_table_load_output.txt, croissant_official_table_load.json (this directory).
+
+LIMITATIONS AND REQUIRED FOLLOW-UP
+No repository archive checksum was invented. The unsupported repository container and two dependent FileSets were replaced with 780 immutable individual image resources, each carrying its actual HF/LFS SHA256 and exact size from the revision-pinned API inventory.
+All 786 CSV/image contentUrl values are pinned to the immutable HF revision. Dataset and project landing-page URLs remain descriptive links.
+CSV bytes were downloaded and locally rehashed. All 780 image hashes and byte sizes were checked against HF/LFS metadata; full image bytes were not downloaded, rehashed locally, or decoded.
+RAI and provenance narratives reproduce author-supplied release documentation and are not independent verification of credentials, annotation histories, or account retention settings.
+The repository git commit is not a SHA256 archive checksum and was not placed in a checksum property. No repository archive is needed for the revised individual-file resource representation.
+The official validate command is metadata/static validation. Table loading used local CSVs previously downloaded from their immutable URLs; the audit did not perform a full image download, independently rehash all image bytes, decode image pixels, or verify third-party clinical/annotation claims.
+No metadata was uploaded to OpenReview, Hugging Face, or GitHub.
+
+PRIMARY REFERENCES
+Croissant 1.0 specification: https://docs.mlcommons.org/croissant/docs/croissant-spec.html
+Official Python validator instructions: https://github.com/mlcommons/croissant/tree/main/python/mlcroissant
+Repository checksum issue linked by upstream placeholder: https://github.com/mlcommons/croissant/issues/80
