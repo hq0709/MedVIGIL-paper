@@ -120,6 +120,8 @@ Figure generators now write to root `figures/` and use the bundled root `fonts/`
 
 The reviewed conference manuscript is available as [PDF](neurips_2026.pdf) and [LaTeX source](neurips_2026.tex). The `paper/` conference copy is synchronized; journal and preprint variants are separate versions.
 
+A separate [marked comparison PDF](neurips_2026_changes.pdf) shows additions in blue and removals in red against the original manuscript (`0e66f8b`). It includes the appendix and checklist, with the R4 table shown before and after. See the [comparison notes and build instructions](revision_notes/marked_changes_2026-10-17.txt) and [review source](neurips_2026_changes.tex). Figures use the revised artwork without an image-level comparison; this review copy is separate from the clean manuscript.
+
 - [Revision summary and remaining author-record requirements](revision_notes/revision_summary_2026-10-17.txt)
 - [Missing experimental results](revision_notes/missing_experiments_2026-10-17.txt)
 - [Main-text and appendix change scope](revision_notes/main_appendix_changes_2026-10-17.txt)
