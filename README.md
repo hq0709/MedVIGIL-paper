@@ -106,18 +106,17 @@ For a fresh evaluation, follow the [harness instructions](https://github.com/hq0
 
 The paper LaTeX source and analysis scripts in this repository are released under the MIT License (see `LICENSE`). MedVIGIL annotations are released under CC BY-NC-SA 4.0; source assets keep their upstream licences (VQA-RAD CC0, SLAKE CC BY-SA 4.0, ROCO CC BY-NC-SA 4.0). MIMIC-CXR and CheXpert content is withheld under the applicable credentialed data use agreements; see the manuscript's documentation appendix and the dataset datasheet.
 
-## README-scoped revision
+## Strict README revision
 
-The latest revision follows the supplied camera-ready checklist and necessary consistency updates. Broader scientific/editorial rewrites from the preceding revision have been withdrawn pending author confirmation. The abstract retains its original research definition and narrative, with only the checklist-required first-use definition of gold, drafting disclosure and release information synchronized. The original model artwork and unrelated figure generators have been restored.
+The latest revision applies only the supplied camera-ready checklist and the authors' confirmed details. Content changes made to expand the main text or broadly trim the appendix have been withdrawn; the latest author affiliations are retained. The abstract keeps its original opening, definition, enumeration, narrative and R4 result sentence, with only the required gold definition, drafting/finalisation disclosure and release scope updated. Additional scientific and editorial issues are reserved for separate author confirmation. Figure assets and their source references are unchanged.
 
 Funding is disclosed only as grant number 1R01EB038426-01. The authors confirm no competing interests. R4 is Radiology, 20 years; its mapped full-benchmark results remain MCS 83.3, SFR 5.8% and VGR +4.7 pp. The private reading pack, complete image key, nonpublic gold records and credentialed per-probe outputs are not published.
 
 ## Latest revision files
 
 - [LaTeX source](neurips_2026.tex)
-- [README item scope](revision_notes/readme_scope_2026-10-17.txt) and [revision summary](revision_notes/revision_summary_2026-10-17.txt)
+- [Strict README scope and revision summary](revision_notes/readme_scope_2026-10-18.txt)
 - [Missing experimental results](revision_notes/missing_experiments_2026-10-17.txt)
-- [Main-text and appendix change scope](revision_notes/main_appendix_changes_2026-10-17.txt)
 - [NeurIPS 2026 requirements audit](revision_notes/neurips_2026_requirements.txt)
 - [Corrected Croissant metadata](croissant.json) and [validation notes](revision_notes/croissant_validation.txt)
 
