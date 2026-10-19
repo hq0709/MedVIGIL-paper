@@ -103,13 +103,13 @@ Weihang You\textsuperscript{1},}\\
 {\normalfont\bfseries
 Haozhen Gong\textsuperscript{3},
 Ruiyu Yan\textsuperscript{4},
-Jinglei Lv\textsuperscript{5,7},
-Lin Zhao\textsuperscript{6},}\\
+Jinglei Lv\textsuperscript{5,6},
+Lin Zhao\textsuperscript{7},}\\
 {\normalfont\bfseries
 Hui Ren\textsuperscript{2},
 Quanzheng Li\textsuperscript{2},
 Tianming Liu\textsuperscript{1},
-Xiang Li\textsuperscript{2,\textdagger}}
+Xiang Li\textsuperscript{2,}\thanks{Corresponding author.}}
 \\[0.4em]
 \normalfont\mdseries\normalsize
 \textsuperscript{1}University of Georgia\quad
@@ -117,13 +117,14 @@ Xiang Li\textsuperscript{2,\textdagger}}
 \textsuperscript{3}National University of Singapore\\
 \textsuperscript{4}New York University\quad
 \textsuperscript{5}University of Sydney\quad
-\textsuperscript{6}New Jersey Institute of Technology\\
-\textsuperscript{7}Western Sydney University\quad
-\textsuperscript{\textdagger}Corresponding author
+\textsuperscript{6}Western Sydney University\\
+\textsuperscript{7}New Jersey Institute of Technology
 }
 
 \begin{document}
+\setcounter{footnote}{1}
 \maketitle
+\setcounter{footnote}{0}
 
 \begin{abstract}
 Medical vision--language models (VLMs) are usually evaluated on intact image--question pairs, but trustworthy clinical use requires a stronger property: a model must recognise when the evidential basis for an answer has failed. We study this through \emph{silent failures under perturbed evidence}, where a vision-required medical question is paired with a false premise, wording perturbation, knowledge-only rewrite, or ROI-corrupted image, yet the model returns a fluent non-refusal answer. We introduce \medvigil, a 300-case evaluation suite drawn from four public medical VQA sources, supervised end to end by four board-certified radiologists: every gold answer (the physician-finalised correct option), refusal option, candidate-answer set, paraphrase, false-premise trap, ROI box, and clinical risk tier is clinician-finalised; GPT-5.5 drafts text perturbations, false-premise traps, and V-CF conditions, which R1/R2 review and edit and P3 finalises. Two attending radiologists annotate every case in parallel, a senior radiologist consolidates the released manifest, and a separate fourth radiologist independent of construction answers every probe to provide the human reference baseline. The full benchmark contains 2{,}556 MCQ probes, 240 counterfactual triplets, physician-adjudicated risk-tier and answerability flags, ROI boxes, and a paired open-ended variant; the public release contains 240 cases, 2{,}002 probes, and 180 triplets. We report seven correctness-conditioned audit metrics that summarise into the \medvigil\ Composite Score (MCS), and audit 16 vision-capable models plus two text-only baselines. The independent radiologist scores MCS $83.3$ at silent-failure rate $5.8\%$, leaving a $14.1$-point composite headroom above the strongest audited model (Claude Opus 4.7 at $69.2$). The public subset and evaluation harness are publicly released.\footnote{Dataset: \url{https://huggingface.co/datasets/jhq0709/MedVIGIL}; evaluation harness: \url{https://github.com/hq0709/MedVIGIL}.}
@@ -145,7 +146,9 @@ This problem can be further attributed to text priors dominating model outputs a
 
 We formalise this gap as an \emph{evidence-contract} framework: when the answer-relevant region is masked or the question embeds a premise the image contradicts, the contract is broken and the appropriate behaviour shifts from producing a better answer to recognising that the evidential basis has failed. \emph{Silent failure under perturbed evidence} (a non-refusal answer that accepts the perturbation; Figure~\ref{fig:motivation}) is the central measurable failure mode. To operationalise this construct, we introduce \medvigil, a 300-case dataset-backed evaluation suite supervised end to end by four board-certified radiologists (\textsc{R1}, \textsc{R2} parallel annotation; \textsc{P3} senior consolidation; an independent \textsc{R4} from a different academic medical centre, blinded to construction, providing the human reference baseline; full pipeline in Section~\ref{sec:pipeline}). It spans eight probe families (five textual, three visual; Section~\ref{sec:phenomenon}), 240 counterfactual triplets, and clinician-finalised risk tiers, and combines Capability, Safety, and Grounding via the harmonic-mean \medvigil\ Composite Score (MCS, Section~\ref{sec:mcs}) so that strong clean-input performance cannot mask unsafe failure or weak visual grounding.
 
-We audit 16 vision-capable models and two text-only baselines (up to $2{,}556$ scored probes per model) and observe consistent axis divergence: Claude Opus 4.7 leads MCS at $69.2$ by balance; Gemini 3.1 Flash-Lite has the largest ROI contrast (VGR $+49.5$\,pp); GPT-4o drops to MCS $44.1$ on Safety; and the construction-blind \textsc{R4} reaches MCS $83.3$, $14.1$ points above the strongest audited model. Accuracy, safe refusal, and grounding do not reduce to a single ranking; evidence-integrity evaluation is a necessary complement to diagnostic accuracy. \textbf{Contributions.} \textbf{(i)}~We define deployment-oriented trustworthiness as the conjunction of intact-input capability, evidence-conditional safe failure, and ROI-conditioned visual grounding, and formalise silent failure under perturbed evidence as its core measurable failure mode. \textbf{(ii)}~We introduce \medvigil, a 300-case four-radiologist suite with eight probe families, 240 counterfactual triplets, clinician-finalised risk tiers, and a seven-metric correctness-conditioned scoring suite (Overall Acc., \sfr, VGR, PR, NEG, SDR, LPA); its public release contains 240 cases, 2{,}002 probes, and 180 triplets. \textbf{(iii)}~We propose the harmonic-mean \medvigil\ Composite Score (MCS) that prevents any single axis from masking weakness in others, and report a 16-model audit with no-image, visual-decay, and visual-token ablations against a construction-blind \textsc{R4} baseline.
+We audit 16 vision-capable models and two text-only baselines (up to $2{,}556$ scored probes per model) and observe consistent axis divergence: Claude Opus 4.7 leads MCS at $69.2$ by balance; Gemini 3.1 Flash-Lite has the largest ROI contrast (VGR $+49.5$\,pp); GPT-4o drops to MCS $44.1$ on Safety; and the construction-blind \textsc{R4} reaches MCS $83.3$, $14.1$ points above the strongest audited model. Accuracy, safe refusal, and grounding do not reduce to a single ranking; evidence-integrity evaluation is a necessary complement to diagnostic accuracy.
+
+\textbf{Contributions.} \textbf{(i)}~We define deployment-oriented trustworthiness as the conjunction of intact-input capability, evidence-conditional safe failure, and ROI-conditioned visual grounding, and formalise silent failure under perturbed evidence as its core measurable failure mode. \textbf{(ii)}~We introduce \medvigil, a 300-case four-radiologist suite with eight probe families, 240 counterfactual triplets, clinician-finalised risk tiers, and a seven-metric correctness-conditioned scoring suite (Overall Acc., \sfr, VGR, PR, NEG, SDR, LPA); its public release contains 240 cases, 2{,}002 probes, and 180 triplets. \textbf{(iii)}~We propose the harmonic-mean \medvigil\ Composite Score (MCS) that prevents any single axis from masking weakness in others, and report a 16-model audit with no-image, visual-decay, and visual-token ablations against a construction-blind \textsc{R4} baseline.
 
 \section{Related Work}
 \label{sec:related_work}
