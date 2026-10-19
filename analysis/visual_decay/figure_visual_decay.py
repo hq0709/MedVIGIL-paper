@@ -1,26 +1,22 @@
-"""Visual-information-decay ablation figure + crossover table.
+"""Plot visual decay and export the corresponding crossover summary.
 
-Reads results/blur_sweep/aggregate.csv (produced by aggregate.py) and writes:
-  paper/MedVIGIL/figures/fig_visual_decay.{pdf,png,svg}
-  paper/MedVIGIL/figures/visual_decay_crossover.csv
-  paper/MedVIGIL/figures/visual_decay_crossover.tex
-  paper/MedVIGIL/figures/fig_visual_decay_per_tier.{pdf,png}
+Reads count-based results/blur_aggregate.csv. If present,
+results/visual_decay_summary.csv overrides only the overall image-required
+percentages with the revised values reported in Table 16. It supplies no new
+counts or tier results. Use --skip-per-tier until revised tier records are
+available; generation of a purported tier decomposition is otherwise refused
+when its weighted averages disagree with the revised summary.
 
-Main figure: 1 row x 4 columns, one panel per model. x = blur sigma (log
-scale), y = MCQ exact-letter accuracy. Two solid lines per panel:
-  * image-required cases (text_only_answerable=False)  -- "needs vision"
-  * text-answerable  cases (text_only_answerable=True) -- vision-irrelevant control
-Plus a horizontal dashed line at the no-image (sigma=inf) accuracy on the
-image-required group, marking the language-prior floor.
-
-Crossover L*: the smallest sigma at which image-required accuracy is within
-TOLERANCE percentage points of the no-image floor, i.e. visual information
-no longer adds anything beyond what the language prior already supplies.
+Outputs go to figures/. L* is the first evaluated finite sigma at which
+(accuracy(sigma) - accuracy(no-image)) / (accuracy(clean) - accuracy(no-image))
+is at most 0.20. The four-case text-answerable reference is dashed; it is not
+assumed to be constant or a test of invariant language ability.
 """
 from __future__ import annotations
 
 import csv
 import math
+import argparse
 from collections import defaultdict
 from pathlib import Path
 
@@ -32,17 +28,10 @@ from matplotlib import font_manager
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
-AGG_CSV = ROOT / "results" / "blur_sweep" / "aggregate.csv"
-OUT_DIR = ROOT / "paper" / "MedVIGIL" / "figures"
-FONT_DIR = ROOT / "paper" / "MedVIGIL" / "fonts"
-
-# Look in either MedVIGIL/ or MedVIGIL_NeurIPS2026/ depending on local layout.
-for cand in (ROOT / "paper" / "MedVIGIL_NeurIPS2026" / "figures",
-             ROOT / "paper" / "MedVIGIL" / "figures"):
-    if cand.parent.exists():
-        OUT_DIR = cand
-        FONT_DIR = cand.parent / "fonts"
-        break
+AGG_CSV = ROOT / "results" / "blur_aggregate.csv"
+SUMMARY_CSV = ROOT / "results" / "visual_decay_summary.csv"
+OUT_DIR = ROOT / "figures"
+FONT_DIR = ROOT / "fonts"
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -102,6 +91,40 @@ def load_aggregate() -> dict:
     return d
 
 
+def apply_revised_summary(data: dict, *, skip_per_tier: bool) -> bool:
+    """Apply author-supplied percentages without inferring counts or tiers."""
+    if not SUMMARY_CSV.exists():
+        return False
+    revised = {}
+    with SUMMARY_CSV.open(newline="", encoding="utf-8") as stream:
+        for row in csv.DictReader(stream):
+            key = (row["model_id"], row["sigma"])
+            value = float(row["acc_percent"])
+            if key in revised or not math.isfinite(value) or not 0 <= value <= 100:
+                raise ValueError(f"Invalid or duplicate revised percentage: {key}")
+            revised[key] = value
+    expected = {(m, s) for m in MODELS for s in SIGMA_ORDER}
+    if set(revised) != expected:
+        raise ValueError("Revised summary must contain exactly four models x eight conditions")
+    mismatches = []
+    for (model, sigma), value in revised.items():
+        group = data[model][sigma]["image_required"]
+        tiers = [group.get(tier) for tier in ("L1", "L2", "L3", "L4", "L5")]
+        if any(tier is None for tier in tiers):
+            mismatches.append((model, sigma))
+        else:
+            weighted = sum(tier["n"] * tier["acc"] for tier in tiers) / sum(tier["n"] for tier in tiers)
+            if abs(weighted - value) > 0.0501:
+                mismatches.append((model, sigma))
+    if mismatches and not skip_per_tier:
+        raise ValueError("Tier records disagree with the revised overall percentages. "
+                         "Provide revised tier records or use --skip-per-tier; no figures were regenerated.")
+    for (model, sigma), value in revised.items():
+        # No denominator or integer count is implied by a reported percentage.
+        data[model][sigma]["image_required"]["all"] = {"n": None, "acc": value}
+    return True
+
+
 def compute_crossover(curves_acc: dict[str, float], floor_acc: float,
                        baseline_acc: float, frac: float = LOSS_FRACTION_THRESHOLD) -> str | None:
     """Smallest finite sigma at which the residual visual contribution is at
@@ -123,9 +146,20 @@ def compute_crossover(curves_acc: dict[str, float], floor_acc: float,
 
 
 def main() -> None:
+    global AGG_CSV, SUMMARY_CSV, OUT_DIR
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--aggregate", type=Path, default=AGG_CSV)
+    parser.add_argument("--summary", type=Path, default=SUMMARY_CSV)
+    parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
+    parser.add_argument("--skip-per-tier", action="store_true",
+                        help="Update only the overall figure and crossover rows")
+    args = parser.parse_args()
+    AGG_CSV, SUMMARY_CSV, OUT_DIR = args.aggregate, args.summary, args.output_dir
     if not AGG_CSV.exists():
         raise SystemExit(f"missing {AGG_CSV}; run aggregate.py first")
     data = load_aggregate()
+    apply_revised_summary(data, skip_per_tier=args.skip_per_tier)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     # -------- main figure: 1 x N panels --------
     n_panels = sum(1 for m in MODELS if m in data)
@@ -193,7 +227,7 @@ def main() -> None:
 
         # Sigma=0 tag — placed clearly above-right so it does not overlap the marker
         if not math.isnan(ir_acc["0"]):
-            ax.annotate(f"σ=0: {ir_acc['0']:.0f}",
+            ax.annotate(f"σ=0: {ir_acc['0']:.1f}",
                         (1.0, ir_acc["0"]),
                         xytext=(8, 10), textcoords="offset points",
                         fontsize=9, color=color, fontweight="bold", zorder=6,
@@ -203,7 +237,7 @@ def main() -> None:
         if not math.isnan(floor):
             ax.scatter([x_inf], [floor], marker="X", color="0.30", s=70,
                         zorder=5, edgecolor="white", lw=0.8)
-            ax.annotate(f"no-img: {floor:.0f}",
+            ax.annotate(f"no-img: {floor:.1f}",
                         (x_inf, floor),
                         xytext=(-8, -1), textcoords="offset points",
                         fontsize=8, color="0.25", ha="right", va="center",
@@ -256,7 +290,7 @@ def main() -> None:
         leg.get_frame().set_linewidth(0.4)
 
         # gather table rows
-        for tier in ("all", "L1", "L2", "L3", "L4", "L5"):
+        for tier in (("all",) if args.skip_per_tier else ("all", "L1", "L2", "L3", "L4", "L5")):
             tier_curve = {s: data[model].get(s, {}).get("image_required", {}).get(tier, {}).get("acc", math.nan)
                           for s in SIGMA_ORDER}
             tier_floor = tier_curve.get("inf", math.nan)
@@ -278,117 +312,118 @@ def main() -> None:
         fig.savefig(OUT_DIR / f"fig_visual_decay.{ext}", dpi=200, bbox_inches="tight")
     plt.close(fig)
 
-    # -------- per-tier figure --------
-    # Sequential blue->red palette: low risk = cool, high risk = warm.
-    # Hand-tuned for white background + colour-blind-friendly hue separation.
-    tier_colors = {
-        "L1": "#1A6FB0",  # deep blue
-        "L2": "#2E9F8F",  # teal
-        "L3": "#A1A12B",  # olive (replaces washed-out yellow)
-        "L4": "#D17A2B",  # orange
-        "L5": "#B82C2C",  # deep red
-    }
-    tier_labels = {
-        "L1": "L1 (modality / meta)",
-        "L2": "L2 (low-stakes)",
-        "L3": "L3 (mid)",
-        "L4": "L4 (high-stakes)",
-        "L5": "L5 (don't-miss)",
-    }
+    if not args.skip_per_tier:
+        # -------- per-tier figure --------
+        # Sequential blue->red palette: low risk = cool, high risk = warm.
+        # Hand-tuned for white background + colour-blind-friendly hue separation.
+        tier_colors = {
+            "L1": "#1A6FB0",  # deep blue
+            "L2": "#2E9F8F",  # teal
+            "L3": "#A1A12B",  # olive (replaces washed-out yellow)
+            "L4": "#D17A2B",  # orange
+            "L5": "#B82C2C",  # deep red
+        }
+        tier_labels = {
+            "L1": "L1 (modality / meta)",
+            "L2": "L2 (low-stakes)",
+            "L3": "L3 (mid)",
+            "L4": "L4 (high-stakes)",
+            "L5": "L5 (don't-miss)",
+        }
 
-    fig2, axes2 = plt.subplots(1, n_panels, figsize=(3.7 * n_panels, 4.05),
-                                sharey=True)
-    if n_panels == 1:
-        axes2 = [axes2]
-    fig2.subplots_adjust(top=0.78, bottom=0.16, left=0.05, right=0.985,
-                          wspace=0.10)
+        fig2, axes2 = plt.subplots(1, n_panels, figsize=(3.7 * n_panels, 4.05),
+                                    sharey=True)
+        if n_panels == 1:
+            axes2 = [axes2]
+        fig2.subplots_adjust(top=0.78, bottom=0.16, left=0.05, right=0.985,
+                              wspace=0.10)
 
-    # X-marker x-position spread — render each tier's no-image floor at a
-    # slightly different x so they don't pile up.
-    inf_dx = {"L1": 0.85, "L2": 0.95, "L3": 1.05, "L4": 1.15, "L5": 1.25}
+        # X-marker x-position spread — render each tier's no-image floor at a
+        # slightly different x so they don't pile up.
+        inf_dx = {"L1": 0.85, "L2": 0.95, "L3": 1.05, "L4": 1.15, "L5": 1.25}
 
-    panel_i = 0
-    for model in MODELS:
-        if model not in data:
-            continue
-        ax = axes2[panel_i]; panel_i += 1
-        label, model_color = MODEL_DISPLAY[model]
-
-        for tier in ("L1", "L2", "L3", "L4", "L5"):
-            curve = {s: data[model].get(s, {}).get("image_required", {}).get(tier, {}).get("acc", math.nan)
-                     for s in SIGMA_ORDER}
-
-            xs_full = [1.0] + [sigma_to_x(s, x_inf) for s in finite_sigmas]
-            ys_full = [curve["0"]] + [curve[s] for s in finite_sigmas]
-            valid = [(x, y) for x, y in zip(xs_full, ys_full) if not math.isnan(y)]
-            if not valid:
+        panel_i = 0
+        for model in MODELS:
+            if model not in data:
                 continue
-            xs, ys = zip(*valid)
+            ax = axes2[panel_i]; panel_i += 1
+            label, model_color = MODEL_DISPLAY[model]
 
-            ax.plot(xs, ys, "-", color=tier_colors[tier], lw=1.9, alpha=0.95,
-                    zorder=4, label=tier)
-            ax.plot(xs, ys, "o", color=tier_colors[tier], ms=4.3,
-                    markeredgecolor="white", markeredgewidth=0.6, zorder=5)
+            for tier in ("L1", "L2", "L3", "L4", "L5"):
+                curve = {s: data[model].get(s, {}).get("image_required", {}).get(tier, {}).get("acc", math.nan)
+                         for s in SIGMA_ORDER}
 
-            # No-image floor X markers, staggered horizontally per tier
-            floor_t = curve.get("inf", math.nan)
-            if not math.isnan(floor_t):
-                ax.scatter([x_inf * inf_dx[tier]], [floor_t], marker="X",
-                            color=tier_colors[tier], s=58, edgecolor="white",
-                            lw=0.7, zorder=6)
+                xs_full = [1.0] + [sigma_to_x(s, x_inf) for s in finite_sigmas]
+                ys_full = [curve["0"]] + [curve[s] for s in finite_sigmas]
+                valid = [(x, y) for x, y in zip(xs_full, ys_full) if not math.isnan(y)]
+                if not valid:
+                    continue
+                xs, ys = zip(*valid)
 
-        # Visual divider separating finite sigmas from the noimg group
-        ax.axvline(x_inf * 0.7, color="0.85", lw=0.7, ls="-", zorder=1)
+                ax.plot(xs, ys, "-", color=tier_colors[tier], lw=1.9, alpha=0.95,
+                        zorder=4, label=tier)
+                ax.plot(xs, ys, "o", color=tier_colors[tier], ms=4.3,
+                        markeredgecolor="white", markeredgewidth=0.6, zorder=5)
 
-        ax.set_xscale("log")
-        ax.set_xlim(0.7, x_inf * 1.55)
-        ax.set_ylim(-2, 100)
-        xticks = [1.0] + [float(s) for s in finite_sigmas] + [x_inf * 1.05]
-        xticklabels = ["0"] + finite_sigmas + [r"$\infty$"]
-        ax.set_xticks(xticks); ax.set_xticklabels(xticklabels, fontsize=9, **ANNOT_FONT)
-        ax.set_yticks([0, 25, 50, 75, 100])
-        for lbl in ax.get_yticklabels():
-            lbl.set_fontsize(9); lbl.set_fontfamily(ANNOT_FONT["family"])
-        ax.set_xlabel(r"blur $\sigma$ (px)", fontsize=10.5, **ANNOT_FONT)
-        if panel_i == 1:
-            ax.set_ylabel("MCQ accuracy (%)", fontsize=10.5, **ANNOT_FONT)
-        ax.tick_params(axis="both", which="major", length=4.5, width=0.8,
-                        color="0.35", direction="out", pad=3)
-        ax.text(0.5, 1.02, label, transform=ax.transAxes,
-                ha="center", va="bottom", fontsize=12,
-                color=model_color, fontweight="bold")
-        ax.grid(True, axis="y", alpha=0.25, lw=0.4)
-        ax.set_axisbelow(True)
-        for spine in ("top", "right"):
-            ax.spines[spine].set_visible(False)
-        ax.spines["left"].set_color("0.35"); ax.spines["left"].set_linewidth(0.9)
-        ax.spines["bottom"].set_color("0.35"); ax.spines["bottom"].set_linewidth(0.9)
+                # No-image floor X markers, staggered horizontally per tier
+                floor_t = curve.get("inf", math.nan)
+                if not math.isnan(floor_t):
+                    ax.scatter([x_inf * inf_dx[tier]], [floor_t], marker="X",
+                                color=tier_colors[tier], s=58, edgecolor="white",
+                                lw=0.7, zorder=6)
 
-    # Shared legend ABOVE the panels (with padding so it doesn't collide with
-    # per-panel headers); the headers and legend share vertical real estate
-    # because we widened top margin above.
-    legend_handles = [
-        plt.Line2D([0], [0], marker="o", color=tier_colors[t], lw=2.0, ms=5.5,
-                    markeredgecolor="white", markeredgewidth=0.6,
-                    label={"L1": "L1 modality / meta",
-                           "L2": "L2 low-stakes",
-                           "L3": "L3 mid",
-                           "L4": "L4 high-stakes",
-                           "L5": "L5 don't-miss"}[t])
-        for t in ("L1", "L2", "L3", "L4", "L5")
-    ]
-    inf_handle = plt.Line2D([0], [0], marker="X", color="0.4", lw=0,
-                              ms=7.0, markeredgecolor="white",
-                              markeredgewidth=0.6, label=r"$\sigma=\infty$ (no image)")
-    leg = fig2.legend(handles=legend_handles + [inf_handle], loc="upper center",
-                       ncols=6, fontsize=9.5, frameon=False,
-                       bbox_to_anchor=(0.5, 0.965),
-                       handletextpad=0.4, columnspacing=1.5)
-    for txt in leg.get_texts():
-        txt.set_fontfamily(ANNOT_FONT["family"])
-    for ext in ("pdf", "png"):
-        fig2.savefig(OUT_DIR / f"fig_visual_decay_per_tier.{ext}", dpi=200)
-    plt.close(fig2)
+            # Visual divider separating finite sigmas from the noimg group
+            ax.axvline(x_inf * 0.7, color="0.85", lw=0.7, ls="-", zorder=1)
+
+            ax.set_xscale("log")
+            ax.set_xlim(0.7, x_inf * 1.55)
+            ax.set_ylim(-2, 100)
+            xticks = [1.0] + [float(s) for s in finite_sigmas] + [x_inf * 1.05]
+            xticklabels = ["0"] + finite_sigmas + [r"$\infty$"]
+            ax.set_xticks(xticks); ax.set_xticklabels(xticklabels, fontsize=9, **ANNOT_FONT)
+            ax.set_yticks([0, 25, 50, 75, 100])
+            for lbl in ax.get_yticklabels():
+                lbl.set_fontsize(9); lbl.set_fontfamily(ANNOT_FONT["family"])
+            ax.set_xlabel(r"blur $\sigma$ (px)", fontsize=10.5, **ANNOT_FONT)
+            if panel_i == 1:
+                ax.set_ylabel("MCQ accuracy (%)", fontsize=10.5, **ANNOT_FONT)
+            ax.tick_params(axis="both", which="major", length=4.5, width=0.8,
+                            color="0.35", direction="out", pad=3)
+            ax.text(0.5, 1.02, label, transform=ax.transAxes,
+                    ha="center", va="bottom", fontsize=12,
+                    color=model_color, fontweight="bold")
+            ax.grid(True, axis="y", alpha=0.25, lw=0.4)
+            ax.set_axisbelow(True)
+            for spine in ("top", "right"):
+                ax.spines[spine].set_visible(False)
+            ax.spines["left"].set_color("0.35"); ax.spines["left"].set_linewidth(0.9)
+            ax.spines["bottom"].set_color("0.35"); ax.spines["bottom"].set_linewidth(0.9)
+
+        # Shared legend ABOVE the panels (with padding so it doesn't collide with
+        # per-panel headers); the headers and legend share vertical real estate
+        # because we widened top margin above.
+        legend_handles = [
+            plt.Line2D([0], [0], marker="o", color=tier_colors[t], lw=2.0, ms=5.5,
+                        markeredgecolor="white", markeredgewidth=0.6,
+                        label={"L1": "L1 modality / meta",
+                               "L2": "L2 low-stakes",
+                               "L3": "L3 mid",
+                               "L4": "L4 high-stakes",
+                               "L5": "L5 don't-miss"}[t])
+            for t in ("L1", "L2", "L3", "L4", "L5")
+        ]
+        inf_handle = plt.Line2D([0], [0], marker="X", color="0.4", lw=0,
+                                  ms=7.0, markeredgecolor="white",
+                                  markeredgewidth=0.6, label=r"$\sigma=\infty$ (no image)")
+        leg = fig2.legend(handles=legend_handles + [inf_handle], loc="upper center",
+                           ncols=6, fontsize=9.5, frameon=False,
+                           bbox_to_anchor=(0.5, 0.965),
+                           handletextpad=0.4, columnspacing=1.5)
+        for txt in leg.get_texts():
+            txt.set_fontfamily(ANNOT_FONT["family"])
+        for ext in ("pdf", "png"):
+            fig2.savefig(OUT_DIR / f"fig_visual_decay_per_tier.{ext}", dpi=200)
+        plt.close(fig2)
 
     # -------- crossover table CSV --------
     csv_out = OUT_DIR / "visual_decay_crossover.csv"
@@ -404,12 +439,15 @@ def main() -> None:
     # console summary (the LaTeX table is now hand-edited directly in
     # neurips_2026.tex; we no longer auto-write a visual_decay_crossover.tex)
     print(f"\n[ok] main figure  -> {OUT_DIR / 'fig_visual_decay.pdf'}")
-    print(f"[ok] per-tier fig -> {OUT_DIR / 'fig_visual_decay_per_tier.pdf'}")
+    if not args.skip_per_tier:
+        print(f"[ok] per-tier fig -> {OUT_DIR / 'fig_visual_decay_per_tier.pdf'}")
+    else:
+        print("[pending] per-tier figure unchanged; revised tier records are required")
     print(f"[ok] csv table    -> {csv_out}")
     print("\nCrossover L* per model (overall, image-required cases):")
     for m, ls in crossovers.items():
         label = MODEL_DISPLAY[m][0]
-        print(f"  {label:<22} L* = {'>=64' if ls is None else ls}")
+        print(f"  {label:<22} L* = {'not reached' if ls is None else ls}")
 
 
 if __name__ == "__main__":

@@ -43,3 +43,10 @@ Stage A构建方法和gallery原文字恢复；G5仅保留必须纠正的masked�
 尚缺结果
 README11：MedGemma完整主表行的Original、PR、NEG、SDR、LPA、MCS六列。
 README13：多模型、多强度真实伪影实验及对应参数/完整记录。
+
+
+2026-10-18 — Author-requested main-text restoration
+Restored the coauthor main-text additions from eb31599: Section 4.4 annotation agreement; Section 6.2 bootstrap/sensitivity results; Section 6.3 Image Dependence, the compact six-model table and interpretation; and the MedGemma evaluation description and forward references.
+Preserved the revised visual-decay percentages and drops, all 28 pre-existing captions, current licences, R4 public/restricted boundaries, abstract and limitations. The current Figure 6 is unchanged.
+Retained the full appendix table under tab:noimg_ablation_full to avoid duplicate labels, and aligned the sensitivity variant count to the eight alternatives shown in the existing table.
+Verified restoration against eb31599, checked the preserved content, and compiled 45 pages with 10 main-text pages. The current PR is updated without merging.

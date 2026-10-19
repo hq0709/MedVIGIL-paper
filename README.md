@@ -63,7 +63,7 @@ If you do not have tectonic, `latexmk -pdf neurips_2026.tex` works with TeX Live
 
 ## Reproducing tables and figures
 
-The analysis scripts read aggregate CSVs under `results/`. They support table and figure analysis; historical probe responses are not bundled:
+The analysis scripts read aggregate CSVs under `results/`. Historical model-response caches are not bundled; the public R4 clinician responses are available under `data/r4_public/`:
 
 ```bash
 # Headline MCS values (Table 1)
@@ -78,15 +78,17 @@ python3 analysis/mcs_sensitivity.py
 # R4 aggregate reproduction from mapped, verified counts
 python3 analysis/clinician_baseline_mcs.py
 
-# Original reading-pack validation and complete per-probe scoring:
-# follow analysis/README_r4.txt; requires answer sheet, seq_key.csv and gold.csv.
-# The private reading pack is not bundled with this source.
+# Public R4 per-probe reproduction (240 cases, 2,002 responses)
+python3 analysis/score_r4.py --answers data/r4_public/answers.csv --probes data/r4_public/probes_mcq.csv --manifest data/r4_public/manifest.csv --seq-map data/r4_public/seq_to_probe.csv --require-complete --reference-scope public --output-dir r4_public_recomputed
+
+# Full per-probe scoring additionally requires the author-held private inputs.
+# See analysis/README_r4.txt for population definitions and complete commands.
 
 # Audit-summary figure (Fig. 3)
 python3 analysis/silent_failure/figure_audit_summary.py
 
-# Visual decay figures (Figs. 4 and 6)
-python3 analysis/visual_decay/figure_visual_decay.py
+# Revised overall visual decay (Fig. 4); retain the current tier plot (Fig. 6)
+python3 analysis/visual_decay/figure_visual_decay.py --skip-per-tier
 ```
 
 For a fresh evaluation, follow the [harness instructions](https://github.com/hq0709/MedVIGIL/blob/abda0797cce67b5f3205817bcb796945b6fe7277/scripts/README.md). The public subset covers 2,002 probes; evaluation on all 2,556 additionally requires the credentialed arm. The historical per-model response caches are not bundled in this repository.
@@ -104,11 +106,11 @@ For a fresh evaluation, follow the [harness instructions](https://github.com/hq0
 
 ## License
 
-The paper LaTeX source and analysis scripts in this repository are released under the MIT License (see `LICENSE`). MedVIGIL annotations are released under CC BY-NC-SA 4.0; source assets keep their upstream licences (VQA-RAD CC0, SLAKE CC BY-SA 4.0, ROCO CC BY-NC-SA 4.0). MIMIC-CXR and CheXpert content is withheld under the applicable credentialed data use agreements; see the manuscript's documentation appendix and the dataset datasheet.
+The paper LaTeX source and analysis scripts in this repository are released under the MIT License (see `LICENSE`). MedVIGIL-authored annotations and benchmark metadata are CC BY 4.0 under the canonical [evaluation-repository LICENSE](https://github.com/hq0709/MedVIGIL/blob/main/LICENSE). Source content retains its upstream terms: VQA-RAD CC0, SLAKE research-use, and ROCO MIT-style metadata over PMC-OA images with their original per-image licences. MedVIGIL does not relicense source imagery or other upstream content. MIMIC-CXR and CheXpert content is withheld under the applicable credentialed data use agreements; see the manuscript's documentation appendix and the dataset datasheet.
 
 ## Strict README revision
 
-The latest revision applies only the supplied camera-ready checklist and the authors' confirmed details. Content changes made to expand the main text or broadly trim the appendix have been withdrawn; the latest author affiliations are retained. The abstract keeps its original opening, definition, enumeration, narrative and R4 result sentence, with only the required gold definition, drafting/finalisation disclosure and release scope updated. Additional scientific and editorial issues are reserved for separate author confirmation. Figure assets and their source references are unchanged.
+The latest revision restores the coauthor's main-text additions from `eb31599`: annotation-agreement results, ranking-robustness analysis, the matched no-image ablation and six-model table, and the MedGemma evaluation description. The current abstract disclosures, author affiliations, extended appendix, revised data, licence terms and existing figure/table captions are retained. The abstract keeps its original opening, definition, enumeration, narrative and R4 result sentence, with only the required gold definition, drafting/finalisation disclosure and release scope updated. The author-confirmed visual-decay revision updates Table 16, its discussion and Figure 4 from the revised summary percentages. Figure 6 retains the original 296-case tier records with an explicit subset caption. See [visual-decay reproduction notes](analysis/visual_decay/REVISED_SUMMARY.md) for the distinction between the two summaries.
 
 Funding is disclosed only as grant number 1R01EB038426-01. The authors confirm no competing interests. R4 is Radiology, 20 years; its mapped full-benchmark results remain MCS 83.3, SFR 5.8% and VGR +4.7 pp. The private reading pack, complete image key, nonpublic gold records and credentialed per-probe outputs are not published.
 
@@ -123,3 +125,7 @@ Funding is disclosed only as grant number 1R01EB038426-01. The authors confirm n
 Compiled manuscript PDFs and marked comparison materials are kept locally. Figure assets needed for compilation remain in the repository. The `paper/` conference copy is synchronized; journal and preprint variants are separate versions.
 
 Missing MedGemma columns and the broader artefact experiment remain open. The corrected metadata here does not imply that the Hugging Face copy or OpenReview forms have been updated. No conference submission or chair message has been performed.
+
+The public R4 answer release and reproducibility instructions are at https://github.com/JunhaoChenMichael/MedVIGIL/tree/ad805039ef9ae0eb406b23fd321d8a176da47c73/data/r4_public. It contains 2,002 public-subset answers from 240 cases (MCS 82.7), with separate full-benchmark aggregate counts (MCS 83.3). All 60 credentialed CXR cases remain excluded from public per-probe records.
+
+Upstream integration is proposed in https://github.com/hq0709/MedVIGIL/pull/1. The answer package is already public at the immutable release link above; it is not yet merged into the upstream main branch.
