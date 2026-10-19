@@ -50,3 +50,25 @@ Restored the coauthor main-text additions from eb31599: Section 4.4 annotation a
 Preserved the revised visual-decay percentages and drops, all 28 pre-existing captions, current licences, R4 public/restricted boundaries, abstract and limitations. The current Figure 6 is unchanged.
 Retained the full appendix table under tab:noimg_ablation_full to avoid duplicate labels, and aligned the sensitivity variant count to the eight alternatives shown in the existing table.
 Verified restoration against eb31599, checked the preserved content, and compiled 45 pages with 10 main-text pages. The current PR is updated without merging.
+
+
+2026-10-18 — Author-requested coauthor appendix trimming
+Applied the appendix deletions and condensed prose from eb31599 to the latest
+manuscript. Removed the duplicate no-image appendix table (the compact main-text
+table remains), the five-case letter-trajectory table and discussion, the first
+Extended Discussion subsection, the per-item limitations appendix Q, and R4's
+file-by-file linkage/reproduction notes. Renamed H to Prompt and
+Acquisition-Artefact Controls and removed rebuttal-process wording.
+Preserved current licences, the 240-case / 2,002-response public R4 release facts,
+all retained results and captions, all figure assets, and all 32 revised decay
+percentages (Huatuo no-image 20.7%; drop 34.6 pp). Figure 6 remains the original
+296-case tier plot with its approved caption. Main-text additions remain intact;
+only the coauthor's redundant Limitations phrases and deleted-Q pointer were removed.
+Updated both checklist Q references to the main-text Limitations. Sensitivity
+continues to count four weight alternatives plus four Grounding alternatives.
+The root and paper/ conference sources are synchronized. Compilation: 38 pages,
+10 main-text pages, acknowledgements start on page 11; all 27 retained floats and
+their captions match the previous current version exactly. No undefined
+references, duplicate labels, missing glyphs, or overfull boxes. All 38 pages
+were rendered and visually checked. A new PR is used because PR #2 was already
+merged remotely; this appendix-trimming PR is left open without merging.
