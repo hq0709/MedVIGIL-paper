@@ -103,8 +103,8 @@ Weihang You\textsuperscript{1},}\\
 {\normalfont\bfseries
 Haozhen Gong\textsuperscript{3},
 Ruiyu Yan\textsuperscript{4},
-Jinglei Lv\textsuperscript{5,7},
-Lin Zhao\textsuperscript{6},}\\
+Jinglei Lv\textsuperscript{5,6},
+Lin Zhao\textsuperscript{7},}\\
 {\normalfont\bfseries
 Hui Ren\textsuperscript{2},
 Quanzheng Li\textsuperscript{2},
@@ -117,8 +117,8 @@ Xiang Li\textsuperscript{2,}\thanks{Corresponding author.}}
 \textsuperscript{3}National University of Singapore\\
 \textsuperscript{4}New York University\quad
 \textsuperscript{5}University of Sydney\quad
-\textsuperscript{6}New Jersey Institute of Technology\\
-\textsuperscript{7}Western Sydney University
+\textsuperscript{6}Western Sydney University\\
+\textsuperscript{7}New Jersey Institute of Technology
 }
 
 \begin{document}
@@ -339,7 +339,7 @@ MedGemma-4b-it$^{\dagger}$ & 39.4 & -- & 84.5 & +26.6 & -- & -- & -- & -- & -- \
 
 \textbf{Silent failure concentrates on high-risk traps.} Per-CRT trap \sfr\ rises monotonically for most models: GPT-4o reaches $87.3$\% L1 original accuracy but $68.2$\% \sfr\ on L3 traps, $75.6$\% on L4, and $68.9$\% on L5; GPT-5.4-mini shows the same pattern at $69.8$\%/$67.6$\% on L4/L5. Even Claude Opus 4.7, the safest audited model, retains $30.9$\% L3 and $28.4$\% L5 trap \sfr. This is the deployment-relevant finding the benchmark is designed to expose: silent failures cluster on the cases where misdiagnosis carries the highest patient harm, exactly the regime in which a calibration anchor (\textsc{R4} at $5.8$\% trap \sfr) matters most.
 
-\textbf{Two distinct failure regimes.} Unsafe models split into two regimes: \emph{vision-anchored but unsafe} (e.g.\ Gemini 3-Flash, VGR $+41.1$\,pp / \sfr\ $37.2$\%) which uses the ROI when present but fails to refuse when it is removed, and \emph{prior-driven and unsafe} (e.g.\ GPT-5.4-nano, $-27.1$\,pp / $51.7$\%) which does not use ROI evidence consistently. The two regimes are only separable because the paired ROI-only / ROI-masked design lets VGR and trap \sfr\ vary independently.
+\textbf{Two distinct failure regimes.} Unsafe models split into two regimes: \emph{vision-anchored but unsafe} (e.g.\ Gemini 3-Flash, VGR $+41.1$\,pp / \sfr\ $37.2$\%) which uses the ROI when present but fails to refuse when it is removed, and \emph{prior-driven and unsafe} (e.g.\ GPT-5.4-nano, $-27.1$\,pp / $51.7$\%) which does not use ROI evidence consistently.
 
 \textbf{MCS reorders the leaderboard by bottleneck.} Claude Opus 4.7 leads at $69.2$ because all three component scores are high; Gemini 3.1 Flash-Lite ranks second at $66.0$ on the strength of its Safety and Grounding axes; GPT-4o falls to $44.1$ because Safety is its bottleneck; Qwen3.5-9B remains lowest at $31.0$ with Safety below $25$. Opus's case-clustered bootstrap $95\%$ CI $[66.6,72.1]$ lies above every reported interval outside the top three (GPT-5.5 upper bound $64.3$), and Opus leads under eight alternative CRT-weight and Grounding definitions, with Spearman $\rho\geq0.97$ against the default ranking (Appendices~\ref{app:bootstrap_appendix},~\ref{app:mcs_sensitivity}). Breakdowns and interpretation are in Appendices~\ref{app:audit_breakdowns},~\ref{app:extended_discussion}.
 
@@ -365,7 +365,7 @@ MedGemma-4b-it$^{\dagger}$ & 39.4 & -- & 84.5 & +26.6 & -- & -- & -- & -- & -- \
   \end{tabular*}
 \end{table}
 
-Interpreting silent failure requires establishing image use on intact probes. Every matched model has positive $\Delta_{\mathrm{orig}}$, and four exceed $+50$\,pp (Table~\ref{tab:noimg_ablation}); GPT-5.5 drops from $75.0\%$ to $5.3\%$ without the image. DeepSeek's text-only baselines ($1.7$--$4.0\%$ Original, $99.3\%$ LPA; Appendix~\ref{app:noimg_ablation}) confirm that original probes require the image. GPT-4o's $53.0\%$ \sfr\ accompanies only $6.3\%$ Original accuracy without it: the model consults the image yet accepts the false premise. GPT-5.4-nano's $+24.7$\,pp image contribution alongside $-27.1$\,pp VGR shows inconsistent use of the answer-relevant region rather than no image use.
+Every matched model has positive $\Delta_{\mathrm{orig}}$, and four exceed $+50$\,pp (Table~\ref{tab:noimg_ablation}); GPT-5.5 drops from $75.0\%$ to $5.3\%$ without the image. DeepSeek's text-only baselines ($1.7$--$4.0\%$ Original, $99.3\%$ LPA; Appendix~\ref{app:noimg_ablation}) confirm that original probes require the image. GPT-4o's $53.0\%$ \sfr\ accompanies only $6.3\%$ Original accuracy without it: the model consults the image yet accepts the false premise. GPT-5.4-nano's $+24.7$\,pp image contribution alongside $-27.1$\,pp VGR shows inconsistent use of the answer-relevant region rather than no image use.
 
 \subsection{Ablation: Visual Information Decay}
 \label{sec:visual_decay}
@@ -377,28 +377,24 @@ Interpreting silent failure requires establishing image use on intact probes. Ev
   \label{fig:visual_decay}
 \end{figure}
 
-We sweep an isotropic Gaussian blur over each of the 300 original probes at $\sigma\in\{0,2,4,8,16,32,64\}$\,px plus the no-image control ($\sigma{=}\infty$), and define the language-takeover point $L^\star$ as the smallest $\sigma$ at which the accuracy above the no-image baseline falls to at most $20$\% of its clean-image value (Figure~\ref{fig:visual_decay}; full protocol in Appendix~\ref{app:visual_decay_appendix}). The four-case text-answerable reference is descriptive; its size is insufficient to establish invariance of language ability. $L^\star$ varies by a factor of four across the four representative models ($16$--$64$\,px) and does not track the headline MCS ordering: GPT-4o reaches this threshold latest ($L^\star{=}64$); Claude Sonnet 4.6 has the largest clean-to-no-image drop ($65.7\%\!\to\!9.0\%$, $56.7$\,pp) and crosses at $\sigma{=}32$; Qwen3.5-397B drops by $40.3$\,pp and crosses earliest ($L^\star{=}16$); HuatuoGPT-V 7B has the smallest drop ($34.6$\,pp) and highest no-image accuracy ($20.7$\%, versus GPT-4o's $5.0$\%). These comparisons do not isolate the effect of medical fine-tuning. A complementary ROI-mask token-ablation pilot ($T{=}0.7$, five-sample self-consistency, $n{=}80$) on three flagship API models is in Appendix~\ref{app:token_ablation}. ROI-masked and ROI-only are controlled causal probes of evidence availability, while Gaussian blur tests gradual image degradation. Medical VLM performance can degrade under weak image artefacts, and strong artefacts may not be reliably detected~\cite{cheng2025robustness}; the reported acquisition-artefact controls are in Appendix~\ref{app:rebuttal_controls}.
+We sweep an isotropic Gaussian blur over each of the 300 original probes at $\sigma\in\{0,2,4,8,16,32,64\}$\,px plus the no-image control ($\sigma{=}\infty$), and define the language-takeover point $L^\star$ as the smallest $\sigma$ at which the accuracy above the no-image baseline falls to at most $20$\% of its clean-image value (Figure~\ref{fig:visual_decay}). The four-case text-answerable reference is descriptive; its size is insufficient to establish invariance of language ability. $L^\star$ varies by a factor of four across the four representative models ($16$--$64$\,px) and does not track the headline MCS ordering: GPT-4o reaches this threshold latest ($L^\star{=}64$); Claude Sonnet 4.6 has the largest clean-to-no-image drop ($65.7\%\!\to\!9.0\%$, $56.7$\,pp) and crosses at $\sigma{=}32$; Qwen3.5-397B drops by $40.3$\,pp and crosses earliest ($L^\star{=}16$); HuatuoGPT-V 7B has the smallest drop ($34.6$\,pp) and highest no-image accuracy ($20.7$\%, versus GPT-4o's $5.0$\%). These comparisons do not isolate the effect of medical fine-tuning. A complementary ROI-mask token-ablation pilot ($T{=}0.7$, five-sample self-consistency, $n{=}80$) on three flagship API models is in Appendix~\ref{app:token_ablation}. Medical VLM performance can degrade under weak image artefacts, and strong artefacts may not be reliably detected~\cite{cheng2025robustness}; the reported acquisition-artefact controls are in Appendix~\ref{app:rebuttal_controls}.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-Trustworthy medical VLM evaluation cannot stop at intact-image accuracy. A model may answer clean images correctly while still accepting false premises, ignoring ROI-conditioned evidence loss, or relying on language priors when the image should be decisive. \medvigil\ operationalizes deployment-oriented trustworthiness through paired clean, textual-perturbation, ROI-conditioned, and clinical-risk-stratified probes, with silent failure serving as the key measured failure mode under broken evidence. The audit shows that accuracy, safe refusal, and visual grounding do not reduce to a single leaderboard, motivating the \medvigil\ Composite Score as a compact summary alongside the underlying per-axis metrics. Medical VLM evaluations should therefore test not only whether a model can answer an intact image, but also whether it can recognize when the evidence contract has failed.
+\medvigil\ operationalizes deployment-oriented trustworthiness through paired clean, textual-perturbation, ROI-conditioned, and clinical-risk-stratified probes, with silent failure serving as the key measured failure mode under broken evidence. The audit shows that accuracy, safe refusal, and visual grounding do not reduce to a single leaderboard, motivating the \medvigil\ Composite Score as a compact summary alongside the underlying per-axis metrics.
 
 \section{Limitations}
 \label{sec:limitations}
 
-\medvigil\ targets unsafe non-refusal under controlled evidence perturbations and is complementary to diagnostic-accuracy and workflow-prevalence studies. Three limitation families apply: \textbf{(L1)~audit scope}: systematic full-image corruptions, severity-aware metrics (Critical-Findings Hallucination Rate, CFHR; Severity Drift Magnitude, SDM; patch-masking Visual Faithfulness Rate, VFR), and the released triplet-coherence (TR-coh) axis are designed but deferred; \textbf{(L2)~annotation and human reference}: ROI bboxes are benchmark regions for binary masks rather than segmentation labels, and the human reference rests on a single construction-blind rater \textsc{R4}; \textbf{(L3)~external validity and ablation breadth}: pretraining-overlap with public sources cannot be ruled out (all credentialed CXR case content is withheld, Appendix~\ref{app:documentation}), and thinking-mode, temperature, safety-prompt, and medical-specialised-family ablations are pending. As models improve, headroom on legacy public sources may shrink; versioned manifests and a v2 release with new cases and more specialties are planned. Reported and deferred analyses are separated in Table~\ref{tab:scope_status}.
+Three limitation families apply: \textbf{(L1)~audit scope}: systematic full-image corruptions, severity-aware metrics (Critical-Findings Hallucination Rate, CFHR; Severity Drift Magnitude, SDM; patch-masking Visual Faithfulness Rate, VFR), and the released triplet-coherence (TR-coh) axis are designed but deferred; \textbf{(L2)~annotation and human reference}: ROI bboxes are benchmark regions for binary masks rather than segmentation labels, and the human reference rests on a single construction-blind rater \textsc{R4}; \textbf{(L3)~external validity and ablation breadth}: pretraining-overlap with public sources cannot be ruled out (all credentialed CXR case content is withheld, Appendix~\ref{app:documentation}), and thinking-mode, temperature, safety-prompt, and medical-specialised-family ablations are pending. As models improve, headroom on legacy public sources may shrink; versioned manifests and a v2 release with new cases and more specialties are planned. Reported and deferred analyses are separated in Table~\ref{tab:scope_status}.
 
-\clearpage
-\section*{Acknowledgements and Disclosures}
+\section*{Acknowledgements}
 \label{app:acknowledgments}
 
-We thank the radiologists at Harvard Medical School and Massachusetts General Hospital whose clinical expertise made \medvigil\ possible. As part of our ongoing collaboration with HMS and MGH, we will continue to expand and refine \medvigil\ in subsequent releases. Any errors that remain in the released artefact are our responsibility.
+We thank the radiologists at Harvard Medical School and Massachusetts General Hospital whose clinical expertise made \medvigil\ possible. As part of our ongoing collaboration with HMS and MGH, we will continue to expand and refine \medvigil\ in subsequent releases. Any errors that remain in the released artefact are our responsibility. This work was supported by grant number 1R01EB038426-01. The authors declare no competing interests.
 
-\textbf{Funding.} This work was supported by grant number 1R01EB038426-01.
-
-\textbf{Competing interests.} The authors declare no competing interests.
-
+\clearpage
 \bibliographystyle{plainnat}
 \bibliography{ref}
 
