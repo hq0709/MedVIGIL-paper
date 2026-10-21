@@ -25,6 +25,7 @@
 \usepackage{nicefrac}
 \usepackage{microtype}
 \usepackage{placeins}
+\usepackage{float}
 \usepackage{wrapfig}
 \usepackage{subcaption}
 \usepackage{enumitem}
@@ -136,7 +137,7 @@ Medical vision--language models (VLMs) are usually evaluated on intact image--qu
 \label{sec:introduction}
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=\linewidth]{figures/motivation.png}
+  \includegraphics[width=0.97\linewidth]{figures/motivation.png}
   \caption{A vision-required chest X-ray paired with two evidence-perturbations (ROI mask, laterality flip) yields contrasting behaviours: a \textcolor{red!75!black}{\textbf{silent failure}} fabricating a left-apical-pneumothorax measurement vs.\ a \textcolor{green!50!black}{\textbf{safe refusal}} recognising the broken evidence.}
   \label{fig:motivation}
 \end{figure}
@@ -382,7 +383,7 @@ We sweep an isotropic Gaussian blur over each of the 300 original probes at $\si
 \section{Conclusion}
 \label{sec:conclusion}
 
-\medvigil\ operationalizes deployment-oriented trustworthiness through paired clean, textual-perturbation, ROI-conditioned, and clinical-risk-stratified probes, with silent failure serving as the key measured failure mode under broken evidence. The audit shows that accuracy, safe refusal, and visual grounding do not reduce to a single leaderboard, motivating the \medvigil\ Composite Score as a compact summary alongside the underlying per-axis metrics.
+Trustworthy medical VLM evaluation cannot stop at intact-image accuracy. A model may answer clean images correctly while still accepting false premises, ignoring ROI-conditioned evidence loss, or relying on language priors when the image should be decisive. \medvigil\ operationalizes deployment-oriented trustworthiness through paired clean, textual-perturbation, ROI-conditioned, and clinical-risk-stratified probes, with silent failure serving as the key measured failure mode under broken evidence. The audit shows that accuracy, safe refusal, and visual grounding do not reduce to a single leaderboard, motivating the \medvigil\ Composite Score as a compact summary alongside the underlying per-axis metrics. Construction-blind radiologist \textsc{R4} has MCS 83.3 with 5.8\% silent failure, 14.1 points above Claude Opus 4.7 (69.2), the strongest audited model, leaving substantial headroom. Medical VLM evaluations should therefore test not only whether a model can answer an intact image, but also whether it can recognize when the evidence contract has failed.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -400,6 +401,7 @@ We thank the radiologists at Harvard Medical School and Massachusetts General Ho
 
 \clearpage
 \appendix
+\raggedbottom
 
 \section{Benchmark Positioning}
 \label{app:benchmark_positioning}
@@ -1025,7 +1027,13 @@ This appendix records the operational details required to re-execute the audit a
 
 \textbf{Model snapshots.} The audit period is 2026-04-09 to 2026-05-04. Table~\ref{tab:model_snapshots} lists the provider-side snapshot identifier, access channel, and decoding mode for every audited configuration; weights for the two open-weight medical-specific systems are pinned by Hugging Face commit SHA.
 
-\begin{table}[!htbp]
+\textbf{Image preprocessing.} Source images are converted to RGB JPEG, longest-side-resampled to 1024\,px with PIL's \texttt{Image.LANCZOS}, and JPEG-encoded at quality\,$=\,92$. ROI masks are filled mid-grey ($(128,128,128)$) on the rectangular ROI; ROI-only retains pixels inside the ROI and replaces all pixels outside with the same mid-grey; lr\_flip applies \texttt{ImageOps.mirror}; the Gaussian-blur sweep applies \texttt{cv2.GaussianBlur} with $(2k{+}1)$ kernel for the requested $\sigma$.
+
+\textbf{Parser and retry.} The model's text response is normalised by stripping whitespace, lowercasing, and matching the first standalone capital letter in $\{A,B,C,D,E\}$; any match is accepted. Empty or non-letter responses are recorded as parse failures and retried up to three times with the same prompt and settings; persistent failures are scored as silent failure on trap probes (because no refusal letter was selected) and as wrong on non-trap probes. Each retry is logged in the run JSONL alongside the final accepted letter.
+
+\textbf{Determinism and digest.} Pin the HF dataset revision and manifest digest, and read the released \texttt{probes\_mcq.csv} directly. New runs produce per-probe response records for the released aggregation code. The code repository (abstract footnote) provides baseline runners, integrity validation, the auxiliary open-ended judge, metric aggregation, and figure generation.
+
+\begin{table}[H]
   \centering
   \caption{Per-model snapshot identifiers, access channel, and decoding mode. All decoding is greedy (temperature\,$=\,0$, top-p\,$=\,1$, $\le 8$ output tokens), thinking modes disabled where exposed.}
   \label{tab:model_snapshots}
@@ -1059,18 +1067,12 @@ This appendix records the operational details required to re-execute the audit a
   \end{tabular*}
 \end{table}
 
-\textbf{Image preprocessing.} Source images are converted to RGB JPEG, longest-side-resampled to 1024\,px with PIL's \texttt{Image.LANCZOS}, and JPEG-encoded at quality\,$=\,92$. ROI masks are filled mid-grey ($(128,128,128)$) on the rectangular ROI; ROI-only retains pixels inside the ROI and replaces all pixels outside with the same mid-grey; lr\_flip applies \texttt{ImageOps.mirror}; the Gaussian-blur sweep applies \texttt{cv2.GaussianBlur} with $(2k{+}1)$ kernel for the requested $\sigma$.
-
-\textbf{Parser and retry.} The model's text response is normalised by stripping whitespace, lowercasing, and matching the first standalone capital letter in $\{A,B,C,D,E\}$; any match is accepted. Empty or non-letter responses are recorded as parse failures and retried up to three times with the same prompt and settings; persistent failures are scored as silent failure on trap probes (because no refusal letter was selected) and as wrong on non-trap probes. Each retry is logged in the run JSONL alongside the final accepted letter.
-
-\textbf{Determinism and digest.} Pin the HF dataset revision and manifest digest, and read the released \texttt{probes\_mcq.csv} directly. New runs produce per-probe response records for the released aggregation code. The code repository (abstract footnote) provides baseline runners, integrity validation, the auxiliary open-ended judge, metric aggregation, and figure generation.
-
 \section{Bootstrap Rank Stability}
 \label{app:bootstrap_appendix}
 
 To check that the headline ranking in Table~\ref{tab:headline_results} is not driven by sample noise, we report case-clustered bootstrap 95\% confidence intervals over the 300 cases. Each bootstrap resample draws 300 case identifiers with replacement and recomputes Capability, Safety (=$100-\mathrm{SFR}_w$), Grounding, and the harmonic-mean MCS using the same probe-level binary correctness signals. We use 500 resamples with a fixed seed (\texttt{20260505}) for reproducibility. The clustered scheme is appropriate because every probe inherits its case's risk tier, ROI, and gold, so per-probe i.i.d.\ resampling would underestimate variance.
 
-\begin{table}[!htbp]
+\begin{table}[H]
   \centering
   \caption{Case-clustered bootstrap 95\% CIs (500 resamples, fixed seed) for nine representative models spanning the MCS range. Capability uses the PR definition (Section~\ref{sec:per_family_metrics}). Rank-stability discussion in main text.}
   \label{tab:bootstrap_ci}
@@ -1133,7 +1135,7 @@ The Spearman lower bound across the eight non-default variants is $0.97$, and Cl
 
 Table~\ref{tab:pcons_diagnostic} reports the legacy paraphrase \emph{consistency} diagnostic $\mathrm{PCons}(f)=\Pr_j[\hat{\ell}^{\mathrm{orig}}_j=\hat{\ell}^{\mathrm{tcf}}_j]$ alongside the headline paraphrase accuracy $\mathrm{PR}(f)$. PCons is informative as an output-stability measure but is not used in the composite (Section~\ref{sec:per_family_metrics}) because it is achievable by a model that is consistently wrong.
 
-\begin{table}[!htbp]
+\begin{table}[H]
   \centering
   \caption{Paraphrase accuracy (PR, used in MCS) vs.\ paraphrase consistency (PCons, diagnostic only). $\mathrm{PCons}-\mathrm{PR}$ is the share of paraphrase pairs on which the model is stable but wrong.}
   \label{tab:pcons_diagnostic}
